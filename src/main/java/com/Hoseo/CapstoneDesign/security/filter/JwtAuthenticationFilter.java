@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = jwtUtil.resolveTokenFromHttpServletRequest(request);
-        //-> whiteList만들어서 permitAll인 엔드 포인트는 넘길것
+        //-> whiteList만들어서 permitAll엔 라우드 사인하는 식으로
         if (token != null) {
 
             // 토큰 검증
@@ -63,8 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails =
                     userService.loadUserByUsername(userIdentificationId.toString());
 
-            //로그아웃리스트 확인
-            UUID jwtJti = jwtUtil.getJtiFromAccessToken(token);
+            //블랙리스트 확인
             if (blackListService.isExistByToken(token)) {
                 AccessTokenBlackListErrorCode e = AccessTokenBlackListErrorCode.TOKEN_IS_BLACK_LIST;
                 throw new AccessTokenBlackListException(e);
@@ -74,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             userDetails,
-                            null,
+                            token,
                             userDetails.getAuthorities() // UserDetails 기반이면 GrantedAuthority 제공
                     );
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

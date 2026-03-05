@@ -63,8 +63,9 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/auth/logout").authenticated()
                         .requestMatchers(
-                                "/api/v1/auth/**",
+                                "/api/v1/auth/reissue",
                                 "/public/**",
                                 "/swagger-ui/**",
                                 "/oauth2/**",

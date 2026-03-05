@@ -83,4 +83,22 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         return rawNewRefreshToken;
     }
+
+    @Override
+    public void revokeAndSoftDeleteByFamily(Users user, String rawRefreshToken) {
+        if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
+            throw new RefreshTokenException(RefreshTokenErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+        LocalDateTime now = TimeUtil.getNowSeoulLocalDateTime();
+        String tokenHash = DigestUtils.sha256Hex(rawRefreshToken);
+
+        RefreshToken token = repository.findByTokenHash(tokenHash)
+                .orElseThrow(() -> new RefreshTokenException(RefreshTokenErrorCode.REFRESH_TOKEN_NOT_FOUND));
+
+        if (!token.getUser().getUserId().equals(user.getUserId())) {
+            throw new RefreshTokenException(RefreshTokenErrorCode.REFRESH_TOKEN_USER_MISMATCH);
+        }
+
+        repository.revokeAndSoftDeleteByFamilyId(user, token.getFamilyId(), now);
+    }
 }
