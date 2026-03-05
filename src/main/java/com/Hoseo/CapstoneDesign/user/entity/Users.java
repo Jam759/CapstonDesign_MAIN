@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@SQLDelete(sql = "UPDATE users SET deleted_at = now() WHERE user_id = ?")
 public class Users extends LifecycleTimestampEntity {
 
     @Id
@@ -27,7 +29,7 @@ public class Users extends LifecycleTimestampEntity {
     @Column(name = "identity_id", nullable = false, unique = true, columnDefinition = "BINARY(16)")
     private UUID identityId; // UUIDv7 저장
 
-    @Column(name = "service_nickname", nullable = false, length = 100)
+    @Column(name = "service_nickname", length = 100)
     private String serviceNickname;
 
     @Enumerated(EnumType.STRING)
@@ -41,7 +43,7 @@ public class Users extends LifecycleTimestampEntity {
     @Column(name = "oauth_provider_id", nullable = false, length = 255)
     private String oauthProviderId;
 
-    @Column(name = "oauth_nickname", length = 255)
+    @Column(name = "oauth_nickname", nullable = false, length = 255)
     private String oauthNickname;
 
     public void updateOauthNickname(String oauthNickname) {

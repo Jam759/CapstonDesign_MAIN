@@ -5,6 +5,7 @@ import com.Hoseo.CapstoneDesign.auth.exception.GitHubException;
 import com.Hoseo.CapstoneDesign.global.util.TimeUtil;
 import com.Hoseo.CapstoneDesign.security.properties.JwtProperties;
 import com.Hoseo.CapstoneDesign.security.service.RefreshTokenService;
+import com.Hoseo.CapstoneDesign.security.service.SecurityCookieService;
 import com.Hoseo.CapstoneDesign.security.util.JwtUtil;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.entity.enums.OauthType;
@@ -32,9 +33,10 @@ public class GithubOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private final JwtProperties jwtProperties;
     private final UserService userService;
     private final RefreshTokenService refreshTokenService;
+    private final SecurityCookieService securityCookieService;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = false)
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
 
@@ -67,8 +69,7 @@ public class GithubOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         if (jwtProperties.cookieDomain() != null && !jwtProperties.cookieDomain().isBlank()) {
             cb.domain(jwtProperties.cookieDomain());
         }
-
-        response.addHeader("Set-Cookie", cb.build().toString());
+        securityCookieService.createRefreshTokenCookie(response, refreshToken);
         response.sendRedirect(jwtProperties.frontRedirectUrl().toString());
     }
 }

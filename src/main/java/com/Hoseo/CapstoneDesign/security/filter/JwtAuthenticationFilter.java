@@ -18,15 +18,33 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final List<String> SKIP_PREFIXES = List.of(
+            "/api/v1/auth/",
+            "/public/",
+            "/swagger-ui/",
+            "/oauth2/",
+            "/login/"
+    );
+
     private final JwtUtil jwtUtil;
     private final UserDetailServiceImpl userService;
     private final AccessTokenBlackListService blackListService;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        for (String prefix : SKIP_PREFIXES) {
+            if (uri.startsWith(prefix)) return true;
+        }
+        return false;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

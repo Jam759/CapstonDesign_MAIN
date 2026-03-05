@@ -22,7 +22,7 @@ public class AuthController {
     private final AuthFacade authFacade;
     private final SecurityCookieService securityCookieService;
 
-    @PostMapping("/auth/refresh")
+    @PostMapping("/auth/reissue")
     public ResponseEntity<AccessTokenReissueResponse> accessTokenReissue(
             @CookieValue(name = "REFRESH_TOKEN", required = false) String refreshTokenRaw,
             HttpServletResponse response

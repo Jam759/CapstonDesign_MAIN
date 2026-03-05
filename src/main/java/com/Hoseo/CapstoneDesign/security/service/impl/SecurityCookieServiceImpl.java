@@ -25,7 +25,7 @@ public class SecurityCookieServiceImpl implements SecurityCookieService {
         ResponseCookie cookie = ResponseCookie.from(jwtProperties.cookieName(), refreshToken)
                 .httpOnly(jwtProperties.cookieHttpOnly())
                 .secure(jwtProperties.cookieSecure())
-                .path("/api/v1/auth/")
+                .path("/api/v1/auth")
                 .maxAge(maxAgeSeconds)
                 .sameSite(jwtProperties.cookieSamesite()) // 상황에 따라 "None" 또는 "Strict" 로 변경
                 .build();
@@ -39,7 +39,7 @@ public class SecurityCookieServiceImpl implements SecurityCookieService {
         ResponseCookie cookie = ResponseCookie.from(jwtProperties.cookieName(), "")
                 .httpOnly(jwtProperties.cookieHttpOnly())
                 .secure(jwtProperties.cookieSecure())
-                .path("/api/v1/auth/")
+                .path("/api/v1/auth")
                 .maxAge(0)
                 .sameSite(jwtProperties.cookieSamesite()) // 상황에 따라 "None" 또는 "Strict" 로 변경
                 .build();

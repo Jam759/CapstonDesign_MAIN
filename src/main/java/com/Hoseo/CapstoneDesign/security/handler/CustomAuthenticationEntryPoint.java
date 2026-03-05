@@ -18,8 +18,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
-        log.error("EntryPoint exception type = {}", authException.getClass().getName());
 
+        log.error("EntryPoint exception : uri={}, method={}, ex={}",
+                request.getRequestURI(), request.getMethod(), authException.getClass().getName());
         // 기본 인증 실패
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write("""
