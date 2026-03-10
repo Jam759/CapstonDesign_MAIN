@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.auth.facade.impl;
 
 import com.Hoseo.CapstoneDesign.auth.dto.application.TokenPair;
 import com.Hoseo.CapstoneDesign.auth.facade.AuthFacade;
+import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.security.factory.SecurityDtoFactory;
 import com.Hoseo.CapstoneDesign.security.service.AccessTokenBlackListService;
 import com.Hoseo.CapstoneDesign.security.service.RefreshTokenService;
@@ -14,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Facade
 @RequiredArgsConstructor
 public class AuthFacadeImpl implements AuthFacade {
 

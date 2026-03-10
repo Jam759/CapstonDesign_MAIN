@@ -1,7 +1,7 @@
-package com.Hoseo.CapstoneDesign.global.validation;
+package com.Hoseo.CapstoneDesign.global.bootGuard;
 
 import com.Hoseo.CapstoneDesign.global.entity.interfaces.CustomSoftDeletable;
-import com.Hoseo.CapstoneDesign.global.validation.exception.EntityConfigurationException;
+import com.Hoseo.CapstoneDesign.global.bootGuard.exception.EntityConfigurationException;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EntityConfigurationValidator implements ApplicationListener<ContextRefreshedEvent> {
+public class EntityConfigurationGuard implements ApplicationListener<ContextRefreshedEvent> {
 
     private final EntityManagerFactory emf;
 

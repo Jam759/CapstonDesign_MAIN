@@ -1,4 +1,4 @@
-package com.Hoseo.CapstoneDesign.global.validation.exception;
+package com.Hoseo.CapstoneDesign.global.bootGuard.exception;
 
 public class EntityConfigurationException extends RuntimeException {
     public EntityConfigurationException(Class<?> entityClass, String reason) {
