@@ -8,6 +8,7 @@ import com.Hoseo.CapstoneDesign.security.handler.GithubOAuth2SuccessHandler;
 import com.Hoseo.CapstoneDesign.security.service.AccessTokenBlackListService;
 import com.Hoseo.CapstoneDesign.security.service.impl.UserDetailServiceImpl;
 import com.Hoseo.CapstoneDesign.security.util.JwtUtil;
+import com.Hoseo.CapstoneDesign.user.entity.enums.SystemRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,15 +64,9 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/logout").authenticated()
-                        .requestMatchers(
-                                "/api/v1/auth/reissue",
-                                "/public/**",
-                                "/swagger-ui/**",
-                                "/oauth2/**",
-                                "/login/**"
-                        ).permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers(SecurityUrlPaths.AUTH_LOGOUT).authenticated()
+                        .requestMatchers(SecurityUrlPaths.PERMIT_ALL_PATTERNS).permitAll()
+                        .requestMatchers("/admin/**").hasRole(SystemRole.ADMIN.name())
                         .anyRequest().authenticated())
                 .oauth2Login(oauth -> {
                     oauth.successHandler(githubOAuth2SuccessHandler);

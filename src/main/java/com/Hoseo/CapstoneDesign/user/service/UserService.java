@@ -37,4 +37,10 @@ public class UserService {
                 });
     }
 
+    public Users updateServiceUserName(Users user,String updateNickname ){
+        user.updateServiceNickname(updateNickname);
+        return repository.save(user);
+    }
+
+
 }

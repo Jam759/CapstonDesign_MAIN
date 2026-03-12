@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.security.filter;
 
 import com.Hoseo.CapstoneDesign.security.exception.AccessTokenBlackListErrorCode;
 import com.Hoseo.CapstoneDesign.security.exception.AccessTokenBlackListException;
+import com.Hoseo.CapstoneDesign.security.config.SecurityUrlPaths;
 import com.Hoseo.CapstoneDesign.security.service.AccessTokenBlackListService;
 import com.Hoseo.CapstoneDesign.security.service.impl.UserDetailServiceImpl;
 import com.Hoseo.CapstoneDesign.security.util.JwtUtil;
@@ -15,23 +16,17 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Arrays;
 import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    private static final List<String> SKIP_PREFIXES = List.of(
-            "/api/v1/auth/",
-            "/public/",
-            "/swagger-ui/",
-            "/oauth2/",
-            "/login/"
-    );
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private final JwtUtil jwtUtil;
     private final UserDetailServiceImpl userService;
@@ -40,10 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        for (String prefix : SKIP_PREFIXES) {
-            if (uri.startsWith(prefix)) return true;
-        }
-        return false;
+        return Arrays.stream(SecurityUrlPaths.JWT_FILTER_SKIP_PATTERNS)
+                .anyMatch(pattern -> PATH_MATCHER.match(pattern, uri));
     }
 
     @Override

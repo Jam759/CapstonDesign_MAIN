@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -40,7 +40,7 @@ auth:
     cookie-http-only: true
     cookie-secure: false    # https면 true
     cookie-samesite: "Lax"
-    front-redirect-url: "http://localhost:5500/index.html"
+    front-redirect-url: "http://localhost:8080/tmp/oauth2/test"
 
 logging:
   level:

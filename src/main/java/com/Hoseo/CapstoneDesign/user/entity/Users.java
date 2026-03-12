@@ -46,8 +46,14 @@ public class Users extends LifecycleTimestampEntity {
     @Column(name = "oauth_nickname", nullable = false, length = 255)
     private String oauthNickname;
 
-    public void updateOauthNickname(String oauthNickname) {
+    public Users updateOauthNickname(String oauthNickname) {
         this.oauthNickname = oauthNickname;
+        return this;
+    }
+
+    public Users updateServiceNickname(String serviceNickname) {
+        this.serviceNickname = serviceNickname;
+        return this;
     }
 
     @Override

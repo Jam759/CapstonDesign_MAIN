@@ -1,7 +1,9 @@
 package com.Hoseo.CapstoneDesign.security.filter;
 
 import com.Hoseo.CapstoneDesign.global.exception.GlobalErrorCode;
+import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionResponse;
 import com.Hoseo.CapstoneDesign.security.exception.AuthBaseException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +15,8 @@ import java.io.IOException;
 
 @Slf4j
 public class GlobalExceptionFilter extends OncePerRequestFilter {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -34,14 +38,11 @@ public class GlobalExceptionFilter extends OncePerRequestFilter {
 
     private void handleAuthException(HttpServletResponse response, GlobalErrorCode errorCode) throws IOException {
         response.setStatus(errorCode.getHttpStatus().value());
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(String.format("""
-                {
-                    "code": %d,
-                    "error": "%s",
-                    "message": "%s"
-                }
-                """, errorCode.getHttpStatus().value(), errorCode.getErrorCode(), errorCode.getMessage()));
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        GlobalExceptionResponse body = new GlobalExceptionResponse(errorCode);
+        response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 
 }

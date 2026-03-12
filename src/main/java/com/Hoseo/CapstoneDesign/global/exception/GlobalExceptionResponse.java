@@ -1,9 +1,11 @@
 package com.Hoseo.CapstoneDesign.global.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
+@AllArgsConstructor
 public class GlobalExceptionResponse {
 
     private int errorCode;
@@ -15,5 +17,6 @@ public class GlobalExceptionResponse {
         this.httpStatus = e.getHttpStatus();
         this.errorMessage = e.getMessage();
     }
+
 
 }
