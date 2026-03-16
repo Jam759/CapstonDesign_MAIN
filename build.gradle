@@ -38,12 +38,13 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.5'
 	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'com.github.f4b6a3:uuid-creator:6.1.1' //uuidv7 지원
 
     implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
-
+    //mdc
     // JWT 라이브러리
     implementation "io.jsonwebtoken:jjwt-api:0.12.6"
     runtimeOnly "io.jsonwebtoken:jjwt-impl:0.12.6"
