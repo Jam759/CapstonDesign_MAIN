@@ -55,6 +55,11 @@ dependencies {
 
 
     implementation 'commons-codec:commons-codec:1.17.0'
+
+    //aws
+    implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
+    implementation "io.awspring.cloud:spring-cloud-aws-starter-sqs"
+
 }
 
 tasks.named('test') {
