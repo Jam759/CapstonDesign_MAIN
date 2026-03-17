@@ -28,6 +28,23 @@ spring:
             client-secret: ${GITHUB_CLIENT_SECRET}
             scope: read:user
             redirect-uri: "http://localhost:8080/login/oauth2/code/{registrationId}"
+  cloud:
+    aws:
+      sqs:
+        queue-not-found-strategy: FAIL
+      region:
+        static: ${SQS_REGION}
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+
+app:
+  aws:
+    sqs:
+      analysis-queue: ${SQS_ANALYSIS_QUEUE}
+      dlq-queue: ${SQS_DLQ}
+      notification-queue: ${SQS_NOTIFICATION_QUEUE}
+
 
 auth:
   jwt:
