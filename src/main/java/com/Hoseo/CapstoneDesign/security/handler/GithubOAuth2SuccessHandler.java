@@ -1,7 +1,7 @@
 package com.Hoseo.CapstoneDesign.security.handler;
 
-import com.Hoseo.CapstoneDesign.auth.exception.GitHubErrorCode;
-import com.Hoseo.CapstoneDesign.auth.exception.GitHubException;
+import com.Hoseo.CapstoneDesign.github.exception.GitHubErrorCode;
+import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
 import com.Hoseo.CapstoneDesign.global.util.TimeUtil;
 import com.Hoseo.CapstoneDesign.security.properties.JwtProperties;
 import com.Hoseo.CapstoneDesign.security.service.RefreshTokenService;

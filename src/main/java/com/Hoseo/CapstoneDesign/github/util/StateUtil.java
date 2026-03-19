@@ -1,5 +1,7 @@
 package com.Hoseo.CapstoneDesign.github.util;
 
+import com.Hoseo.CapstoneDesign.github.exception.GitHubErrorCode;
+import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
 import com.Hoseo.CapstoneDesign.github.dto.application.StatePayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +38,7 @@ public class StateUtil {
             return encoded + "." + signature;
 
         } catch (Exception e) {
-            throw new IllegalStateException("state 생성 실패", e);
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_STATE_CREATE_ERROR);
         }
     }
 
@@ -44,7 +46,7 @@ public class StateUtil {
         try {
             String[] parts = state.split("\\.");
             if (parts.length != 2) {
-                throw new IllegalArgumentException("invalid state format");
+                throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
             }
 
             String encoded = parts[0];
@@ -53,20 +55,20 @@ public class StateUtil {
             String expected = sign(encoded);
 
             if (!constantTimeEquals(signature, expected)) {
-                throw new IllegalArgumentException("invalid state signature");
+                throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
             }
 
             String json = new String(base64UrlDecode(encoded), StandardCharsets.UTF_8);
             StatePayload payload = objectMapper.readValue(json, StatePayload.class);
 
             if (payload.exp() < Instant.now().getEpochSecond()) {
-                throw new IllegalArgumentException("state expired");
+                throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
             }
 
             return payload.userIdentityId();
 
         } catch (Exception e) {
-            throw new IllegalArgumentException("state 검증 실패", e);
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
         }
     }
 

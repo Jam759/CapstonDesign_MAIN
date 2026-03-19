@@ -9,9 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -47,7 +45,7 @@ public class GithubWebhookSecurityFilter extends OncePerRequestFilter {
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write(
                     new GlobalExceptionResponse(
-                            9991, "잘못된 webhook",HttpStatus.UNAUTHORIZED
+                            9991, "잘못된 webhook", HttpStatus.UNAUTHORIZED
                     ).toString());
         }
     }

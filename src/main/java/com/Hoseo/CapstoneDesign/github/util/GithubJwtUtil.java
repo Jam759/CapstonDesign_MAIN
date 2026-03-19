@@ -1,6 +1,9 @@
 package com.Hoseo.CapstoneDesign.github.util;
 
+import com.Hoseo.CapstoneDesign.github.exception.GitHubErrorCode;
+import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
 import io.jsonwebtoken.Jwts;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMKeyPair;
@@ -14,47 +17,68 @@ import java.security.PrivateKey;
 import java.time.Instant;
 import java.util.Date;
 
-//github app과 통신을 위한 jwt생성 유틸
+// github app과 통신을 위한 jwt 생성 유틸
 @Slf4j
 @Component
 public class GithubJwtUtil {
+
     @Value("${github.app.app-id}")
     private String appId;
 
     @Value("${github.app.private-key}")
     private String privateKeyPem;
 
-    public String createAppJwt() {
-        Instant now = Instant.now();
+    private volatile PrivateKey privateKey;
 
-        return Jwts.builder()
-                .issuer(appId)
-                .issuedAt(Date.from(now.minusSeconds(30)))
-                .expiration(Date.from(now.plusSeconds(540)))
-                .signWith(loadPrivateKey(), Jwts.SIG.RS256)
-                .compact();
+    @PostConstruct
+    public void init() {
+        this.privateKey = parsePrivateKey();
     }
 
-    private PrivateKey loadPrivateKey() {
+    public String createAppJwt() {
+        try {
+            Instant now = Instant.now();
+
+            return Jwts.builder()
+                    .issuer(appId)
+                    .issuedAt(Date.from(now.minusSeconds(30)))
+                    .expiration(Date.from(now.plusSeconds(540)))
+                    .signWith(getOrLoadPrivateKey(), Jwts.SIG.RS256)
+                    .compact();
+        } catch (GitHubException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_JWT_CREATE_ERROR);
+        }
+    }
+
+    private PrivateKey getOrLoadPrivateKey() {
+        if (privateKey != null) {
+            return privateKey;
+        }
+
+        synchronized (this) {
+            if (privateKey != null) {
+                return privateKey;
+            }
+            privateKey = parsePrivateKey();
+            return privateKey;
+        }
+    }
+
+    private PrivateKey parsePrivateKey() {
         try {
             if (privateKeyPem == null || privateKeyPem.isBlank()) {
-                throw new IllegalArgumentException("github.app.private-key 값이 비어 있습니다.");
+                throw new GitHubException(GitHubErrorCode.GIT_HUB_PRIVATE_KEY_EMPTY);
             }
 
             String normalizedPem = rebuildPemFromBrokenSingleLine(privateKeyPem);
 
-            String[] lines = normalizedPem.split("\n");
-            log.info("normalized line count={}", lines.length);
-            log.info("normalized first line={}", lines.length > 0 ? lines[0] : "NO_FIRST_LINE");
-            log.info("normalized last line={}", lines.length > 0 ? lines[lines.length - 1] : "NO_LAST_LINE");
-
             try (PEMParser pemParser = new PEMParser(new StringReader(normalizedPem))) {
                 Object pemObject = pemParser.readObject();
 
-                log.info("pemObject class={}", pemObject == null ? "null" : pemObject.getClass().getName());
-
                 if (pemObject == null) {
-                    throw new IllegalArgumentException("PEMParser가 null을 반환했습니다.");
+                    throw new GitHubException(GitHubErrorCode.GIT_HUB_PRIVATE_KEY_INVALID_FORMAT);
                 }
 
                 JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
@@ -67,12 +91,13 @@ public class GithubJwtUtil {
                     return converter.getPrivateKey(privateKeyInfo);
                 }
 
-                throw new IllegalArgumentException("지원하지 않는 PEM 키 형식: " + pemObject.getClass().getName());
+                throw new GitHubException(GitHubErrorCode.GIT_HUB_PRIVATE_KEY_INVALID_FORMAT);
             }
 
+        } catch (GitHubException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("GitHub App private key 로딩 실패", e);
-            throw new IllegalStateException("GitHub App private key 로딩 실패", e);
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_PRIVATE_KEY_LOAD_ERROR);
         }
     }
 
@@ -100,21 +125,21 @@ public class GithubJwtUtil {
             beginMarker = beginPkcs8;
             endMarker = endPkcs8;
         } else {
-            throw new IllegalArgumentException("PEM 헤더/푸터를 찾을 수 없습니다.");
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_PRIVATE_KEY_INVALID_FORMAT);
         }
 
         int beginIndex = value.indexOf(beginMarker);
         int endIndex = value.indexOf(endMarker);
 
         if (beginIndex < 0 || endIndex < 0 || endIndex <= beginIndex) {
-            throw new IllegalArgumentException("PEM 헤더/푸터 위치가 올바르지 않습니다.");
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_PRIVATE_KEY_INVALID_FORMAT);
         }
 
         String base64Body = value.substring(beginIndex + beginMarker.length(), endIndex)
                 .replaceAll("\\s+", "");
 
         if (base64Body.isBlank()) {
-            throw new IllegalArgumentException("PEM 본문이 비어 있습니다.");
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_PRIVATE_KEY_INVALID_FORMAT);
         }
 
         StringBuilder sb = new StringBuilder();
