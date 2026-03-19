@@ -1,5 +1,7 @@
 package com.Hoseo.CapstoneDesign.github.util;
 
+import com.Hoseo.CapstoneDesign.github.exception.GitHubErrorCode;
+import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +18,7 @@ public class GitHubWebhookUtil {
 
     public void verify(String signature256, String rawBody) {
         if (signature256 == null || signature256.isBlank()) {
-            throw new IllegalArgumentException("X-Hub-Signature-256 헤더가 없습니다.");
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_WEBHOOK_SIGNATURE_MISSING);
         }
 
         String expected = "sha256=" + hmacSha256(rawBody, secret);
@@ -27,7 +29,7 @@ public class GitHubWebhookUtil {
         );
 
         if (!matches) {
-            throw new IllegalArgumentException("유효하지 않은 GitHub 웹훅 서명입니다.");
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_WEBHOOK_SIGNATURE_INVALID);
         }
     }
 
@@ -49,7 +51,7 @@ public class GitHubWebhookUtil {
             return sb.toString();
 
         } catch (Exception e) {
-            throw new IllegalStateException("GitHub 웹훅 서명 계산 실패", e);
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_WEBHOOK_SIGNATURE_CREATE_ERROR);
         }
     }
 }

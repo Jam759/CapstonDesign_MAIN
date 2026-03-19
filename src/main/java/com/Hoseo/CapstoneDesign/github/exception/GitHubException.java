@@ -1,4 +1,4 @@
-package com.Hoseo.CapstoneDesign.auth.exception;
+package com.Hoseo.CapstoneDesign.github.exception;
 
 import com.Hoseo.CapstoneDesign.security.exception.AuthBaseException;
 import lombok.Getter;

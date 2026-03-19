@@ -1,7 +1,7 @@
 package com.Hoseo.CapstoneDesign.github.facade;
 
-import com.Hoseo.CapstoneDesign.auth.exception.GitHubErrorCode;
-import com.Hoseo.CapstoneDesign.auth.exception.GitHubException;
+import com.Hoseo.CapstoneDesign.github.exception.GitHubErrorCode;
+import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
