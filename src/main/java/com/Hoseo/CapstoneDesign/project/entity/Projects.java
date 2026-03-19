@@ -1,7 +1,6 @@
 package com.Hoseo.CapstoneDesign.project.entity;
 
 import com.Hoseo.CapstoneDesign.global.entity.LifecycleTimestampEntity;
-import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectMemberType;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectType;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import jakarta.persistence.*;
@@ -31,10 +30,6 @@ public class Projects extends LifecycleTimestampEntity {
 
     @Column(name = "repo_url", nullable = false, columnDefinition = "TEXT")
     private String repoUrl;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "member_type", nullable = false, length = 20)
-    private ProjectMemberType memberType;
 
     @Column(name = "title", nullable = false, length = 50)
     private String title;
