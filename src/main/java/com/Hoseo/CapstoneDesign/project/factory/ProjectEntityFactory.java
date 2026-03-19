@@ -5,6 +5,7 @@ import com.Hoseo.CapstoneDesign.project.entity.ProjectMember;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectMemberRole;
+import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectStatus;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 
 public class ProjectEntityFactory {
@@ -14,7 +15,6 @@ public class ProjectEntityFactory {
             || request.projectType() == null
             || request.projectTitle() == null
             || request.description() == null
-            || request.repoUrl() == null
         ) throw new IllegalArgumentException();
 
         return Projects.builder()
@@ -22,9 +22,8 @@ public class ProjectEntityFactory {
                 .projectType(request.projectType())
                 .title(request.projectTitle())
                 .description(request.description())
-                .repoUrl(request.repoUrl())
                 .goal("")
-                .language("")
+                .projectStatus(ProjectStatus.REPO_NOT_CONNECTED)
                 .build();
     }
 

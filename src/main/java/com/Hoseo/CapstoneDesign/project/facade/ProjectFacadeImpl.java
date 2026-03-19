@@ -2,10 +2,14 @@ package com.Hoseo.CapstoneDesign.project.facade;
 
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectCreateRequest;
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
 import com.Hoseo.CapstoneDesign.project.entity.ProjectMember;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectMemberRole;
+import com.Hoseo.CapstoneDesign.project.exception.ProjectsErrorCode;
+import com.Hoseo.CapstoneDesign.project.exception.ProjectsException;
+import com.Hoseo.CapstoneDesign.project.factory.ProjectDtoFactory;
 import com.Hoseo.CapstoneDesign.project.factory.ProjectEntityFactory;
 import com.Hoseo.CapstoneDesign.project.service.ProjectMemberService;
 import com.Hoseo.CapstoneDesign.project.service.ProjectService;
@@ -33,6 +37,14 @@ public class ProjectFacadeImpl implements ProjectFacade{
                         ProjectInviteStatus.ACCEPTED
                 );
         projectMemberService.create(projectOwner);
-        //sqs로 던지기
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProjectSettingResponse getProjectSetting(Long projectId, Users user) {
+        Projects p = projectService.getById(projectId);
+        if (!p.getUser().equals(user))
+            throw new ProjectsException(ProjectsErrorCode.PROJECT_FORBIDDEN);
+        return ProjectDtoFactory.toProjectSettingResponse(p);
     }
 }

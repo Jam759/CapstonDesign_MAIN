@@ -4,10 +4,12 @@ public final class SecurityUrlPaths {
 
     public static final String AUTH_LOGOUT = "/api/v1/auth/logout";
     public static final String AUTH_REISSUE = "/api/v1/auth/reissue";
-    public static final String GIT_HUB_WEBHOOK = "/api/v1/analysis/webhook/github";
+    public static final String GIT_HUB_WEBHOOK = "/api/v1/github/webhook/callback";
+    public static final String GIT_HUB_WEBHOOK_SETUP = "/api/v1/github/setup/callback";
     public static final String[] PERMIT_ALL_PATTERNS = {
             AUTH_REISSUE,
             GIT_HUB_WEBHOOK,
+            GIT_HUB_WEBHOOK_SETUP,
             "/public/**",
             "/tmp/oauth2/test",
             "/tmp/oauth2/config",
