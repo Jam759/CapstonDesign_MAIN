@@ -1,7 +1,7 @@
 package com.Hoseo.CapstoneDesign.project.entity;
 
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
-import com.Hoseo.CapstoneDesign.github.entity.installationRepository;
+import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
 import com.Hoseo.CapstoneDesign.global.entity.LifecycleTimestampEntity;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectStatus;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectType;
@@ -35,7 +35,7 @@ public class Projects extends LifecycleTimestampEntity {
 
     @JoinColumn(name = "installation_repository_id", nullable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    private installationRepository installationRepository;
+    private InstallationRepository installationRepository;
 
     @Column(name = "title", nullable = false, length = 50)
     private String title;

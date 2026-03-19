@@ -2,7 +2,6 @@ package com.Hoseo.CapstoneDesign.github.entity;
 
 
 import com.Hoseo.CapstoneDesign.global.entity.CreatableEntity;
-import com.Hoseo.CapstoneDesign.user.entity.Users;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-public class installationRepository extends CreatableEntity {
+public class InstallationRepository extends CreatableEntity {
 
     @Id
     private Long installationRepositoryId;
