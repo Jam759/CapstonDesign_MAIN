@@ -1,5 +1,7 @@
 package com.Hoseo.CapstoneDesign.security.config;
 
+import com.Hoseo.CapstoneDesign.github.util.GitHubWebhookUtil;
+import com.Hoseo.CapstoneDesign.security.filter.GithubWebhookSecurityFilter;
 import com.Hoseo.CapstoneDesign.security.filter.GlobalExceptionFilter;
 import com.Hoseo.CapstoneDesign.security.filter.JwtAuthenticationFilter;
 import com.Hoseo.CapstoneDesign.security.handler.CustomAccessDeniedHandler;
@@ -10,6 +12,7 @@ import com.Hoseo.CapstoneDesign.security.service.impl.UserDetailServiceImpl;
 import com.Hoseo.CapstoneDesign.security.util.JwtUtil;
 import com.Hoseo.CapstoneDesign.user.entity.enums.SystemRole;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,6 +36,8 @@ public class SecurityConfig {
     private final UserDetailServiceImpl userService;
     private final AccessTokenBlackListService blackListService;
 
+    private final GitHubWebhookUtil gitHubWebhookUtil;
+
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final GithubOAuth2SuccessHandler githubOAuth2SuccessHandler;
@@ -45,6 +50,11 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(jwtUtil, userService, blackListService);
+    }
+
+    @Bean
+    public GithubWebhookSecurityFilter githubWebhookSecurityFilter() {
+        return new GithubWebhookSecurityFilter(gitHubWebhookUtil);
     }
 
     @Bean
@@ -92,5 +102,16 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", c);
         return source;
     }
+
+
+    @Bean
+    public FilterRegistrationBean<GithubWebhookSecurityFilter> githubWebhookFilterRegistration() {
+        FilterRegistrationBean<GithubWebhookSecurityFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(githubWebhookSecurityFilter());
+        registration.addUrlPatterns(SecurityUrlPaths.GIT_HUB_WEBHOOK);
+        registration.setOrder(1);
+        return registration;
+    }
+
 }
 

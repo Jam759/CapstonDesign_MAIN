@@ -7,5 +7,4 @@ public record SqsProperties(
         String analysisQueue,
         String dlqQueue,
         String notificationQueue
-
 ) {}

@@ -1,0 +1,82 @@
+package com.Hoseo.CapstoneDesign.github.facade;
+
+import com.Hoseo.CapstoneDesign.auth.exception.GitHubErrorCode;
+import com.Hoseo.CapstoneDesign.auth.exception.GitHubException;
+import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailResponse;
+import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
+import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
+import com.Hoseo.CapstoneDesign.github.factory.GitHubDtoFactory;
+import com.Hoseo.CapstoneDesign.github.factory.GitHubEntityFactory;
+import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
+import com.Hoseo.CapstoneDesign.github.service.GithubAppClientService;
+import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
+import com.Hoseo.CapstoneDesign.github.util.StateUtil;
+import com.Hoseo.CapstoneDesign.global.annotation.Facade;
+import com.Hoseo.CapstoneDesign.user.entity.Users;
+import com.Hoseo.CapstoneDesign.user.service.UserService;
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Facade
+@RequiredArgsConstructor
+public class GitHubFacadeImpl implements GitHubFacade{
+
+    private final List<GithubWebhookStrategy> strategies;
+
+    private final GitHubAppInstallationService gitHubAppInstallationService;
+    private final GithubAppClientService githubAppClientService;
+    private final UserService userService;
+    private final StateUtil stateUtil;
+
+    @Override
+    @Transactional(readOnly = true)
+    public InstallationsAvailableResponse getAvailable(Users user) {
+        Optional<GithubAppInstallations> appUsers =
+                gitHubAppInstallationService.findByUser(user);
+        return GitHubDtoFactory.toInstallationsAvailableResponse(user,appUsers,stateUtil);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void connectInstallationIdAndUser(String state, Long installationId, String setupAction) {
+        UUID userIdentityId = stateUtil.verifyAndExtractStateId(state);
+        Users user = userService.getByIdentityId(userIdentityId);
+        GithubInstallationDetailResponse detail
+                = githubAppClientService.getInstallationDetail(installationId);
+
+        gitHubAppInstallationService.findByid(installationId)
+                .ifPresentOrElse(
+                existing -> {
+                    if (!existing.getUser().equals(user)) {
+                        throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_EXIST_USER);
+                    }
+                    if (!existing.getAccountId().equals(detail.account().id())) {
+                        throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
+                    }
+                },
+                () -> {
+                    GithubAppInstallations e =
+                            GitHubEntityFactory.toGithubAppInstallations(installationId, user, detail);
+                    gitHubAppInstallationService.save(e);
+                }
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void webhookEvent(String event, String deliveryId, String signature256, JsonNode payload) {
+        GithubWebhookStrategy strategy = strategies.stream()
+            .filter(s -> s.supports(event))
+            .findFirst()
+            .orElse(null);
+        if (strategy == null) { return ;}
+        strategy.handle(payload, deliveryId);
+    }
+
+
+}

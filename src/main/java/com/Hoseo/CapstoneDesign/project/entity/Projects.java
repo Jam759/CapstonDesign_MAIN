@@ -3,6 +3,7 @@ package com.Hoseo.CapstoneDesign.project.entity;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.installationRepository;
 import com.Hoseo.CapstoneDesign.global.entity.LifecycleTimestampEntity;
+import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectStatus;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectType;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import jakarta.persistence.*;
@@ -28,13 +29,13 @@ public class Projects extends LifecycleTimestampEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Users user;
 
-    @JoinColumn(name = "github_app_installation _id", nullable = false)
+    @JoinColumn(name = "github_app_installation _id", nullable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    private GithubAppInstallations GithubAppInstallationsId;
+    private GithubAppInstallations GithubAppInstallations;
 
-    @JoinColumn(name = "installation_repository_id", nullable = false)
+    @JoinColumn(name = "installation_repository_id", nullable = true)
     @ManyToOne(fetch = FetchType.LAZY)
-    private installationRepository installationRepositoryId;
+    private installationRepository installationRepository;
 
     @Column(name = "title", nullable = false, length = 50)
     private String title;
@@ -48,5 +49,9 @@ public class Projects extends LifecycleTimestampEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "project_type", nullable = false, length = 30)
     private ProjectType projectType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "project_status", nullable = false)
+    private ProjectStatus projectStatus;
 
 }

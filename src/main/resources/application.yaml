@@ -4,13 +4,13 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/capstone_design?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://127.0.0.1:3306/capstone_design?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true  #prod -> os var
+    username: root  #prod -> os var
+    password: root  #prod -> os var
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update  #prod -> update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -27,7 +27,7 @@ spring:
             client-id: ${GITHUB_CLIENT_ID}
             client-secret: ${GITHUB_CLIENT_SECRET}
             scope: read:user
-            redirect-uri: "http://localhost:8080/login/oauth2/code/{registrationId}"
+            redirect-uri: "http://localhost:8080/login/oauth2/code/{registrationId}"  #prod -> os var
   cloud:
     aws:
       sqs:
@@ -48,16 +48,16 @@ app:
 
 auth:
   jwt:
-    issuer: "HoseoCapstoneDesign"
-    access-key: "GxNfK0XvN7pM3jB2YqRtZl4s8dF1vC9qTzE5aWm2sUuLxOeH"
-    refresh-key: "JrW4pD7aZsQ8xR1mTgB2yV5fNnL9kC3vEoH6qUuP0wYtSxMz"
+    issuer: "HoseoCapstoneDesign"  #prod -> os var
+    access-key: "GxNfK0XvN7pM3jB2YqRtZl4s8dF1vC9qTzE5aWm2sUuLxOeH"  #prod -> os var
+    refresh-key: "JrW4pD7aZsQ8xR1mTgB2yV5fNnL9kC3vEoH6qUuP0wYtSxMz"  #prod -> os var
     access-ttl: 15 #min
     refresh-ttl: 7 # days
-    cookie-name: "REFRESH_TOKEN"
+    cookie-name: "REFRESH_TOKEN"  #prod -> os var
     cookie-http-only: true
     cookie-secure: false    # https면 true
     cookie-samesite: "Lax"
-    front-redirect-url: "http://localhost:8080/tmp/oauth2/test"
+    front-redirect-url: "http://localhost:8080/tmp/oauth2/test"  #prod -> os var
 
 logging:
   level:
@@ -70,3 +70,11 @@ mybatis:
   type-aliases-package: com.example.domain
   configuration:
     map-underscore-to-camel-case: true
+
+github:
+  app:
+    app-id: ${GITHUB_APP_ID}
+    private-key: ${GITHUB_APP_PRIVATE_KEY}
+    state-secret: ${GITHUB_APP_STATE_SECRET}
+  webhook:
+    secret: ${GITHUB_WEBHOOK_SECRET}
