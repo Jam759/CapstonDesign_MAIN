@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailR
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubRepositorySummary;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
+import com.Hoseo.CapstoneDesign.github.entity.UserGitHubInstallations;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -13,18 +14,17 @@ public class GitHubEntityFactory {
 
     public static GithubAppInstallations toGithubAppInstallations(
             Long installationId,
-            Users users,
-            GithubInstallationDetailResponse detailResponse
-    ){
+            Long accountId,
+            String accountLogin
+    ) {
         return GithubAppInstallations.builder()
-                .user(users)
                 .GithubAppInstallationsId(installationId)
-                .accountLogin(detailResponse.account().login())
-                .accountId(detailResponse.account().id())
+                .accountLogin(accountLogin)
+                .accountId(accountId)
                 .build();
     }
 
-    public static InstallationRepository toInstallationRepository(GithubAppInstallations installations,JsonNode repoNode){
+    public static InstallationRepository toInstallationRepository(GithubAppInstallations installations, JsonNode repoNode) {
         return InstallationRepository.builder()
                 .installationRepositoryId(repoNode.path("id").asLong())
                 .githubAppInstallation(installations)
@@ -56,4 +56,10 @@ public class GitHubEntityFactory {
                 .toList();
     }
 
+    public static UserGitHubInstallations toUserGitHubInstallations(Users user, GithubAppInstallations githubAppInstallations) {
+        return UserGitHubInstallations.builder()
+                .user(user)
+                .githubAppInstallation(githubAppInstallations)
+                .build();
+    }
 }

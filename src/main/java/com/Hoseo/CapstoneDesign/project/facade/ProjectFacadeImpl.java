@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.project.facade;
 
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectCreateRequest;
+import com.Hoseo.CapstoneDesign.project.dto.request.ProjectSettingRequest;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
 import com.Hoseo.CapstoneDesign.project.entity.ProjectMember;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
@@ -46,5 +47,16 @@ public class ProjectFacadeImpl implements ProjectFacade{
         if (!p.getUser().equals(user))
             throw new ProjectsException(ProjectsErrorCode.PROJECT_FORBIDDEN);
         return ProjectDtoFactory.toProjectSettingResponse(p);
+    }
+
+    @Override
+    public ProjectSettingResponse updateProject(Long projectId, Users user, ProjectSettingRequest request) {
+        Projects p = projectService.getById(projectId);
+        if (!p.getUser().equals(user))
+            throw new ProjectsException(ProjectsErrorCode.PROJECT_FORBIDDEN);
+
+        // TODO: 여기서 브런치, 리포 id 등등 세팅 할것
+
+        return null;
     }
 }

@@ -8,6 +8,7 @@ public record ProjectSettingResponse(
         Long projectId,
         Long gitHubAppInstallationId,
         Long installationRepositoryId,
+        String trackedBranch,
         String repositoryFullName,
         ProjectStatus projectStatus
 ) {}

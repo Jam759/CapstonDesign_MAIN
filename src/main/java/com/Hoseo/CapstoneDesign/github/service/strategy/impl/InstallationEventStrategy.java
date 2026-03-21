@@ -9,22 +9,24 @@ import com.Hoseo.CapstoneDesign.github.factory.GitHubEntityFactory;
 import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
 import com.Hoseo.CapstoneDesign.github.service.GithubAppClientService;
 import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
+import com.Hoseo.CapstoneDesign.github.service.UserGitHubInstallationService;
 import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class InstallationEventStrategy implements GithubWebhookStrategy {
 
     private final GithubAppClientService githubAppClientService;
     private final GitHubAppInstallationService gitHubAppInstallationService;
     private final InstallationRepositoryService installationRepositoryService;
+    private final UserGitHubInstallationService userGitHubInstallationService;
 
     @Override
     public boolean supports(String eventType) {
@@ -44,8 +46,14 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
 
     private void createdHandle(JsonNode payload, String deliveryId) {
         JsonNode installationNode = payload.path("installation");
+        JsonNode accountNode = installationNode.path("account");
+
         long installationId = installationNode.path("id").asLong();
-        GithubAppInstallations installation = gitHubAppInstallationService.getById(installationId);
+        long accountId = accountNode.path("id").asLong();
+        String accountLogin = accountNode.path("login").asText();
+
+        GithubAppInstallations installation = gitHubAppInstallationService.createOrRefresh(installationId, accountId, accountLogin);
+
         JsonNode repositoriesNode = payload.path("repositories");
 
         List<InstallationRepository> installationRepositories = new ArrayList<>();
@@ -76,5 +84,6 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
                 = gitHubAppInstallationService.getById(installationId);
         installationRepositoryService.deleteAllByInstallation(installation);
         gitHubAppInstallationService.delete(installation);
+        userGitHubInstallationService.deleteByGithubAppInstallation(installation);
     }
 }

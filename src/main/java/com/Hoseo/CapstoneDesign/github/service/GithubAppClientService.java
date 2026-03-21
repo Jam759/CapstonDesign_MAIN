@@ -1,12 +1,10 @@
 package com.Hoseo.CapstoneDesign.github.service;
 
-import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailResponse;
-import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationRepositoriesResponse;
-import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationTokenResponse;
-import com.Hoseo.CapstoneDesign.github.dto.application.GithubRepositorySummary;
+import com.Hoseo.CapstoneDesign.github.dto.application.*;
 import com.Hoseo.CapstoneDesign.github.exception.GitHubErrorCode;
 import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
 import com.Hoseo.CapstoneDesign.github.util.GithubJwtUtil;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -108,6 +106,25 @@ public class GithubAppClientService {
         } catch (HttpClientErrorException.Forbidden e) {
             throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_FORBIDDEN);
         }
+    }
+
+    public List<GithubBranchDto> getBranches(Long installationId, String fullName) {
+        String token = this.createInstallationAccessToken(installationId);
+
+        String[] parts = fullName.split("/");
+        if (parts.length != 2) {
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
+        }
+
+        String owner = parts[0];
+        String repo = parts[1];
+
+        return restClient.get()
+                .uri("/repos/{owner}/{repo}/branches", owner, repo)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .body(new ParameterizedTypeReference<List<GithubBranchDto>>() {
+                });
     }
 
 }

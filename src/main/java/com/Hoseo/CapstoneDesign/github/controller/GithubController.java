@@ -1,6 +1,7 @@
 package com.Hoseo.CapstoneDesign.github.controller;
 
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
+import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryBranchesResponse;
 import com.Hoseo.CapstoneDesign.github.facade.GitHubFacade;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,7 +26,7 @@ public class GithubController {
             @RequestParam(required = false, defaultValue = "/tmp/oauth2/test") String returnTo//나중에 바꾸기
     ) {
         InstallationsAvailableResponse response =
-                facade.getAvailable(userDetail.getUser(),returnTo);
+                facade.getAvailable(userDetail.getUser(), returnTo);
         return ResponseEntity.ok(response);
     }
 
@@ -57,4 +58,15 @@ public class GithubController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/installations/{installationId}/repositories/{repositoryId}/branches")
+    public ResponseEntity<RepositoryBranchesResponse> getBranches(
+            @PathVariable Long installationId,
+            @PathVariable Long repositoryId,
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        RepositoryBranchesResponse response =
+                facade.getBranches(userDetail.getUser(), installationId, repositoryId);
+
+        return ResponseEntity.ok(response);
+    }
 }

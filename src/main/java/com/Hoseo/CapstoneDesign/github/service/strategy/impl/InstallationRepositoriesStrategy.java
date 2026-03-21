@@ -10,12 +10,12 @@ import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
 import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class InstallationRepositoriesStrategy implements GithubWebhookStrategy {
 

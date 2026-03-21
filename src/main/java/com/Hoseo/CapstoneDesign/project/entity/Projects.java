@@ -54,4 +54,7 @@ public class Projects extends LifecycleTimestampEntity {
     @Column(name = "project_status", nullable = false)
     private ProjectStatus projectStatus;
 
+    @Column(name = "tracked_branch", nullable = true)
+    private String trackedBranch;
+
 }
