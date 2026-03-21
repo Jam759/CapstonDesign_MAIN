@@ -25,6 +25,11 @@ public class GitHubAppInstallationService {
         return repository.findById(installationId);
     }
 
+    public GithubAppInstallations getByid(Long installationId) {
+        return repository.findById(installationId)
+                .orElseThrow( () -> new GitHubException(GitHubErrorCode.GIT_HUB_NOT_FOUND_USER));
+    }
+
     public GithubAppInstallations save(GithubAppInstallations entity) {
         try {
              return repository.save(entity);

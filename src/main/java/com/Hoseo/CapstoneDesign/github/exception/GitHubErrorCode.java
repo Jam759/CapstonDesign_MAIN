@@ -22,7 +22,8 @@ public enum GitHubErrorCode implements GlobalErrorCode {
 
     GIT_HUB_WEBHOOK_SIGNATURE_MISSING(HttpStatus.BAD_REQUEST, 5210, "GitHub 웹훅 요청에 서명 정보가 없습니다."),
     GIT_HUB_WEBHOOK_SIGNATURE_INVALID(HttpStatus.UNAUTHORIZED, 5211, "GitHub 웹훅 서명이 유효하지 않습니다."),
-    GIT_HUB_WEBHOOK_SIGNATURE_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5212, "GitHub 웹훅 서명 검증 처리 중 오류가 발생하였습니다.");
+    GIT_HUB_WEBHOOK_SIGNATURE_CREATE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 5212, "GitHub 웹훅 서명 검증 처리 중 오류가 발생하였습니다."), 
+    GIT_HUB_WEBHOOK_UNSUPPORTED_ERROR(HttpStatus.BAD_REQUEST, 5212 ,"지원하지 않는 서비스" );
 
     private final HttpStatus httpStatus;
     private final int errorCode;
