@@ -1,7 +1,7 @@
 package com.Hoseo.CapstoneDesign.user.facade;
 
-import com.Hoseo.CapstoneDesign.badge.entity.UserBadge;
-import com.Hoseo.CapstoneDesign.badge.service.UserBadgeService;
+import com.Hoseo.CapstoneDesign.gamification.entity.UserBadge;
+import com.Hoseo.CapstoneDesign.gamification.service.UserBadgeService;
 import com.Hoseo.CapstoneDesign.support.factory.UserProfileUpdateRequestFactory;
 import com.Hoseo.CapstoneDesign.support.fixture.UserBadgeFixture;
 import com.Hoseo.CapstoneDesign.support.mother.UsersMother;

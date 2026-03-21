@@ -1,4 +1,4 @@
-package com.Hoseo.CapstoneDesign.badge.exception;
+package com.Hoseo.CapstoneDesign.gamification.exception;
 
 import com.Hoseo.CapstoneDesign.global.exception.GlobalErrorCode;
 import lombok.AllArgsConstructor;

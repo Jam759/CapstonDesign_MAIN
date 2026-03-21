@@ -1,7 +1,6 @@
-package com.Hoseo.CapstoneDesign.exp.entity;
+package com.Hoseo.CapstoneDesign.gamification.entity;
 
 import com.Hoseo.CapstoneDesign.global.entity.CreatableEntity;
-import com.Hoseo.CapstoneDesign.quest.entity.UserPersonalQuest;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

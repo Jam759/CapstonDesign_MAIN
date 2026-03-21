@@ -1,4 +1,4 @@
-package com.Hoseo.CapstoneDesign.exp.entity.enums;
+package com.Hoseo.CapstoneDesign.gamification.entity.enums;
 
 /**
  * Source: ERD "ExpActionType(DAILY_LOGIN ~~)".

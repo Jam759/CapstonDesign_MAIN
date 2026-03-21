@@ -1,4 +1,4 @@
-package com.Hoseo.CapstoneDesign.badge.entity;
+package com.Hoseo.CapstoneDesign.gamification.entity;
 
 import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import jakarta.persistence.Column;

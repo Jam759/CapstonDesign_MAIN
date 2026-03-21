@@ -1,6 +1,6 @@
 package com.Hoseo.CapstoneDesign.user.factory;
 
-import com.Hoseo.CapstoneDesign.badge.entity.UserBadge;
+import com.Hoseo.CapstoneDesign.gamification.entity.UserBadge;
 import com.Hoseo.CapstoneDesign.user.dto.response.UpdateUserInfoResponse;
 import com.Hoseo.CapstoneDesign.user.entity.UserInfoUpdateHistory;
 import com.Hoseo.CapstoneDesign.user.entity.Users;

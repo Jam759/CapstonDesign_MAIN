@@ -1,4 +1,4 @@
-package com.Hoseo.CapstoneDesign.quest.entity;
+package com.Hoseo.CapstoneDesign.gamification.entity;
 
 import com.Hoseo.CapstoneDesign.global.entity.CreatableEntity;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;

@@ -1,6 +1,6 @@
 package com.Hoseo.CapstoneDesign.support.fixture;
 
-import com.Hoseo.CapstoneDesign.badge.entity.UserBadge;
+import com.Hoseo.CapstoneDesign.gamification.entity.UserBadge;
 
 import java.util.Set;
 

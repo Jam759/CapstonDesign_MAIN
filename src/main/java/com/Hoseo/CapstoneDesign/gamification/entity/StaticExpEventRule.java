@@ -1,6 +1,6 @@
-package com.Hoseo.CapstoneDesign.exp.entity;
+package com.Hoseo.CapstoneDesign.gamification.entity;
 
-import com.Hoseo.CapstoneDesign.exp.entity.enums.ExpActionType;
+import com.Hoseo.CapstoneDesign.gamification.entity.enums.ExpActionType;
 import com.Hoseo.CapstoneDesign.global.entity.LifecycleTimestampEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

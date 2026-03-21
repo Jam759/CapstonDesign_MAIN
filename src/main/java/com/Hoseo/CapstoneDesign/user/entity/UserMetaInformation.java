@@ -1,6 +1,6 @@
 package com.Hoseo.CapstoneDesign.user.entity;
 
-import com.Hoseo.CapstoneDesign.exp.entity.LevelRule;
+import com.Hoseo.CapstoneDesign.gamification.entity.LevelRule;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

@@ -1,6 +1,6 @@
-package com.Hoseo.CapstoneDesign.badge.repository;
+package com.Hoseo.CapstoneDesign.gamification.repository;
 
-import com.Hoseo.CapstoneDesign.badge.entity.Badge;
+import com.Hoseo.CapstoneDesign.gamification.entity.Badge;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BadgeRepository extends JpaRepository<Badge, Long> {

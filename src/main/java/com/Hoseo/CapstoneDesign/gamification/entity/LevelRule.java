@@ -1,4 +1,4 @@
-package com.Hoseo.CapstoneDesign.exp.entity;
+package com.Hoseo.CapstoneDesign.gamification.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

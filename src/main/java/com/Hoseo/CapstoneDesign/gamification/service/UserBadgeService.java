@@ -1,15 +1,13 @@
-package com.Hoseo.CapstoneDesign.badge.service;
+package com.Hoseo.CapstoneDesign.gamification.service;
 
-import com.Hoseo.CapstoneDesign.badge.entity.UserBadge;
-import com.Hoseo.CapstoneDesign.badge.exception.UserBadgeErrorCode;
-import com.Hoseo.CapstoneDesign.badge.exception.UserBadgeException;
-import com.Hoseo.CapstoneDesign.badge.repository.UserBadgeRepository;
+import com.Hoseo.CapstoneDesign.gamification.entity.UserBadge;
+import com.Hoseo.CapstoneDesign.gamification.exception.UserBadgeErrorCode;
+import com.Hoseo.CapstoneDesign.gamification.exception.UserBadgeException;
+import com.Hoseo.CapstoneDesign.gamification.repository.UserBadgeRepository;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
