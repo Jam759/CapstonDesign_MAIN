@@ -5,6 +5,7 @@ import java.util.UUID;
 public record StatePayload(
         UUID userIdentityId,
         String nonce,
-        long exp
+        long exp,
+        String returnTo
 ) {
 }

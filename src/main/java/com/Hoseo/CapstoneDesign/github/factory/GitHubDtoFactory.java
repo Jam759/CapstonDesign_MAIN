@@ -15,11 +15,13 @@ public class GitHubDtoFactory {
     public static InstallationsAvailableResponse toInstallationsAvailableResponse(
             Users user,
             Optional<GithubAppInstallations> appUsers,
-            StateUtil stateUtil
+            StateUtil stateUtil,
+            String returnTo
     ) {
         String installUrl = "";
         if(appUsers.isEmpty()) {
-            String state = stateUtil.createState(user.getIdentityId());
+            String state =
+                    stateUtil.createState(user.getIdentityId(),returnTo);
             installUrl =
                     "https://github.com/apps/projectERPERP/installations/new?state="
                             + URLEncoder.encode(state, StandardCharsets.UTF_8);

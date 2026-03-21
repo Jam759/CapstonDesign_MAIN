@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.github.entity;
 
+import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailResponse;
 import com.Hoseo.CapstoneDesign.global.entity.CreatableEntity;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import jakarta.persistence.*;
@@ -28,4 +29,8 @@ public class GithubAppInstallations extends CreatableEntity {
     @Column(name = "account_login", nullable = false)
     private String accountLogin;
 
+    public void refreshFrom(GithubInstallationDetailResponse detail) {
+        this.accountLogin = detail.account().login();
+        this.accountId = detail.account().id();
+    }
 }

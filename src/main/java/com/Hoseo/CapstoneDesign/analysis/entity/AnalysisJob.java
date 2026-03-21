@@ -26,8 +26,8 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "analysis_jobs")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AnalysisJob extends CreatableEntity {
 
     @Id

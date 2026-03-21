@@ -29,4 +29,11 @@ public class InstallationRepositoryService {
     public void deleteAllByInstallation(GithubAppInstallations installation) {
         repository.deleteAllByGithubAppInstallation(installation);
     }
+
+    public void deleteAllByInstallationAndRepositoryIds(
+            GithubAppInstallations installation,
+            List<Long> repositoryIds
+    ) {
+        repository.deleteAllByGithubAppInstallationAndInstallationRepositoryIdIn(installation, repositoryIds);
+    }
 }
