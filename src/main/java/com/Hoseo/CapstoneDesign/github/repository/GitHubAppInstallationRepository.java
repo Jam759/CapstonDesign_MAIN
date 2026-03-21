@@ -8,6 +8,4 @@ import java.util.Optional;
 
 public interface GitHubAppInstallationRepository extends JpaRepository<GithubAppInstallations, Long> {
 
-    Optional<GithubAppInstallations> findByUser(Users user);
-
 }

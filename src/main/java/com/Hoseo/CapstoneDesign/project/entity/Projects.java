@@ -18,7 +18,7 @@ import org.hibernate.annotations.SQLDelete;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-@SQLDelete(sql = "UPDATE projects SET deleted_at = now() WHERE user_id = ?")
+@SQLDelete(sql = "UPDATE projects SET deleted_at = now() WHERE project_id = ?")
 public class Projects extends LifecycleTimestampEntity {
 
     @Id
@@ -53,5 +53,8 @@ public class Projects extends LifecycleTimestampEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "project_status", nullable = false)
     private ProjectStatus projectStatus;
+
+    @Column(name = "tracked_branch", nullable = true)
+    private String trackedBranch;
 
 }

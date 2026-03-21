@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.notification.service;
 
 import com.Hoseo.CapstoneDesign.notification.dto.application.SseBaseResponse;
 import com.Hoseo.CapstoneDesign.notification.repository.SseEmitterRepository;
+import com.Hoseo.CapstoneDesign.user.entity.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -16,8 +17,9 @@ public class NotificationSseService {
 
     private final SseEmitterRepository emitterRepository;
 
-    public SseEmitter subscribe(Long userId) {
+    public SseEmitter subscribe(Users user) {
         SseEmitter emitter = new SseEmitter(60_000L);
+        Long userId = user.getUserId();
         emitterRepository.save(userId, emitter);
 
         emitter.onCompletion(() -> emitterRepository.delete(userId));

@@ -1,6 +1,7 @@
 package com.Hoseo.CapstoneDesign.github.controller;
 
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
+import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryBranchesResponse;
 import com.Hoseo.CapstoneDesign.github.facade.GitHubFacade;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,10 +22,11 @@ public class GithubController {
     //여기서 가입 여부 확인 후 안되어있으면 URL주는 곳으로 가서 이동
     @GetMapping("/installations/available")
     public ResponseEntity<InstallationsAvailableResponse> getInstallAvailable(
-            @AuthenticationPrincipal UserDetailImpl userDetail
+            @AuthenticationPrincipal UserDetailImpl userDetail,
+            @RequestParam(required = false, defaultValue = "/tmp/oauth2/test") String returnTo//나중에 바꾸기
     ) {
         InstallationsAvailableResponse response =
-                facade.getAvailable(userDetail.getUser());
+                facade.getAvailable(userDetail.getUser(), returnTo);
         return ResponseEntity.ok(response);
     }
 
@@ -32,12 +34,15 @@ public class GithubController {
     @GetMapping("/setup/callback")
     public ResponseEntity<Void> setupCallback(
             @RequestParam("installation_id") Long installationId,
-            @RequestParam("state") String state,
+            @RequestParam(value = "state", required = false) String state,
             @RequestParam(value = "setup_action", required = false) String setupAction
     ) {
-        facade.connectInstallationIdAndUser(state, installationId, setupAction);
+
+        URI redirectUri =
+                facade.connectInstallationIdAndUser(state, installationId, setupAction);
+
         return ResponseEntity.status(302)
-                .location(URI.create("http://localhost:8080/tmp/oauth2/test")) //redirect보낼 프론트 url -> 프로젝트 메인으로 보내기
+                .location(redirectUri) //redirect보낼 프론트 url -> 프로젝트 메인으로 보내기
                 .build();
     }
 
@@ -53,4 +58,15 @@ public class GithubController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/installations/{installationId}/repositories/{repositoryId}/branches")
+    public ResponseEntity<RepositoryBranchesResponse> getBranches(
+            @PathVariable Long installationId,
+            @PathVariable Long repositoryId,
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        RepositoryBranchesResponse response =
+                facade.getBranches(userDetail.getUser(), installationId, repositoryId);
+
+        return ResponseEntity.ok(response);
+    }
 }

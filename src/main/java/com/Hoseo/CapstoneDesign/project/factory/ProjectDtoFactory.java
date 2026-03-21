@@ -12,6 +12,7 @@ public class ProjectDtoFactory {
         Long installationRepositoryId = null;
         String repositoryFullName = null;
         Long gitHubAppInstallationId = null;
+        String trackedBranch = null;
 
         if (p.getInstallationRepository() != null) {
             installationRepositoryId = p.getInstallationRepository().getInstallationRepositoryId();
@@ -22,8 +23,13 @@ public class ProjectDtoFactory {
             gitHubAppInstallationId = p.getGithubAppInstallations().getGithubAppInstallationsId();
         }
 
+        if (p.getTrackedBranch() != null) {
+            trackedBranch = p.getTrackedBranch();
+        }
+
         return ProjectSettingResponse.builder()
                 .projectId(p.getProjectId())
+                .trackedBranch(trackedBranch)
                 .installationRepositoryId(installationRepositoryId)
                 .projectStatus(p.getProjectStatus())
                 .gitHubAppInstallationId(gitHubAppInstallationId)
