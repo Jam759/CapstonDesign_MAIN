@@ -25,7 +25,7 @@ public class GitHubAppInstallationService {
         return repository.findById(installationId);
     }
 
-    public GithubAppInstallations getByid(Long installationId) {
+    public GithubAppInstallations getById(Long installationId) {
         return repository.findById(installationId)
                 .orElseThrow( () -> new GitHubException(GitHubErrorCode.GIT_HUB_NOT_FOUND_USER));
     }
@@ -36,5 +36,9 @@ public class GitHubAppInstallationService {
          } catch (Exception e) {
              throw new GitHubException(GitHubErrorCode.GIT_HUB_SAVE_ERROR);
          }
+    }
+
+    public void delete(GithubAppInstallations installation) {
+        repository.delete(installation);
     }
 }

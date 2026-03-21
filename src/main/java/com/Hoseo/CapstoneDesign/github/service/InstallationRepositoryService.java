@@ -1,7 +1,9 @@
 package com.Hoseo.CapstoneDesign.github.service;
 
+import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
 import com.Hoseo.CapstoneDesign.github.repository.InstallationRepositoryRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,19 @@ import java.util.List;
 public class InstallationRepositoryService {
 
     private final InstallationRepositoryRepository repository;
+    private final EntityManager entityManager;
 
     public List<InstallationRepository> saveAll(List<InstallationRepository> entities){
         return repository.saveAll(entities);
     }
 
+    public void bulkInsert(List<InstallationRepository> entities) {
+        for (InstallationRepository entity : entities) {
+            entityManager.persist(entity);
+        }
+    }
+
+    public void deleteAllByInstallation(GithubAppInstallations installation) {
+        repository.deleteAllByGithubAppInstallation(installation);
+    }
 }

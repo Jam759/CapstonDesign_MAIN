@@ -18,9 +18,9 @@ public class InstallationRepository extends CreatableEntity {
     @Id
     private Long installationRepositoryId;
 
-    @JoinColumn(name = "github_app_installation _id", nullable = false)
+    @JoinColumn(name = "github_app_installation_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    private GithubAppInstallations GithubAppInstallationsId;
+    private GithubAppInstallations githubAppInstallation;
 
     @Column(name = "full_name", nullable = false, length = 255)
     private String fullName;
