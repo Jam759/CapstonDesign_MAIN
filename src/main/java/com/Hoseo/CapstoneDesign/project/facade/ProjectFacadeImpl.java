@@ -1,5 +1,9 @@
 package com.Hoseo.CapstoneDesign.project.facade;
 
+import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
+import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
+import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
+import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectCreateRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectSettingRequest;
@@ -20,20 +24,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Facade
 @RequiredArgsConstructor
-public class ProjectFacadeImpl implements ProjectFacade{
+public class ProjectFacadeImpl implements ProjectFacade {
 
     private final ProjectService projectService;
     private final ProjectMemberService projectMemberService;
+    private final GitHubAppInstallationService gitHubAppInstallationService;
+    private final InstallationRepositoryService installationRepositoryService;
+
 
     @Override
     @Transactional(readOnly = false)
     public void createProject(ProjectCreateRequest request, Users user) {
-        Projects pjEntity = ProjectEntityFactory.toProjects(request,user);
+        Projects pjEntity = ProjectEntityFactory.toProjects(request, user);
         Projects savedPj = projectService.create(pjEntity);
 
         ProjectMember projectOwner =
                 ProjectEntityFactory.toProjectsMember(
-                        user,savedPj,
+                        user, savedPj,
                         ProjectMemberRole.OWNER,
                         ProjectInviteStatus.ACCEPTED
                 );
@@ -50,13 +57,23 @@ public class ProjectFacadeImpl implements ProjectFacade{
     }
 
     @Override
+    @Transactional(readOnly = false)
     public ProjectSettingResponse updateProject(Long projectId, Users user, ProjectSettingRequest request) {
         Projects p = projectService.getById(projectId);
         if (!p.getUser().equals(user))
             throw new ProjectsException(ProjectsErrorCode.PROJECT_FORBIDDEN);
 
-        // TODO: 여기서 브런치, 리포 id 등등 세팅 할것
+        GithubAppInstallations githubAppInstallations
+                = gitHubAppInstallationService.getByUser(user);
+        InstallationRepository repository
+                = installationRepositoryService.getByInstallationAndRepositoryId(
+                githubAppInstallations,
+                request.installationRepositoryId()
+        );
 
-        return null;
+        p.setTrackedSetting(githubAppInstallations, repository, request.trackedBranch());
+        Projects savedProject = projectService.create(p);
+
+        return ProjectDtoFactory.toProjectSettingResponse(savedProject);
     }
 }

@@ -57,4 +57,14 @@ public class Projects extends LifecycleTimestampEntity {
     @Column(name = "tracked_branch", nullable = true)
     private String trackedBranch;
 
+    public void setTrackedSetting(
+            GithubAppInstallations installations,
+            InstallationRepository installationRepository,
+            String trackedBranch
+    ) {
+        this.GithubAppInstallations = installations;
+        this.installationRepository = installationRepository;
+        this.trackedBranch = trackedBranch;
+    }
+
 }
