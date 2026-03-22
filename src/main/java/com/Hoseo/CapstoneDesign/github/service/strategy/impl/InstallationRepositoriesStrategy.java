@@ -50,13 +50,15 @@ public class InstallationRepositoriesStrategy implements GithubWebhookStrategy {
         List<InstallationRepository> installationRepositories = new ArrayList<>();
         for (JsonNode repoNode : repositoriesAdded) {
             InstallationRepository installationRepository =
-                    GitHubEntityFactory.toInstallationRepository(installations, repoNode);
+                    GitHubEntityFactory.toInstallationRepository(repoNode);
             installationRepositories.add(installationRepository);
         }
 
         if (installationRepositories.isEmpty()) {
             return;
         }
+
+        installationRepositories.forEach( t -> t.markGithubAppInstallation(installations));
         installationRepositoryService.bulkInsert(installationRepositories);
     }
 

@@ -1,24 +1,12 @@
 package com.Hoseo.CapstoneDesign.analysis.entity;
 
 import com.Hoseo.CapstoneDesign.analysis.entity.enums.AnalysisJobStatus;
+import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
+import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
 import com.Hoseo.CapstoneDesign.global.entity.CreatableEntity;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -35,12 +23,13 @@ public class AnalysisJob extends CreatableEntity {
     @Column(name = "analysis_job_id", nullable = false)
     private Long analysisJobId;
 
+    @JoinColumn(name = "github_app_installation_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    private GithubAppInstallations githubAppInstallation;
 
-    @Column(name = "repo_url", nullable = false, columnDefinition = "TEXT")
-    private String repoUrl;
+    @JoinColumn(name = "installation_repository_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private InstallationRepository installationRepository;
 
     @Column(name = "before_commit_hash", columnDefinition = "TEXT")
     private String beforeCommitHash;
@@ -61,7 +50,10 @@ public class AnalysisJob extends CreatableEntity {
     @Column(name = "retry_count", nullable = false)
     private Short retryCount;
 
-    @Column(name = "delivery_id", nullable = false, length = 255)
+    @Column(name = "delivery_id", nullable = false, length = 255, unique = true)
     private String deliveryId;
 
+    public void updateJobStatus(AnalysisJobStatus analysisJobStatus) {
+        this.jobStatus = analysisJobStatus;
+    }
 }

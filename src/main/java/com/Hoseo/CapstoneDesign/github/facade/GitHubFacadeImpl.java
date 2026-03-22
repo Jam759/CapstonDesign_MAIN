@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.github.facade;
 
+import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubBranchDto;
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
@@ -39,6 +40,7 @@ public class GitHubFacadeImpl implements GitHubFacade {
     private final GitHubAppInstallationService gitHubAppInstallationService;
     private final InstallationRepositoryService installationRepositoryService;
     private final GithubAppClientService githubAppClientService;
+    private final AnalysisJobService analysisJobService;
     private final UserService userService;
     private final StateUtil stateUtil;
 
@@ -74,7 +76,7 @@ public class GitHubFacadeImpl implements GitHubFacade {
                 detail.account().login()
         );
 
-        UserGitHubInstallations userGitHubInstallation = GitHubEntityFactory.toUserGitHubInstallations(user,githubAppInstallations);
+        UserGitHubInstallations userGitHubInstallation = GitHubEntityFactory.toUserGitHubInstallations(user, githubAppInstallations);
         userGitHubInstallationService.save(userGitHubInstallation);
 
         return stateUtil.buildRedirectUri(state);
@@ -100,13 +102,13 @@ public class GitHubFacadeImpl implements GitHubFacade {
         InstallationRepository repository =
                 installationRepositoryService.getByInstallationAndRepositoryId(installation, repositoryId);
 
-        if (!userGitHubInstallationService.isExistByUserAndInstallation(user,installation))
+        if (!userGitHubInstallationService.isExistByUserAndInstallation(user, installation))
             throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
 
         List<GithubBranchDto> branches
                 = githubAppClientService.getBranches(installationId, repository.getFullName());
 
-        return GitHubDtoFactory.toRepositoryBranchesResponse(installationId,repository, branches);
+        return GitHubDtoFactory.toRepositoryBranchesResponse(installationId, repository, branches);
     }
 
 
