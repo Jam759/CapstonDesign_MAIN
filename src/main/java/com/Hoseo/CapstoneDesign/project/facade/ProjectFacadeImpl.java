@@ -1,10 +1,19 @@
 package com.Hoseo.CapstoneDesign.project.facade;
 
+import com.Hoseo.CapstoneDesign.analysis.entity.AnalysisJob;
+import com.Hoseo.CapstoneDesign.analysis.entity.enums.AnalysisJobStatus;
+import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisDtoFactory;
+import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisJobEntityFactory;
+import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
+import com.Hoseo.CapstoneDesign.github.dto.application.FullScanAnalysisQueueMessage;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
 import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
 import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
+import com.Hoseo.CapstoneDesign.global.aws.properties.SqsProperties;
+import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsBaseMessage;
+import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsMessageSender;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectCreateRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectSettingRequest;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
@@ -30,7 +39,9 @@ public class ProjectFacadeImpl implements ProjectFacade {
     private final ProjectMemberService projectMemberService;
     private final GitHubAppInstallationService gitHubAppInstallationService;
     private final InstallationRepositoryService installationRepositoryService;
-
+    private final AnalysisJobService analysisJobService;
+    private final SqsMessageSender sqsMessageSender;
+    private final SqsProperties sqsProperties;
 
     @Override
     @Transactional(readOnly = false)
@@ -73,6 +84,16 @@ public class ProjectFacadeImpl implements ProjectFacade {
 
         p.setTrackedSetting(githubAppInstallations, repository, request.trackedBranch());
         Projects savedProject = projectService.create(p);
+        // full 분석 발행
+        String idempotency = projectId + "-" + user.getUserId() + "-" + repository.getInstallationRepositoryId();
+        AnalysisJob analysisJob = AnalysisJobEntityFactory.toAnalysisJob(githubAppInstallations, repository, null, null, request.trackedBranch(), idempotency);
+        AnalysisJob savedJob = analysisJobService.create(analysisJob);
+        SqsBaseMessage message
+                = AnalysisDtoFactory.toSqsFullScanAnalysisQueueMessage(githubAppInstallations, repository, analysisJob, savedProject);
+
+        sqsMessageSender.send(sqsProperties.analysisQueue(), message);
+        savedJob.updateJobStatus(AnalysisJobStatus.QUEUED);
+        analysisJobService.create(savedJob);
 
         return ProjectDtoFactory.toProjectSettingResponse(savedProject);
     }

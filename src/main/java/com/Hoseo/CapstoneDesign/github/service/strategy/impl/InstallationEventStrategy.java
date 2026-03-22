@@ -52,8 +52,6 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
         long accountId = accountNode.path("id").asLong();
         String accountLogin = accountNode.path("login").asText();
 
-        GithubAppInstallations installation = gitHubAppInstallationService.createOrRefresh(installationId, accountId, accountLogin);
-
         JsonNode repositoriesNode = payload.path("repositories");
 
         List<InstallationRepository> installationRepositories = new ArrayList<>();
@@ -64,16 +62,20 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
                     githubAppClientService.createInstallationAccessToken(installationId);
             List<GithubRepositorySummary> repos =
                     githubAppClientService.getAllAccessibleRepositories(installationToken);
-            installationRepositories = GitHubEntityFactory.toInstallationRepositories(installation, repos);
+            installationRepositories = GitHubEntityFactory.toInstallationRepositories(repos);
         } else {
             for (JsonNode repoNode : repositoriesNode) {
                 InstallationRepository e =
-                        GitHubEntityFactory.toInstallationRepository(installation, repoNode);
+                        GitHubEntityFactory.toInstallationRepository(repoNode);
                 installationRepositories.add(e);
             }
         }
-        if (!installationRepositories.isEmpty())
+        if (!installationRepositories.isEmpty()) {
+            GithubAppInstallations installation = gitHubAppInstallationService.createOrRefresh(installationId, accountId, accountLogin);
+            installationRepositories.forEach( t -> t.markGithubAppInstallation(installation));
             installationRepositoryService.bulkInsert(installationRepositories);
+
+        }
     }
 
     private void deletedHandle(JsonNode payload, String deliveryId) {

@@ -31,4 +31,8 @@ public class InstallationRepository extends CreatableEntity {
     @Column(name = "is_private", nullable = false)
     private boolean isPrivate;
 
+    public void markGithubAppInstallation(GithubAppInstallations githubAppInstallation) {
+        this.githubAppInstallation = githubAppInstallation;
+    }
+
 }

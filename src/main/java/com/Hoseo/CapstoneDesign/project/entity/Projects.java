@@ -62,9 +62,11 @@ public class Projects extends LifecycleTimestampEntity {
             InstallationRepository installationRepository,
             String trackedBranch
     ) {
+        if (this.projectStatus == ProjectStatus.REPO_CONNECTED) return;
         this.GithubAppInstallations = installations;
         this.installationRepository = installationRepository;
         this.trackedBranch = trackedBranch;
+        this.projectStatus = ProjectStatus.REPO_CONNECTED;
     }
 
 }
