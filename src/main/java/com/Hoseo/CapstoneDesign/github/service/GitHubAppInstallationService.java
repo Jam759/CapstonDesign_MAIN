@@ -23,8 +23,13 @@ public class GitHubAppInstallationService {
     private final UserGitHubInstallationRepository userGitHubInstallationRepository;
 
     public Optional<UserGitHubInstallations> findByUser(Users user) {
-
         return userGitHubInstallationRepository.findByUser(user);
+    }
+
+    public GithubAppInstallations getByUser(Users user) {
+        return userGitHubInstallationRepository.findByUser(user)
+                .orElseThrow( () -> new GitHubException(GitHubErrorCode.GIT_HUB_NOT_FOUND_USER))
+                .getGithubAppInstallation();
     }
 
 
