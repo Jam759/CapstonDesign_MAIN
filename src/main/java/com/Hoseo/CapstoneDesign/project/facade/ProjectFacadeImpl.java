@@ -21,6 +21,7 @@ import com.Hoseo.CapstoneDesign.project.entity.ProjectMember;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectMemberRole;
+import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectStatus;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsErrorCode;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsException;
 import com.Hoseo.CapstoneDesign.project.factory.ProjectDtoFactory;
@@ -73,7 +74,8 @@ public class ProjectFacadeImpl implements ProjectFacade {
         Projects p = projectService.getById(projectId);
         if (!p.getUser().equals(user))
             throw new ProjectsException(ProjectsErrorCode.PROJECT_FORBIDDEN);
-
+        if (p.getProjectStatus() != ProjectStatus.REPO_NOT_CONNECTED)
+            throw new ProjectsException(ProjectsErrorCode.PROJECT_ALREADY_SETTING);
         GithubAppInstallations githubAppInstallations
                 = gitHubAppInstallationService.getByUser(user);
         InstallationRepository repository
