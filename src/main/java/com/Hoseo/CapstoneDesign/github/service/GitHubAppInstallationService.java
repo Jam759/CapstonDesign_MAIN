@@ -62,7 +62,13 @@ public class GitHubAppInstallationService {
                         throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
                     }
                     existing.refreshFrom(accountId, accountLogin);
-                    return repository.save(existing);
+                    try{
+                        return repository.save(existing);
+                    }catch (DataIntegrityViolationException e) {
+                        return repository.findById(installationId).orElseThrow();
+                        // webhook, setUpCallback에서 비슷한 시각에 같은 pk로 2번 저장하는
+                        // race condition남 예외 처리로 흡수
+                    }
                 })
                 .orElseGet(() -> {
                     try {

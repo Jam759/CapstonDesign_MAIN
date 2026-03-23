@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Entity
 @Getter
 @Builder
@@ -29,4 +31,17 @@ public class GithubAppInstallations extends CreatableEntity {
         this.accountLogin = accountLogin;
         this.accountId =accountId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GithubAppInstallations that)) return false;
+        return Objects.equals(GithubAppInstallationsId, that.GithubAppInstallationsId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(GithubAppInstallationsId);
+    }
+
 }
