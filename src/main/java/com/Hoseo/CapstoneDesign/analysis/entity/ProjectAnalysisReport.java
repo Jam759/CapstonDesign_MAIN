@@ -44,18 +44,14 @@ public class ProjectAnalysisReport extends CreatableEntity {
     @Column(name = "version", nullable = false)
     private Integer version;
 
-    @Column(name = "previous_version")
-    private Integer previousVersion;
-
     @Column(name = "before_commit_hash", columnDefinition = "TEXT")
     private String beforeCommitHash;
 
     @Column(name = "after_commit_hash", columnDefinition = "TEXT")
     private String afterCommitHash;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "analysis_with_report_id")
-    private ProjectAnalysisReport analysisWithReport;
+    @Column(name = "analysis_with_report_id", nullable = true)
+    private Long analysisWithReport;
 
     @Column(name = "s3_bucket", length = 100)
     private String s3Bucket;
