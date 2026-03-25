@@ -18,7 +18,7 @@ public class GitHubEntityFactory {
             String accountLogin
     ) {
         return GithubAppInstallations.builder()
-                .GithubAppInstallationsId(installationId)
+                .githubAppInstallationsId(installationId)
                 .accountLogin(accountLogin)
                 .accountId(accountId)
                 .build();

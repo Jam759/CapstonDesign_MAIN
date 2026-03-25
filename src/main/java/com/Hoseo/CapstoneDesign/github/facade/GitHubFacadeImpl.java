@@ -75,6 +75,7 @@ public class GitHubFacadeImpl implements GitHubFacade {
                 detail.account().id(),
                 detail.account().login()
         );
+
         UserGitHubInstallations userGitHubInstallation = GitHubEntityFactory.toUserGitHubInstallations(user, githubAppInstallations);
         userGitHubInstallationService.save(userGitHubInstallation);
 

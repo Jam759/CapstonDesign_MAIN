@@ -19,7 +19,8 @@ import java.util.Objects;
 public class GithubAppInstallations extends CreatableEntity {
 
     @Id
-    private Long GithubAppInstallationsId;
+    @Column(name = "github_app_installations_id")
+    private Long githubAppInstallationsId;
 
     @Column(name = "account_id", nullable = false,unique = true)
     private Long accountId;
@@ -36,12 +37,12 @@ public class GithubAppInstallations extends CreatableEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof GithubAppInstallations that)) return false;
-        return Objects.equals(GithubAppInstallationsId, that.GithubAppInstallationsId);
+        return Objects.equals(githubAppInstallationsId, that.githubAppInstallationsId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(GithubAppInstallationsId);
+        return Objects.hash(githubAppInstallationsId);
     }
 
 }
