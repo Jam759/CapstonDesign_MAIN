@@ -1,16 +1,13 @@
 package com.Hoseo.CapstoneDesign.github.service;
 
-import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailResponse;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.UserGitHubInstallations;
 import com.Hoseo.CapstoneDesign.github.exception.GitHubErrorCode;
 import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
-import com.Hoseo.CapstoneDesign.github.factory.GitHubEntityFactory;
 import com.Hoseo.CapstoneDesign.github.repository.GitHubAppInstallationRepository;
 import com.Hoseo.CapstoneDesign.github.repository.UserGitHubInstallationRepository;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -28,7 +25,7 @@ public class GitHubAppInstallationService {
 
     public GithubAppInstallations getByUser(Users user) {
         return userGitHubInstallationRepository.findByUser(user)
-                .orElseThrow( () -> new GitHubException(GitHubErrorCode.GIT_HUB_NOT_FOUND_USER))
+                .orElseThrow(() -> new GitHubException(GitHubErrorCode.GIT_HUB_NOT_FOUND_USER))
                 .getGithubAppInstallation();
     }
 
@@ -54,32 +51,23 @@ public class GitHubAppInstallationService {
         repository.delete(installation);
     }
 
+    public GithubAppInstallations createOrRefresh(
+            Long installationId,
+            Long accountId,
+            String accountLogin
+    ) {
+        repository.upsertInstallation(installationId, accountId, accountLogin);
 
-    public GithubAppInstallations createOrRefresh(Long installationId, Long accountId,String accountLogin) {
-        return repository.findById(installationId)
-                .map(existing -> {
-                    if (!existing.getAccountId().equals(accountId)) {
-                        throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
-                    }
-                    existing.refreshFrom(accountId, accountLogin);
-                    try{
-                        return repository.save(existing);
-                    }catch (DataIntegrityViolationException e) {
-                        return repository.findById(installationId).orElseThrow();
-                        // webhook, setUpCallback에서 비슷한 시각에 같은 pk로 2번 저장하는
-                        // race condition남 예외 처리로 흡수
-                    }
-                })
-                .orElseGet(() -> {
-                    try {
-                        GithubAppInstallations entity =
-                                GitHubEntityFactory.toGithubAppInstallations(installationId, accountId, accountLogin);
-                        return repository.save(entity);
-                    } catch (DataIntegrityViolationException e) {
-                        return repository.findById(installationId).orElseThrow();
-                        // webhook, setUpCallback에서 비슷한 시각에 같은 pk로 2번 저장하는
-                        // race condition남 예외 처리로 흡수
-                    }
-                });
+        GithubAppInstallations loaded = getById(installationId);
+
+        validateAccount(loaded, accountId);
+        return loaded;
     }
+
+    private void validateAccount(GithubAppInstallations installation, Long accountId) {
+        if (!installation.getAccountId().equals(accountId)) {
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
+        }
+    }
+
 }

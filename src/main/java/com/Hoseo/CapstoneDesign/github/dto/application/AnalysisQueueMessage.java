@@ -7,6 +7,7 @@ public record AnalysisQueueMessage(
         String beforeCommit,
         String afterCommit,
         String branchName,
-        boolean isPrivate
+        boolean isPrivate,
+        long projectId
 ) {
 }

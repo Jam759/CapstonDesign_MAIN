@@ -14,8 +14,8 @@ public class AnalysisDtoFactory {
             GithubAppInstallations installations,
             InstallationRepository installationRepository,
             AnalysisJob savedJob,
-            String repositoryFullName
-    ) {
+            String repositoryFullName,
+            Projects project) {
         AnalysisQueueMessage message = new AnalysisQueueMessage(
                 installations.getGithubAppInstallationsId(),
                 installationRepository.getInstallationRepositoryId(),
@@ -23,7 +23,8 @@ public class AnalysisDtoFactory {
                 savedJob.getBeforeCommitHash(),
                 savedJob.getAfterCommitHash(),
                 savedJob.getBranch(),
-                installationRepository.isPrivate()
+                installationRepository.isPrivate(),
+                project.getProjectId()
         );
 
         return SqsBaseMessage.builder()
@@ -39,7 +40,8 @@ public class AnalysisDtoFactory {
                 project.getTrackedBranch(),
                 repository.getInstallationRepositoryId(),
                 githubAppInstallations.getGithubAppInstallationsId(),
-                repository.isPrivate()
+                repository.isPrivate(),
+                project.getProjectId()
         );
 
         return SqsBaseMessage.builder()

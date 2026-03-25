@@ -5,5 +5,6 @@ public record FullScanAnalysisQueueMessage (
     String branchName,
     Long repositoryId,
     Long installationId,
-    boolean isPrivate
+    boolean isPrivate,
+    long projectId
 ) {}

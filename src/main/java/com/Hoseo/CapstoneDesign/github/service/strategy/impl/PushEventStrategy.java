@@ -107,7 +107,7 @@ public class PushEventStrategy implements GithubWebhookStrategy {
         }
         // ex) SQS 메시지 생성, clone 대상 식별 등
         SqsBaseMessage message
-                = AnalysisDtoFactory.toSqsAnalysisQueueMessage(installation, installationRepository, savedJob, repositoryFullName);
+                = AnalysisDtoFactory.toSqsAnalysisQueueMessage(installation, installationRepository, savedJob, repositoryFullName, project);
         sqsMessageSender.send(sqsProperties.analysisQueue(), message);
         savedJob.updateJobStatus(AnalysisJobStatus.QUEUED);
         analysisJobService.create(savedJob);
