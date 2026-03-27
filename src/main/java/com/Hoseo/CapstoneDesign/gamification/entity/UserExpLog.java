@@ -39,8 +39,12 @@ public class UserExpLog extends CreatableEntity {
     private StaticExpEventRule expEventRule;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_personal_quest_id", nullable = false)
-    private UserPersonalQuest userPersonalQuest;
+    @JoinColumn(name = "user_ai_quest_id", nullable = true)
+    private UserAiQuest userAiQuest;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "static_exp_event_rule_id" , nullable = true)
+    private StaticExpEventRule staticExpEventRule;
 
     @Column(name = "delta_exp", nullable = false)
     private Short deltaExp;

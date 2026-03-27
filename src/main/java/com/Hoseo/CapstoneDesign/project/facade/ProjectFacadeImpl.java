@@ -94,7 +94,7 @@ public class ProjectFacadeImpl implements ProjectFacade {
                 = AnalysisDtoFactory.toSqsFullScanAnalysisQueueMessage(githubAppInstallations, repository, analysisJob, savedProject);
 
         sqsMessageSender.send(sqsProperties.analysisQueue(), message);
-        savedJob.updateJobStatus(AnalysisJobStatus.QUEUED);
+        savedJob.updateJobStatus(AnalysisJobStatus.ANALYSIS_JOB_QUEUED);
         analysisJobService.create(savedJob);
 
         return ProjectDtoFactory.toProjectSettingResponse(savedProject);
