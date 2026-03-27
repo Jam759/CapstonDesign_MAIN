@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create  #prod -> update
+      ddl-auto: update  #prod -> update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect

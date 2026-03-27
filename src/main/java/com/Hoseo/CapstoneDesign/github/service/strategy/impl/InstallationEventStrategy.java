@@ -70,6 +70,9 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
                 installationRepositories.add(e);
             }
         }
+
+
+
         if (!installationRepositories.isEmpty()) {
             GithubAppInstallations installation = gitHubAppInstallationService.createOrRefresh(installationId, accountId, accountLogin);
             installationRepositories.forEach( t -> t.markGithubAppInstallation(installation));

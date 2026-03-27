@@ -1,12 +1,14 @@
 package com.Hoseo.CapstoneDesign.github.repository;
 
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
+import com.Hoseo.CapstoneDesign.github.entity.UserGitHubInstallations;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface GitHubAppInstallationRepository extends JpaRepository<GithubAppInstallations, Long> {
@@ -26,4 +28,5 @@ public interface GitHubAppInstallationRepository extends JpaRepository<GithubApp
             @Param("accountId") Long accountId,
             @Param("accountLogin") String accountLogin
     );
+
 }

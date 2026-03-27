@@ -127,4 +127,34 @@ public class GithubAppClientService {
                 });
     }
 
+    public boolean isRepositoryCollaborator(
+            Long installationId,
+            String fullName,
+            String githubLogin
+    ) {
+        String token = this.createInstallationAccessToken(installationId);
+
+        String[] parts = fullName.split("/");
+        if (parts.length != 2) {
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
+        }
+
+        String owner = parts[0];
+        String repo = parts[1];
+
+        try {
+            restClient.get()
+                    .uri("/repos/{owner}/{repo}/collaborators/{username}", owner, repo, githubLogin)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .retrieve()
+                    .toBodilessEntity();
+
+            return true;
+        } catch (HttpClientErrorException.NotFound e) {
+            return false;
+        } catch (HttpClientErrorException.Unauthorized | HttpClientErrorException.Forbidden e) {
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_FORBIDDEN);
+        }
+    }
+
 }

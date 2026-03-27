@@ -7,6 +7,8 @@ import com.Hoseo.CapstoneDesign.user.entity.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+
 @Service
 @RequiredArgsConstructor
 public class UserGitHubInstallationService {
@@ -24,4 +26,5 @@ public class UserGitHubInstallationService {
     public void deleteByGithubAppInstallation(GithubAppInstallations installation) {
         repository.deleteByGithubAppInstallation(installation);
     }
+
 }

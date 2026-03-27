@@ -10,6 +10,7 @@ import com.Hoseo.CapstoneDesign.user.entity.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -70,4 +71,9 @@ public class GitHubAppInstallationService {
         }
     }
 
+    public List<GithubAppInstallations> getAllByUserIds(List<Long> userIds) {
+        List<UserGitHubInstallations> users = userGitHubInstallationRepository.findByUser_UserIdIn(userIds);
+        return users.stream().map(UserGitHubInstallations::getGithubAppInstallation).toList();
+
+    }
 }
