@@ -45,4 +45,8 @@ public class InstallationRepositoryService {
                         InstallationRepositoryErrorCode.INSTALLATION_REPOSITORY_NOT_FOUND
                 ));
     }
+
+    public List<InstallationRepository> getByGithubAppInstallations(GithubAppInstallations installation) {
+        return repository.findAllByGithubAppInstallation(installation);
+    }
 }

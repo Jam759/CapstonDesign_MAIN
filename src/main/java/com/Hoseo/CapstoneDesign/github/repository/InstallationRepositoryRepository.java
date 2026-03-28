@@ -13,4 +13,6 @@ public interface InstallationRepositoryRepository extends JpaRepository<Installa
     void deleteAllByGithubAppInstallationAndInstallationRepositoryIdIn(GithubAppInstallations installation, List<Long> repositoryIds);
 
     Optional<InstallationRepository> findByGithubAppInstallationAndInstallationRepositoryId(GithubAppInstallations githubAppInstallation, Long installationRepositoryId);
+
+    List<InstallationRepository> findAllByGithubAppInstallation(GithubAppInstallations githubAppInstallation);
 }

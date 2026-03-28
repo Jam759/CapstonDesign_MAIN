@@ -5,6 +5,7 @@ import com.Hoseo.CapstoneDesign.github.dto.application.GithubBranchDto;
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryBranchesResponse;
+import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryResponse;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
 import com.Hoseo.CapstoneDesign.github.entity.UserGitHubInstallations;
@@ -97,8 +98,8 @@ public class GitHubFacadeImpl implements GitHubFacade {
 
     @Override
     @Transactional(readOnly = true)
-    public RepositoryBranchesResponse getBranches(Users user, Long installationId, Long repositoryId) {
-        GithubAppInstallations installation = gitHubAppInstallationService.getById(installationId);
+    public RepositoryBranchesResponse getBranches(Users user, Long repositoryId) {
+        GithubAppInstallations installation = gitHubAppInstallationService.getByUser(user);
         InstallationRepository repository =
                 installationRepositoryService.getByInstallationAndRepositoryId(installation, repositoryId);
 
@@ -106,9 +107,21 @@ public class GitHubFacadeImpl implements GitHubFacade {
             throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
 
         List<GithubBranchDto> branches
-                = githubAppClientService.getBranches(installationId, repository.getFullName());
+                = githubAppClientService.getBranches(installation.getGithubAppInstallationsId(), repository.getFullName());
 
-        return GitHubDtoFactory.toRepositoryBranchesResponse(installationId, repository, branches);
+        return GitHubDtoFactory.toRepositoryBranchesResponse(installation.getGithubAppInstallationsId(), repository, branches);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public List<RepositoryResponse> getRepositories(Users user) {
+        GithubAppInstallations installation = gitHubAppInstallationService.getByUser(user);
+        List<InstallationRepository> repositories
+                = installationRepositoryService.getByGithubAppInstallations(installation);
+        if (repositories.isEmpty()) {
+            return List.of();
+        }
+        return repositories.stream().map(GitHubDtoFactory::toRepositoryResponse).toList();
     }
 
 

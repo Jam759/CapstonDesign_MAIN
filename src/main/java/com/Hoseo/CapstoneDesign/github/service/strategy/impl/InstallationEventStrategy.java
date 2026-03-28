@@ -77,8 +77,8 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
             GithubAppInstallations installation = gitHubAppInstallationService.createOrRefresh(installationId, accountId, accountLogin);
             installationRepositories.forEach( t -> t.markGithubAppInstallation(installation));
             installationRepositoryService.bulkInsert(installationRepositories);
-
         }
+
     }
 
     private void deletedHandle(JsonNode payload, String deliveryId) {

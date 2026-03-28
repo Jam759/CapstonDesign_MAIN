@@ -1,11 +1,12 @@
-package com.Hoseo.CapstoneDesign.notification.controller;
+package com.Hoseo.CapstoneDesign.notification.listener;
 
 import com.Hoseo.CapstoneDesign.analysis.enums.AnalysisStatus;
 import com.Hoseo.CapstoneDesign.global.aws.properties.SqsProperties;
 import com.Hoseo.CapstoneDesign.notification.dto.application.FailMessage;
 import com.Hoseo.CapstoneDesign.notification.dto.application.NotificationQueueBaseMessage;
 import com.Hoseo.CapstoneDesign.notification.dto.application.SuccessMessage;
-import com.fasterxml.jackson.core.TreeNode;
+import com.Hoseo.CapstoneDesign.notification.facade.NotificationFacade;
+import com.Hoseo.CapstoneDesign.notification.facade.NotificationFacadeImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class NotificationQueueListener {
 
     private final ObjectMapper objectMapper;
-    private final SqsProperties properties;
+    private final NotificationFacade notificationFacade;
 
     @SqsListener("${app.aws.sqs.notification-queue}")
     public void listen(@Payload String messageBody) {
@@ -35,15 +36,14 @@ public class NotificationQueueListener {
             );
 
             if (envelope.getStatus() == AnalysisStatus.SUCCESS) {
-                handleSuccess(envelope);
+                notificationFacade.successHandle(envelope);
                 return;
             }
 
             if (envelope.getStatus() == AnalysisStatus.FAILED) {
-                handleFailed(envelope);
+                notificationFacade.failedHandle(envelope);
                 return;
             }
-
             log.warn(
                     "Unknown analysis status. jobId={}, status={}",
                     envelope.getJobId(),
@@ -55,36 +55,4 @@ public class NotificationQueueListener {
         }
     }
 
-    //나중에 클래스만들어서 옮기기
-
-    private void handleSuccess(NotificationQueueBaseMessage envelope) throws Exception {
-        SuccessMessage data = objectMapper.convertValue(envelope.getData(), SuccessMessage.class);
-
-        log.info(
-                "Analysis success. jobId={}, completeQuestIds={}, newQuestIds={}, newProjectKBid={}, userViewReportId={}",
-                envelope.getJobId(),
-                data.getCompleteQuestIds(),
-                data.getNewQuestIds(),
-                data.getNewProjectKBid(),
-                data.getUserViewReportId()
-        );
-
-        // TODO: 성공 분기 처리
-    }
-
-    private void handleFailed(NotificationQueueBaseMessage envelope) throws Exception {
-        FailMessage data =
-                objectMapper.convertValue(envelope.getData(), FailMessage.class);
-
-        log.warn(
-                "Analysis failed. jobId={}, errorCode={}, errorMessage={}, httpStatus={}, retryable={}",
-                envelope.getJobId(),
-                data.getErrorCode(),
-                data.getErrorMessage(),
-                data.getHTTPStatus(),
-                data.getRetryable()
-        );
-
-        // TODO: 실패 분기 처리
-    }
 }
