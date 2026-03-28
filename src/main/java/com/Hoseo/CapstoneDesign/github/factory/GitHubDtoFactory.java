@@ -3,6 +3,7 @@ package com.Hoseo.CapstoneDesign.github.factory;
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubBranchDto;
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryBranchesResponse;
+import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryResponse;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
 import com.Hoseo.CapstoneDesign.github.entity.UserGitHubInstallations;
@@ -57,6 +58,14 @@ public class GitHubDtoFactory {
                 .repositoryFullName(repository.getFullName())
                 .installationId(installationId)
                 .branches(branchItemList)
+                .build();
+    }
+
+    public static RepositoryResponse toRepositoryResponse(InstallationRepository repository) {
+        return RepositoryResponse.builder()
+                .repositoryId(repository.getInstallationRepositoryId())
+                .repositoryFullName(repository.getFullName())
+                .isPrivate(repository.isPrivate())
                 .build();
     }
 }

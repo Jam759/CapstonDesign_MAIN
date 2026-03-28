@@ -19,6 +19,5 @@ public class NotificationEventListener {
     public void UserLevelUpEventHandle(UserLevelUpEvent event) {
         notificationFacade.notifyLevelUp(event);
     }
-
      */
 }

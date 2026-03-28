@@ -2,10 +2,12 @@ package com.Hoseo.CapstoneDesign.github.facade;
 
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryBranchesResponse;
+import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryResponse;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.net.URI;
+import java.util.List;
 
 public interface GitHubFacade {
 
@@ -15,5 +17,7 @@ public interface GitHubFacade {
 
     void webhookEvent(String event, String deliveryId, String signature256, JsonNode payload);
 
-    RepositoryBranchesResponse getBranches(Users user, Long installationId, Long repositoryId);
+    RepositoryBranchesResponse getBranches(Users user, Long repositoryId);
+
+    List<RepositoryResponse> getRepositories(Users user);
 }

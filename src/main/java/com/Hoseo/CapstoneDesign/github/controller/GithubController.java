@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.github.controller;
 
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryBranchesResponse;
+import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryResponse;
 import com.Hoseo.CapstoneDesign.github.facade.GitHubFacade;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,15 +60,23 @@ public class GithubController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/installations/{installationId}/repositories/{repositoryId}/branches")
+    @GetMapping("/repositories/{repositoryId}/branches")
     public ResponseEntity<RepositoryBranchesResponse> getBranches(
-            @PathVariable Long installationId,
             @PathVariable Long repositoryId,
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
         RepositoryBranchesResponse response =
-                facade.getBranches(userDetail.getUser(), installationId, repositoryId);
+                facade.getBranches(userDetail.getUser(), repositoryId);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/repositories")
+    public ResponseEntity<List<RepositoryResponse>> getRepositories(
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        List<RepositoryResponse> res =
+                facade.getRepositories(userDetail.getUser());
+        return ResponseEntity.ok(res);
     }
 }
