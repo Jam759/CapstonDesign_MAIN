@@ -39,6 +39,9 @@ public class SseNotification extends CreatableEntity {
     @JoinColumn(name = "type", nullable = false)
     private CommonGroupDetail type;
 
+    @Column(name = "title", nullable = false)
+    private String title;
+
     @Column(name = "message", nullable = false, length = 255)
     private String message;
 

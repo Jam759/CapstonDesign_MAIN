@@ -53,6 +53,8 @@ app:
       analysis-queue: ${SQS_ANALYSIS_QUEUE}
       dlq-queue: ${SQS_DLQ}
       notification-queue: ${SQS_NOTIFICATION_QUEUE}
+    s3:
+      bucket-name: ${S3_BUCKET_NAME}
 
 auth:
   jwt:
