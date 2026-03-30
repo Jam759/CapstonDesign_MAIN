@@ -28,8 +28,10 @@ public class GamificationController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "8") Integer size
     ){
+        // TODO : 추후 구현 현재는 mock데이터 반환
 //        List<RankingResponse> res =
 //                facade.getRanking(page, size);
+        List<RankingResponse> res = facade.getRanking(page, size);
         return ResponseEntity.ok(res);
     }
 
@@ -37,8 +39,10 @@ public class GamificationController {
     public ResponseEntity<RankingResponse> getMyRank(
             @AuthenticationPrincipal UserDetailImpl userDetail
     ){
+        // TODO : 추후 구현 현재는 mock데이터 반환
 //        RankingResponse myRank =
 //                facade.getMyRank(userDetail.getUser());
+        RankingResponse myRank = facade.getMyRank(userDetail != null ? userDetail.getUser() : null);
         return ResponseEntity.ok(myRank);
     }
 
@@ -49,8 +53,11 @@ public class GamificationController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "8") Integer size
     ){
+        // TODO : 추후 구현 현재는 mock데이터 반환
 //        List<QuestResponse> res =
 //                facade.getMyQuest(userDetail.getUser(), progressStatus, page, size);
+        List<QuestResponse> res =
+                facade.getMyQuest(userDetail != null ? userDetail.getUser() : null, progressStatus, page, size);
         return ResponseEntity.ok(res);
     }
 
@@ -58,7 +65,9 @@ public class GamificationController {
     public ResponseEntity<List<BadgeResponse>> getMyBadges(
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
+        // TODO : 추후 구현 현재는 mock데이터 반환
 //        List<BadgeResponse> res = facade.getMyBadges(userDetail.getUser());
+        List<BadgeResponse> res = facade.getMyBadges(userDetail != null ? userDetail.getUser() : null);
         return ResponseEntity.ok(res);
     }
 
