@@ -20,6 +20,10 @@ public class GitHubAppInstallationService {
     private final GitHubAppInstallationRepository repository;
     private final UserGitHubInstallationRepository userGitHubInstallationRepository;
 
+    public GithubAppInstallations getReferenceById(Long installationId) {
+        return repository.getReferenceById(installationId);
+    }
+
     public Optional<UserGitHubInstallations> findByUser(Users user) {
         return userGitHubInstallationRepository.findByUser(user);
     }
@@ -75,5 +79,17 @@ public class GitHubAppInstallationService {
         List<UserGitHubInstallations> users = userGitHubInstallationRepository.findByUser_UserIdIn(userIds);
         return users.stream().map(UserGitHubInstallations::getGithubAppInstallation).toList();
 
+    }
+
+    public boolean userIsExistByUserAndInstallation(Users user, GithubAppInstallations installation) {
+        return userGitHubInstallationRepository.existsByUserAndGithubAppInstallation(user, installation);
+    }
+
+    public UserGitHubInstallations saveUserGitHubInstallations(UserGitHubInstallations userGitHubInstallation) {
+        return userGitHubInstallationRepository.save(userGitHubInstallation);
+    }
+
+    public void deleteUserGitHubInstallationByGithubAppInstallation(GithubAppInstallations installation) {
+        userGitHubInstallationRepository.deleteByGithubAppInstallation(installation);
     }
 }

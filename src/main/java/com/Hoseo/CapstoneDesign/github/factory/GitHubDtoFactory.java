@@ -1,6 +1,7 @@
 package com.Hoseo.CapstoneDesign.github.factory;
 
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubBranchDto;
+import com.Hoseo.CapstoneDesign.github.dto.query.UserGitHubInstallationLinkQueryResult;
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryBranchesResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryResponse;
@@ -41,9 +42,7 @@ public class GitHubDtoFactory {
     }
 
     public static RepositoryBranchesResponse toRepositoryBranchesResponse(
-            Long installationId,
-            InstallationRepository repository,
-            List<GithubBranchDto> branches
+            UserGitHubInstallationLinkQueryResult result, List<GithubBranchDto> branches
     ) {
         List<RepositoryBranchesResponse.BranchItem>  branchItemList =
                 branches.stream()
@@ -54,9 +53,9 @@ public class GitHubDtoFactory {
                                     .build();
                         }).toList();
         return RepositoryBranchesResponse.builder()
-                .repositoryId(repository.getInstallationRepositoryId())
-                .repositoryFullName(repository.getFullName())
-                .installationId(installationId)
+                .repositoryId(result.installationRepositoryId())
+                .repositoryFullName(result.repositoryFullName())
+                .installationId(result.gitHubInstallationId())
                 .branches(branchItemList)
                 .build();
     }
