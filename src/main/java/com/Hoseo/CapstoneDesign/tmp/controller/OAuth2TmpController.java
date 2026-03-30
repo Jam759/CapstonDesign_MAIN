@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.tmp.controller;
 
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import com.Hoseo.CapstoneDesign.security.properties.JwtProperties;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/tmp/oauth2")
+@Hidden
 public class OAuth2TmpController {
 
     private final JwtProperties jwtProperties;
