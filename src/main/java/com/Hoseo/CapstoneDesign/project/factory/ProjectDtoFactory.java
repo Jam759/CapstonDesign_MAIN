@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.project.factory;
 
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectCreateResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
 
@@ -34,6 +35,15 @@ public class ProjectDtoFactory {
                 .projectStatus(p.getProjectStatus())
                 .gitHubAppInstallationId(gitHubAppInstallationId)
                 .repositoryFullName(repositoryFullName)
+                .build();
+    }
+
+    public static ProjectCreateResponse toProjectCreateResponse(Projects saved) {
+        return ProjectCreateResponse.builder()
+                .projectId(saved.getProjectId())
+                .title(saved.getTitle())
+                .description(saved.getDescription())
+                .createdAt(saved.getCreatedAt())
                 .build();
     }
 }
