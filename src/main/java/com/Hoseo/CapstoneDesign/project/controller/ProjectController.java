@@ -1,13 +1,10 @@
 package com.Hoseo.CapstoneDesign.project.controller;
 
-import com.Hoseo.CapstoneDesign.project.dto.response.ProjectThumbnailResponse;
+import com.Hoseo.CapstoneDesign.project.dto.response.*;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectCreateRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteResponseRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectSettingRequest;
-import com.Hoseo.CapstoneDesign.project.dto.response.InviteStatusResponse;
-import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteResponse;
-import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
 import com.Hoseo.CapstoneDesign.project.facade.ProjectFacade;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
@@ -26,12 +23,12 @@ public class ProjectController {
     private final ProjectFacade facade;
 
     @PostMapping()
-    public ResponseEntity<Void> createProject(
+    public ResponseEntity<ProjectCreateResponse> createProject(
             @AuthenticationPrincipal UserDetailImpl userDetail,
             @RequestBody ProjectCreateRequest request
     ) {
-        facade.createProject(request, userDetail.getUser());
-        return ResponseEntity.ok().build();
+        ProjectCreateResponse res = facade.createProject(request, userDetail.getUser());
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping()

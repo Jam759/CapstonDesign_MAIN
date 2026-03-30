@@ -5,7 +5,6 @@ import com.Hoseo.CapstoneDesign.analysis.entity.enums.AnalysisJobStatus;
 import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisDtoFactory;
 import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisJobEntityFactory;
 import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
-import com.Hoseo.CapstoneDesign.github.dto.application.FullScanAnalysisQueueMessage;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
 import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
@@ -16,6 +15,7 @@ import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsBaseMessage;
 import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsMessageSender;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectCreateRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectSettingRequest;
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectCreateResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
 import com.Hoseo.CapstoneDesign.project.entity.ProjectMember;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
@@ -46,7 +46,7 @@ public class ProjectFacadeImpl implements ProjectFacade {
 
     @Override
     @Transactional(readOnly = false)
-    public void createProject(ProjectCreateRequest request, Users user) {
+    public ProjectCreateResponse createProject(ProjectCreateRequest request, Users user) {
         Projects pjEntity = ProjectEntityFactory.toProjects(request, user);
         Projects savedPj = projectService.create(pjEntity);
 
@@ -57,6 +57,7 @@ public class ProjectFacadeImpl implements ProjectFacade {
                         ProjectInviteStatus.ACCEPTED
                 );
         projectMemberService.create(projectOwner);
+        return ProjectDtoFactory.toProjectCreateResponse(savedPj);
     }
 
     @Override
