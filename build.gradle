@@ -59,6 +59,7 @@ dependencies {
     //aws
     implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0")
     implementation "io.awspring.cloud:spring-cloud-aws-starter-sqs"
+    implementation "software.amazon.awssdk:s3"
 
     //Key파싱용
     implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
