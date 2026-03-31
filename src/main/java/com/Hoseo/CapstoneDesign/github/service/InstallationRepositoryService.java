@@ -22,6 +22,10 @@ public class InstallationRepositoryService {
         return repository.saveAll(entities);
     }
 
+    public InstallationRepository getReferenceById(Long id) {
+        return repository.getReferenceById(id);
+    }
+
     public void bulkInsert(List<InstallationRepository> entities) {
         for (InstallationRepository entity : entities) {
             entityManager.persist(entity);

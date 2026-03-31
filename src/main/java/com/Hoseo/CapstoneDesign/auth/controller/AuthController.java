@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.auth.dto.application.TokenPair;
 import com.Hoseo.CapstoneDesign.auth.dto.response.AccessTokenReissueResponse;
 import com.Hoseo.CapstoneDesign.auth.facade.AuthFacade;
 import com.Hoseo.CapstoneDesign.auth.factory.AuthDtoFactory;
+import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionResponse;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import com.Hoseo.CapstoneDesign.security.service.SecurityCookieService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,7 +44,16 @@ public class AuthController {
                     description = "재발급 성공",
                     content = @Content(schema = @Schema(implementation = AccessTokenReissueResponse.class))
             ),
-            @ApiResponse(responseCode = "401", description = "인증 실패")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Refresh Token이 없거나 유효하지 않음",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Refresh Token 저장 정보를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
+            )
     })
     public ResponseEntity<AccessTokenReissueResponse> accessTokenReissue(
             @Parameter(description = "Refresh Token 쿠키 값", example = "eyJhbGciOiJIUzI1NiJ9...")
@@ -62,7 +72,11 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "로그아웃 성공"),
-            @ApiResponse(responseCode = "401", description = "인증 실패")
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 실패",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
+            )
     })
     public ResponseEntity<Void> logout(
             @Parameter(hidden = true)

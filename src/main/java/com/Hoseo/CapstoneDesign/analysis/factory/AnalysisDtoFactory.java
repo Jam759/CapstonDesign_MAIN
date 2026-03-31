@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.analysis.entity.AnalysisJob;
 import com.Hoseo.CapstoneDesign.analysis.enums.AnalysisEventType;
 import com.Hoseo.CapstoneDesign.github.dto.application.AnalysisQueueMessage;
 import com.Hoseo.CapstoneDesign.github.dto.application.FullScanAnalysisQueueMessage;
+import com.Hoseo.CapstoneDesign.github.dto.query.GitHubWebhookValidationQueryResult;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
 import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsBaseMessage;
@@ -13,21 +14,19 @@ import com.Hoseo.CapstoneDesign.user.entity.Users;
 public class AnalysisDtoFactory {
 
     public static SqsBaseMessage toSqsAnalysisQueueMessage(
-            GithubAppInstallations installations,
-            InstallationRepository installationRepository,
             AnalysisJob savedJob,
-            String repositoryFullName,
-            Projects project, Users matchedUser) {
+            GitHubWebhookValidationQueryResult result
+    ) {
         AnalysisQueueMessage message = new AnalysisQueueMessage(
-                installations.getGithubAppInstallationsId(),
-                installationRepository.getInstallationRepositoryId(),
-                repositoryFullName,
+                result.matchedInstallationId(),
+                result.installationRepositoryId(),
+                result.repositoryFullName(),
                 savedJob.getBeforeCommitHash(),
                 savedJob.getAfterCommitHash(),
                 savedJob.getBranch(),
-                installationRepository.isPrivate(),
-                project.getProjectId(),
-                matchedUser.getUserId()
+                result.isPrivate(),
+                result.projectId(),
+                result.userId()
         );
 
         return SqsBaseMessage.builder()

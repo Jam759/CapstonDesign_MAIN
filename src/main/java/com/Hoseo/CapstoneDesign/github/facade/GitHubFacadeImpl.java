@@ -3,6 +3,7 @@ package com.Hoseo.CapstoneDesign.github.facade;
 import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubBranchDto;
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailResponse;
+import com.Hoseo.CapstoneDesign.github.dto.query.UserGitHubInstallationLinkQueryResult;
 import com.Hoseo.CapstoneDesign.github.dto.response.InstallationsAvailableResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryBranchesResponse;
 import com.Hoseo.CapstoneDesign.github.dto.response.RepositoryResponse;
@@ -14,9 +15,9 @@ import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
 import com.Hoseo.CapstoneDesign.github.factory.GitHubDtoFactory;
 import com.Hoseo.CapstoneDesign.github.factory.GitHubEntityFactory;
 import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
+import com.Hoseo.CapstoneDesign.github.service.GitHubQueryService;
 import com.Hoseo.CapstoneDesign.github.service.GithubAppClientService;
 import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
-import com.Hoseo.CapstoneDesign.github.service.UserGitHubInstallationService;
 import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
 import com.Hoseo.CapstoneDesign.github.util.StateUtil;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
@@ -37,12 +38,14 @@ public class GitHubFacadeImpl implements GitHubFacade {
 
     private final List<GithubWebhookStrategy> strategies;
 
-    private final UserGitHubInstallationService userGitHubInstallationService;
     private final GitHubAppInstallationService gitHubAppInstallationService;
     private final InstallationRepositoryService installationRepositoryService;
     private final GithubAppClientService githubAppClientService;
     private final AnalysisJobService analysisJobService;
     private final UserService userService;
+
+    private final GitHubQueryService gitHubQueryService;
+
     private final StateUtil stateUtil;
 
     @Override
@@ -78,7 +81,7 @@ public class GitHubFacadeImpl implements GitHubFacade {
         );
 
         UserGitHubInstallations userGitHubInstallation = GitHubEntityFactory.toUserGitHubInstallations(user, githubAppInstallations);
-        userGitHubInstallationService.save(userGitHubInstallation);
+        gitHubAppInstallationService.saveUserGitHubInstallations(userGitHubInstallation);
 
         return stateUtil.buildRedirectUri(state);
     }
@@ -99,17 +102,11 @@ public class GitHubFacadeImpl implements GitHubFacade {
     @Override
     @Transactional(readOnly = true)
     public RepositoryBranchesResponse getBranches(Users user, Long repositoryId) {
-        GithubAppInstallations installation = gitHubAppInstallationService.getByUser(user);
-        InstallationRepository repository =
-                installationRepositoryService.getByInstallationAndRepositoryId(installation, repositoryId);
-
-        if (!userGitHubInstallationService.isExistByUserAndInstallation(user, installation))
-            throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
-
+        UserGitHubInstallationLinkQueryResult result
+                = gitHubQueryService.getUserLinkedRepoOrThrow(user.getUserId(), repositoryId);
         List<GithubBranchDto> branches
-                = githubAppClientService.getBranches(installation.getGithubAppInstallationsId(), repository.getFullName());
-
-        return GitHubDtoFactory.toRepositoryBranchesResponse(installation.getGithubAppInstallationsId(), repository, branches);
+                = githubAppClientService.getBranches(result.gitHubInstallationId(), result.repositoryFullName());
+        return GitHubDtoFactory.toRepositoryBranchesResponse(result, branches);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.tmp.controller;
 
 import com.Hoseo.CapstoneDesign.global.aws.properties.SqsProperties;
 import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsMessageSender;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@Hidden
 public class SqsTempController {
 
     private final SqsMessageSender messageSender;

@@ -9,7 +9,6 @@ import com.Hoseo.CapstoneDesign.github.factory.GitHubEntityFactory;
 import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
 import com.Hoseo.CapstoneDesign.github.service.GithubAppClientService;
 import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
-import com.Hoseo.CapstoneDesign.github.service.UserGitHubInstallationService;
 import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,6 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
     private final GithubAppClientService githubAppClientService;
     private final GitHubAppInstallationService gitHubAppInstallationService;
     private final InstallationRepositoryService installationRepositoryService;
-    private final UserGitHubInstallationService userGitHubInstallationService;
 
     @Override
     public boolean supports(String eventType) {
@@ -89,6 +87,6 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
                 = gitHubAppInstallationService.getById(installationId);
         installationRepositoryService.deleteAllByInstallation(installation);
         gitHubAppInstallationService.delete(installation);
-        userGitHubInstallationService.deleteByGithubAppInstallation(installation);
+        gitHubAppInstallationService.deleteUserGitHubInstallationByGithubAppInstallation(installation);
     }
 }

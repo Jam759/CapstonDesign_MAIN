@@ -7,6 +7,7 @@ import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestApprovalStatus;
 import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestProgressStatus;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,12 +16,14 @@ import java.util.List;
 public class GamificationFacadeImpl implements GamificationFacade{
 
     @Override
+    @Transactional(readOnly = true)
     public List<RankingResponse> getRanking(Integer page, Integer size) {
         // TODO : 추후 구현 현재는 mock데이터 반환
         return paginate(mockRanking(), page, size);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public RankingResponse getMyRank(Users user) {
         // TODO : 추후 구현 현재는 mock데이터 반환
         return RankingResponse.builder()
@@ -33,6 +36,7 @@ public class GamificationFacadeImpl implements GamificationFacade{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<QuestResponse> getMyQuest(Users user, AiQuestProgressStatus progressStatus, Integer page, Integer size) {
         // TODO : 추후 구현 현재는 mock데이터 반환
         List<QuestResponse> filtered = mockQuests().stream()
@@ -42,6 +46,7 @@ public class GamificationFacadeImpl implements GamificationFacade{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BadgeResponse> getMyBadges(Users user) {
         // TODO : 추후 구현 현재는 mock데이터 반환
         return List.of(

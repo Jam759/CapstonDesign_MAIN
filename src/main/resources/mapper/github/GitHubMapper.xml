@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.Hoseo.CapstoneDesign.github.mapper.GitHubMapper">
+
+    <select id="findUserLinkedInstallationRepository"
+            resultType="com.Hoseo.CapstoneDesign.github.dto.query.UserGitHubInstallationLinkQueryResult">
+
+        SELECT
+            ughi.user_id AS userId,
+            ughi.github_app_installation_id AS gitHubInstallationId,
+            ir.installation_repository_id AS installationRepositoryId,
+            ir.full_name AS repositoryFullName
+        FROM user_git_hub_installations ughi
+                 INNER JOIN github_app_installations gai
+                            ON gai.github_app_installations_id = ughi.github_app_installation_id
+                 INNER JOIN installation_repository ir
+                            ON ir.github_app_installation_id = gai.github_app_installations_id
+        WHERE ughi.user_id = #{userId}
+          AND ir.installation_repository_id = #{installationRepositoryId}
+
+    </select>
+
+    <select id="findWebhookValidation"
+            resultType="com.Hoseo.CapstoneDesign.github.dto.query.GitHubWebhookValidationQueryResult">
+
+        SELECT
+            p.project_id AS projectId,
+            p.tracked_branch AS trackedBranch,
+            pm.project_member_id AS projectMemberId,
+            u.user_id AS userId,
+            u.oauth_provider_id AS oauthProviderId,
+            gi.github_app_installations_id AS matchedInstallationId,
+            gi.account_id AS matchedInstallationAccountId,
+            ir.installation_repository_id AS installationRepositoryId,
+            ir.full_name AS repositoryFullName,
+            ir.is_private AS isPrivate,
+            base_gi.account_login AS installationAccountLogin
+        FROM github_app_installations base_gi
+                 INNER JOIN installation_repository ir
+                            ON ir.github_app_installation_id = base_gi.github_app_installations_id
+                 INNER JOIN projects p
+                            ON p.installation_repository_id = ir.installation_repository_id
+                 INNER JOIN project_member pm
+                            ON pm.project_id = p.project_id
+                 INNER JOIN users u
+                            ON u.user_id = pm.user_id
+                 INNER JOIN user_git_hub_installations ughi
+                            ON ughi.user_id = u.user_id
+                 INNER JOIN github_app_installations gi
+                            ON gi.github_app_installations_id = ughi.github_app_installation_id
+        WHERE base_gi.github_app_installations_id = #{installationId}
+          AND ir.installation_repository_id = #{installationRepositoryId}
+          AND gi.account_id = #{senderAccountId}
+            LIMIT 1
+
+    </select>
+
+</mapper>

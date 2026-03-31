@@ -5,16 +5,15 @@ import com.Hoseo.CapstoneDesign.analysis.entity.enums.AnalysisJobStatus;
 import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisDtoFactory;
 import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisJobEntityFactory;
 import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
-import com.Hoseo.CapstoneDesign.github.dto.application.AnalysisQueueMessage;
+import com.Hoseo.CapstoneDesign.github.dto.query.GitHubWebhookValidationQueryResult;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
-import com.Hoseo.CapstoneDesign.github.entity.UserGitHubInstallations;
 import com.Hoseo.CapstoneDesign.github.exception.GitHubErrorCode;
 import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
 import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
+import com.Hoseo.CapstoneDesign.github.service.GitHubQueryService;
 import com.Hoseo.CapstoneDesign.github.service.GithubAppClientService;
 import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
-import com.Hoseo.CapstoneDesign.github.service.UserGitHubInstallationService;
 import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
 import com.Hoseo.CapstoneDesign.global.aws.properties.SqsProperties;
 import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsBaseMessage;
@@ -32,22 +31,18 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-
-//리팩터링 1순위
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class PushEventStrategy implements GithubWebhookStrategy {
 
-    private final GitHubAppInstallationService gitHubAppInstallationService;
+    private final GitHubQueryService gitHubQueryService;
     private final GithubAppClientService githubAppClientService;
-    private final UserGitHubInstallationService userGitHubInstallationsService;
+    private final GitHubAppInstallationService gitHubAppInstallationService;
     private final InstallationRepositoryService installationRepositoryService;
     private final SqsMessageSender sqsMessageSender;
     private final SqsProperties sqsProperties;
     private final AnalysisJobService analysisJobService;
-    private final ProjectService projectService;
-    private final ProjectMemberService projectMemberService;
 
     @Override
     public boolean supports(String eventType) {
@@ -65,14 +60,8 @@ public class PushEventStrategy implements GithubWebhookStrategy {
         JsonNode refNode = payload.path("ref");
         JsonNode beforeNode = payload.path("before");
         JsonNode afterNode = payload.path("after");
-
         JsonNode senderIdNode = payload.path("sender").path("id");
-        JsonNode senderLoginNode = payload.path("sender").path("login");
 
-        JsonNode pusherNameNode = payload.path("pusher").path("name");
-        JsonNode pusherEmailNode = payload.path("pusher").path("email");
-
-        JsonNode pusherTypeNode = payload.path("pusher_type");
 
         if (installationIdNode.isMissingNode() || installationIdNode.isNull()) {
             throw new GitHubException(GitHubErrorCode.GIT_HUB_WEBHOOK_UNSUPPORTED_ERROR);
@@ -95,63 +84,33 @@ public class PushEventStrategy implements GithubWebhookStrategy {
 
         long installationId = installationIdNode.asLong();
         long repositoryId = repositoryIdNode.asLong();
-        String repositoryFullName = repositoryFullNameNode.asText();
         String ref = refNode.asText();
         String before = beforeNode.asText();
         String after = afterNode.asText();
         String branchName = extractBranchName(ref);
         Long senderId = senderIdNode.isMissingNode() || senderIdNode.isNull()
                 ? null : senderIdNode.asLong();
-        String senderLogin = senderLoginNode.isMissingNode() || senderLoginNode.isNull()
-                ? null : senderLoginNode.asText();
 
-        String pusherName = pusherNameNode.isMissingNode() || pusherNameNode.isNull()
-                ? null : pusherNameNode.asText();
-
-        String pusherEmail = pusherEmailNode.isMissingNode() || pusherEmailNode.isNull()
-                ? null : pusherEmailNode.asText();
-
-        String pusherType = pusherTypeNode.isMissingNode() || pusherTypeNode.isNull()
-                ? null : pusherTypeNode.asText();
-
-        GithubAppInstallations installation
-                = gitHubAppInstallationService.getById(installationId);
-        InstallationRepository installationRepository
-                = installationRepositoryService.getByInstallationAndRepositoryId(installation, repositoryId);
-        Projects project
-                = projectService.getByInstallationRepository(installationRepository);
-
+        GitHubWebhookValidationQueryResult validateResult
+                =  gitHubQueryService.validateWebhook(installationId,repositoryId,senderId);
+        if (validateResult == null) {
+            throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
+        }
         //깃헙내 콜라보레이터인지 확인
         if ( !githubAppClientService.isRepositoryCollaborator(
-                installationId,repositoryFullName,installation.getAccountLogin()))
+                validateResult.matchedInstallationId(),
+                validateResult.repositoryFullName(),
+                validateResult.installationAccountLogin()))
             throw new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID);
 
-        //우리 서비스내 팀원인지 확인 -> 위 로직은 나중에 이용자를 개인이 아닌 깃헙내 organization까지 지원할 경우 바꿔야함
-        List<ProjectMember> projectMemberList = projectMemberService.getProjectMember(project);
-        Users matchedUser = projectMemberList.stream()
-                .map(ProjectMember::getUser)
-                .filter(user -> user.getOauthProviderId() != null)
-                .filter(user -> user.getOauthProviderId().equals(String.valueOf(senderId)))
-                .findFirst()
-                .orElseThrow(() -> new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID));
-
-        List<GithubAppInstallations> memberInstallations =
-                gitHubAppInstallationService.getAllByUserIds(List.of(matchedUser.getUserId()));
-
-        GithubAppInstallations matchedInstallation = memberInstallations.stream()
-                .filter(gi -> gi.getAccountId().equals(senderId))
-                .findFirst()
-                .orElseThrow(() -> new GitHubException(GitHubErrorCode.GIT_HUB_APP_INVALID));
-
-
-        String trackedBranch = project.getTrackedBranch();
+        String trackedBranch = validateResult.trackedBranch();
         if (!trackedBranch.equals(branchName)) {
             return;
         }
 
         AnalysisJob job = AnalysisJobEntityFactory.toAnalysisJob(
-                matchedInstallation,
-                installationRepository,
+                gitHubAppInstallationService.getReferenceById(validateResult.matchedInstallationId()),
+                installationRepositoryService.getReferenceById(validateResult.installationRepositoryId()),
                 after,
                 before,
                 branchName,
@@ -166,7 +125,7 @@ public class PushEventStrategy implements GithubWebhookStrategy {
         }
         // ex) SQS 메시지 생성, clone 대상 식별 등
         SqsBaseMessage message
-                = AnalysisDtoFactory.toSqsAnalysisQueueMessage(matchedInstallation, installationRepository, savedJob, repositoryFullName, project,matchedUser);
+                = AnalysisDtoFactory.toSqsAnalysisQueueMessage(savedJob, validateResult);
         sqsMessageSender.send(sqsProperties.analysisQueue(), message);
         savedJob.updateJobStatus(AnalysisJobStatus.ANALYSIS_JOB_QUEUED);
         analysisJobService.create(savedJob);
