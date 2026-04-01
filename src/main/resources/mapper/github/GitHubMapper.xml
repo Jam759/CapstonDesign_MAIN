@@ -27,17 +27,17 @@
             resultType="com.Hoseo.CapstoneDesign.github.dto.query.GitHubWebhookValidationQueryResult">
 
         SELECT
-            p.project_id AS projectId,
-            p.tracked_branch AS trackedBranch,
-            pm.project_member_id AS projectMemberId,
-            u.user_id AS userId,
-            u.oauth_provider_id AS oauthProviderId,
-            gi.github_app_installations_id AS matchedInstallationId,
-            gi.account_id AS matchedInstallationAccountId,
-            ir.installation_repository_id AS installationRepositoryId,
-            ir.full_name AS repositoryFullName,
-            ir.is_private AS isPrivate,
-            base_gi.account_login AS installationAccountLogin
+            p.project_id                                                AS projectId,
+            p.tracked_branch                                            AS trackedBranch,
+            pm.project_member_id                                        AS projectMemberId,
+            u.user_id                                                   AS userId,
+            u.oauth_provider_id                                         AS oauthProviderId,
+            gi.github_app_installations_id                              AS matchedInstallationId,
+            gi.account_id                                               AS matchedInstallationAccountId,
+            ir.installation_repository_id                               AS installationRepositoryId,
+            ir.full_name                                                AS repositoryFullName,
+            ir.is_private                                               AS isPrivate,
+            base_gi.account_login                                       AS installationAccountLogin
         FROM github_app_installations base_gi
                  INNER JOIN installation_repository ir
                             ON ir.github_app_installation_id = base_gi.github_app_installations_id
