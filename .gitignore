@@ -39,3 +39,7 @@ out/
 
 ### DateGrip ###
 queries/
+
+### Local logs ###
+.logs/*
+!.logs/.gitkeep

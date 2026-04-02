@@ -45,6 +45,27 @@ spring:
         access-key: ${AWS_ACCESS_KEY_ID}
         secret-key: ${AWS_SECRET_ACCESS_KEY}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    tags:
+      application: ${app.logging.service:capstone-main}
+      server_type: ${app.logging.server-type:spring}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
 app:
   frontend:
     baseUrl: ${FRONTEND_BASE_URL}
@@ -55,6 +76,19 @@ app:
       notification-queue: ${SQS_NOTIFICATION_QUEUE}
     s3:
       bucket-name: ${S3_BUCKET_NAME}
+  logging:
+    service: capstone-main
+    server-type: spring
+    directory: ./.logs
+    exclude-paths:
+      - /favicon.ico
+      - /actuator/health
+      - /actuator/prometheus
+    debug-aspect:
+      enabled: true
+      max-string-length: 120
+      max-collection-size: 10
+      log-return-value: true
 
 auth:
   jwt:

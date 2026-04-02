@@ -8,6 +8,7 @@ import com.Hoseo.CapstoneDesign.github.factory.GitHubEntityFactory;
 import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
 import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
 import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
+import com.Hoseo.CapstoneDesign.github.util.GitHubWebhookPayloadUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -38,8 +39,7 @@ public class InstallationRepositoriesStrategy implements GithubWebhookStrategy {
     }
 
     private void added(JsonNode payload) {
-        JsonNode installationNode = payload.path("installation");
-        long installationId = installationNode.path("id").asLong();
+        long installationId = GitHubWebhookPayloadUtil.requireLong(payload, "installation", "id");
         GithubAppInstallations installations = gitHubAppInstallationService.getById(installationId);
         JsonNode repositoriesAdded = payload.path("repositories_added");
 
@@ -58,34 +58,25 @@ public class InstallationRepositoriesStrategy implements GithubWebhookStrategy {
             return;
         }
 
-        installationRepositories.forEach( t -> t.markGithubAppInstallation(installations));
+        installationRepositories.forEach(repository -> repository.markGithubAppInstallation(installations));
         installationRepositoryService.bulkInsert(installationRepositories);
     }
 
     private void removed(JsonNode payload) {
-        JsonNode installationNode = payload.path("installation");
-        JsonNode installationIdNode = installationNode.path("id");
-
-        if (installationIdNode.isMissingNode() || installationIdNode.isNull()) {
-            throw new GitHubException(GitHubErrorCode.GIT_HUB_WEBHOOK_UNSUPPORTED_ERROR);
-        }
-
-        long installationId = installationIdNode.asLong();
+        long installationId = GitHubWebhookPayloadUtil.requireLong(payload, "installation", "id");
         GithubAppInstallations installations = gitHubAppInstallationService.getById(installationId);
-
         JsonNode repositoriesRemoved = payload.path("repositories_removed");
         if (!repositoriesRemoved.isArray()) {
             return;
         }
 
         List<Long> repositoryIds = new ArrayList<>();
-
         for (JsonNode repoNode : repositoriesRemoved) {
-            JsonNode repoIdNode = repoNode.path("id");
-            if (repoIdNode.isMissingNode() || repoIdNode.isNull()) {
+            Long repositoryId = GitHubWebhookPayloadUtil.optionalLong(repoNode, "id");
+            if (repositoryId == null) {
                 continue;
             }
-            repositoryIds.add(repoIdNode.asLong());
+            repositoryIds.add(repositoryId);
         }
 
         if (repositoryIds.isEmpty()) {

@@ -37,9 +37,9 @@ class NotificationControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("GET /api/notification 는 페이지 크기만큼 mock 알림을 반환한다")
+    @DisplayName("GET /api/v1/notification 는 페이지 크기만큼 mock 알림을 반환한다")
     void getNotificationListReturnsPaginatedMockList() throws Exception {
-        mockMvc.perform(get("/api/notification")
+        mockMvc.perform(get("/api/v1/notification")
                         .param("page", "1")
                         .param("size", "2"))
                 .andExpect(status().isOk())
@@ -50,9 +50,9 @@ class NotificationControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("GET /api/notification/unread 는 읽지 않은 mock 알림 목록을 반환한다")
+    @DisplayName("GET /api/v1/notification/unread 는 읽지 않은 mock 알림 목록을 반환한다")
     void getUnreadNotificationReturnsMockList() throws Exception {
-        mockMvc.perform(get("/api/notification/unread"))
+        mockMvc.perform(get("/api/v1/notification/unread"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].linkType").value("PROJECT"))
@@ -61,9 +61,9 @@ class NotificationControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("PATCH /api/notification 는 읽음 처리 mock 응답으로 200을 반환한다")
+    @DisplayName("PATCH /api/v1/notification 는 읽음 처리 mock 응답으로 200을 반환한다")
     void markAsReadReturnsOk() throws Exception {
-        mockMvc.perform(patch("/api/notification")
+        mockMvc.perform(patch("/api/v1/notification")
                         .param("notificationId", "9001"))
                 .andExpect(status().isOk());
     }

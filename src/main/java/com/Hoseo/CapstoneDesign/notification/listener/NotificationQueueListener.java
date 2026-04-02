@@ -11,8 +11,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import static com.Hoseo.CapstoneDesign.global.logging.support.LoggingConstants.TRACE_ID;
 
 @Slf4j
 @Component
@@ -28,8 +32,11 @@ public class NotificationQueueListener {
             NotificationQueueBaseMessage envelope =
                     objectMapper.readValue(messageBody, NotificationQueueBaseMessage.class);
 
+            bindTraceId(envelope);
+
             log.info(
-                    "SQS analysis result received. jobId={}, eventType={}, status={}",
+                    "SQS analysis result received. traceId={}, jobId={}, eventType={}, status={}",
+                    envelope.getTraceId(),
                     envelope.getJobId(),
                     envelope.getEventType(),
                     envelope.getStatus()
@@ -45,13 +52,22 @@ public class NotificationQueueListener {
                 return;
             }
             log.warn(
-                    "Unknown analysis status. jobId={}, status={}",
+                    "Unknown analysis status. traceId={}, jobId={}, status={}",
+                    envelope.getTraceId(),
                     envelope.getJobId(),
                     envelope.getStatus()
             );
         } catch (Exception e) {
             log.error("Failed to process SQS message. body={}", messageBody, e);
             throw new RuntimeException("SQS message processing failed", e);
+        } finally {
+            MDC.remove(TRACE_ID);
+        }
+    }
+
+    private void bindTraceId(NotificationQueueBaseMessage envelope) {
+        if (StringUtils.hasText(envelope.getTraceId())) {
+            MDC.put(TRACE_ID, envelope.getTraceId());
         }
     }
 

@@ -29,7 +29,7 @@ public class Projects extends LifecycleTimestampEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Users user;
 
-    @JoinColumn(name = "github_app_installation _id", nullable = true)
+    @JoinColumn(name = "github_app_installation_id", nullable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     private GithubAppInstallations GithubAppInstallations;
 

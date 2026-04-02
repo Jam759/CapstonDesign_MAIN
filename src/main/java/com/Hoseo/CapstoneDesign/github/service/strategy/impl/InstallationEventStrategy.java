@@ -10,6 +10,7 @@ import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
 import com.Hoseo.CapstoneDesign.github.service.GithubAppClientService;
 import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
 import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
+import com.Hoseo.CapstoneDesign.github.util.GitHubWebhookPayloadUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -36,26 +37,21 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
     public void handle(JsonNode payload, String deliveryId) {
         String action = payload.path("action").asText(null);
         switch (action) {
-            case "created" -> createdHandle(payload, deliveryId);
-            case "deleted" -> deletedHandle(payload, deliveryId);
+            case "created" -> createdHandle(payload);
+            case "deleted" -> deletedHandle(payload);
             default -> throw new GitHubException(GitHubErrorCode.GIT_HUB_WEBHOOK_UNSUPPORTED_ERROR);
         }
     }
 
-    private void createdHandle(JsonNode payload, String deliveryId) {
-        JsonNode installationNode = payload.path("installation");
-        JsonNode accountNode = installationNode.path("account");
-
-        long installationId = installationNode.path("id").asLong();
-        long accountId = accountNode.path("id").asLong();
-        String accountLogin = accountNode.path("login").asText();
+    private void createdHandle(JsonNode payload) {
+        long installationId = GitHubWebhookPayloadUtil.requireLong(payload, "installation", "id");
+        long accountId = GitHubWebhookPayloadUtil.requireLong(payload, "installation", "account", "id");
+        String accountLogin = GitHubWebhookPayloadUtil.requireText(payload, "installation", "account", "login");
 
         JsonNode repositoriesNode = payload.path("repositories");
-
         List<InstallationRepository> installationRepositories = new ArrayList<>();
+
         if (!repositoriesNode.isArray()) {
-            // repository_selection=all 인 경우 webhook에 전체 목록이 비어있거나 생략된 상황까지 방어
-            // 이거는 client 이용해서 끌어오기
             String installationToken =
                     githubAppClientService.createInstallationAccessToken(installationId);
             List<GithubRepositorySummary> repos =
@@ -63,28 +59,26 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
             installationRepositories = GitHubEntityFactory.toInstallationRepositories(repos);
         } else {
             for (JsonNode repoNode : repositoriesNode) {
-                InstallationRepository e =
+                InstallationRepository installationRepository =
                         GitHubEntityFactory.toInstallationRepository(repoNode);
-                installationRepositories.add(e);
+                installationRepositories.add(installationRepository);
             }
         }
 
-
-
-        if (!installationRepositories.isEmpty()) {
-            GithubAppInstallations installation = gitHubAppInstallationService.createOrRefresh(installationId, accountId, accountLogin);
-            installationRepositories.forEach( t -> t.markGithubAppInstallation(installation));
-            installationRepositoryService.bulkInsert(installationRepositories);
+        if (installationRepositories.isEmpty()) {
+            return;
         }
 
+        GithubAppInstallations installation =
+                gitHubAppInstallationService.createOrRefresh(installationId, accountId, accountLogin);
+        installationRepositories.forEach(repository -> repository.markGithubAppInstallation(installation));
+        installationRepositoryService.bulkInsert(installationRepositories);
     }
 
-    private void deletedHandle(JsonNode payload, String deliveryId) {
-        JsonNode installationNode = payload.path("installation");
-        long installationId = installationNode.path("id").asLong();
+    private void deletedHandle(JsonNode payload) {
+        long installationId = GitHubWebhookPayloadUtil.requireLong(payload, "installation", "id");
 
-        GithubAppInstallations installation
-                = gitHubAppInstallationService.getById(installationId);
+        GithubAppInstallations installation = gitHubAppInstallationService.getById(installationId);
         installationRepositoryService.deleteAllByInstallation(installation);
         gitHubAppInstallationService.delete(installation);
         gitHubAppInstallationService.deleteUserGitHubInstallationByGithubAppInstallation(installation);

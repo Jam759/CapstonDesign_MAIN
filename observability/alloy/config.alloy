@@ -1,0 +1,121 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+loki.process "structured_http" {
+  forward_to = [loki.write.local.receiver]
+
+  stage.json {
+    expressions = {
+      timestamp      = "timestamp",
+      level          = "level",
+      service        = "service",
+      server_type    = "serverType",
+      category       = "category",
+      event_type     = "eventType",
+      trace_id       = "traceId",
+      class_name     = "className",
+      handler_method = "method",
+      message        = "message",
+      duration_ms    = "durationMs",
+      http_method    = "http.method",
+      http_path      = "http.path",
+      http_status    = "http.status",
+      error_message  = "error.message",
+      error_code     = "error.code",
+    }
+    drop_malformed = true
+  }
+
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339"
+  }
+
+  stage.labels {
+    values = {
+      service     = "service",
+      server_type = "server_type",
+      level       = "level",
+      category    = "category",
+      event_type  = "event_type",
+      http_method = "http_method",
+      http_status = "http_status",
+    }
+  }
+}
+
+loki.source.file "structured_http" {
+  targets = [
+    {
+      __path__ = "/var/log/capstone/structured-http.log",
+      job      = "capstone-structured-http",
+      app      = "capstone-main",
+      env      = "local",
+    },
+  ]
+  forward_to = [loki.process.structured_http.receiver]
+  tail_from_end = true
+  file_match {
+    enabled = true
+    sync_period = "5s"
+  }
+}
+
+loki.source.file "application" {
+  targets = [
+    {
+      __path__ = "/var/log/capstone/application.log",
+      job      = "capstone-application",
+      app      = "capstone-main",
+      env      = "local",
+    },
+  ]
+  forward_to = [loki.write.local.receiver]
+  tail_from_end = true
+  file_match {
+    enabled = true
+    sync_period = "5s"
+  }
+}
+
+loki.source.file "git_worker_structured_http" {
+  targets = [
+    {
+      __path__ = "/var/log/git-worker-root/.logs/structured-http.log",
+      job      = "git-worker-structured-http",
+      app      = "git-worker",
+      env      = "local",
+    },
+  ]
+  forward_to = [loki.process.structured_http.receiver]
+  tail_from_end = true
+  file_match {
+    enabled = true
+    sync_period = "5s"
+  }
+}
+
+loki.source.file "git_worker_application" {
+  targets = [
+    {
+      __path__ = "/var/log/git-worker-root/.logs/application.log",
+      job      = "git-worker-application",
+      app      = "git-worker",
+      env      = "local",
+    },
+  ]
+  forward_to = [loki.write.local.receiver]
+  tail_from_end = true
+  file_match {
+    enabled = true
+    sync_period = "5s"
+  }
+}
