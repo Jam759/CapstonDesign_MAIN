@@ -85,3 +85,37 @@ loki.source.file "application" {
     sync_period = "5s"
   }
 }
+
+loki.source.file "git_worker_structured_http" {
+  targets = [
+    {
+      __path__ = "/var/log/git-worker-root/.logs/structured-http.log",
+      job      = "git-worker-structured-http",
+      app      = "git-worker",
+      env      = "local",
+    },
+  ]
+  forward_to = [loki.process.structured_http.receiver]
+  tail_from_end = true
+  file_match {
+    enabled = true
+    sync_period = "5s"
+  }
+}
+
+loki.source.file "git_worker_application" {
+  targets = [
+    {
+      __path__ = "/var/log/git-worker-root/.logs/application.log",
+      job      = "git-worker-application",
+      app      = "git-worker",
+      env      = "local",
+    },
+  ]
+  forward_to = [loki.write.local.receiver]
+  tail_from_end = true
+  file_match {
+    enabled = true
+    sync_period = "5s"
+  }
+}

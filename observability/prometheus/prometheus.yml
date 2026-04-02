@@ -16,3 +16,12 @@ scrape_configs:
         labels:
           application: capstone-main
           env: local
+
+  - job_name: git-worker
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - host.docker.internal:3000
+        labels:
+          application: git-worker
+          env: local

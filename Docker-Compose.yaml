@@ -53,6 +53,7 @@ services:
     volumes:
       - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
       - ./.logs:/var/log/capstone
+      - //wsl.localhost/GitWorker/home/jam759/workSpace/CapstonDesign_Worker:/var/log/git-worker-root:ro
       - alloy_data:/var/lib/alloy/data
 
   grafana:

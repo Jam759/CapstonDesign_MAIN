@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NotificationQueueBaseMessage {
 
+    private String traceId;
     private String jobId;
     private AnalysisEventType eventType;
     private AnalysisStatus status;
