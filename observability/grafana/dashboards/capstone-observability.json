@@ -22,22 +22,6 @@
   "links": [],
   "panels": [
     {
-      "gridPos": {
-        "h": 4,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 1,
-      "options": {
-        "content": "### Unified Filters\\n- `traceId`: 메인 앱과 GitWorker를 같은 trace로 묶어 추적\\n- `mainUriRegex`: Spring 메트릭의 URI regex\\n- `mainPathFilter`: Spring 구조화 HTTP 로그 경로 필터\\n- `workerEventTypeRegex`: GitWorker 큐 메트릭 eventType 필터\\n- `workerContainsText`: jobId, eventType, error code 같은 문자열 검색\\n- `minDurationMs`: 느린 HTTP 요청 기준값",
-        "mode": "markdown"
-      },
-      "pluginVersion": "12.3.1",
-      "title": "Unified Filters",
-      "type": "text"
-    },
-    {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -70,11 +54,11 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
+        "w": 3,
         "x": 0,
-        "y": 4
+        "y": 0
       },
-      "id": 2,
+      "id": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -144,11 +128,11 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 4,
-        "y": 4
+        "w": 3,
+        "x": 3,
+        "y": 0
       },
-      "id": 3,
+      "id": 2,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -200,23 +184,98 @@
               },
               {
                 "color": "yellow",
-                "value": 1
+                "value": 300
+              },
+              {
+                "color": "orange",
+                "value": 800
               },
               {
                 "color": "red",
-                "value": 5
+                "value": 1500
               }
             ]
           },
-          "unit": "ops"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 8,
-        "y": 4
+        "w": 3,
+        "x": 6,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "1000 * histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{application=\"capstone-main\",uri=~\"${mainUriRegex}\"}[$__rate_interval])))",
+          "legendFormat": "p95",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Main P95 Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 60
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 9,
+        "y": 0
       },
       "id": 4,
       "options": {
@@ -242,7 +301,77 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(rate(git_worker_analysis_queue_received_messages_total{application=\"git-worker\",event_type=~\"${workerEventTypeRegex}\"}[$__rate_interval]))",
+          "expr": "100 * sum(jvm_memory_used_bytes{application=\"capstone-main\",area=\"heap\"}) / clamp_min(sum(jvm_memory_max_bytes{application=\"capstone-main\",area=\"heap\"} > 0), 1)",
+          "legendFormat": "heap %",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Main Heap Usage",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 12,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(analysis_queue_received_messages_total{application=\"git-worker\",event_type=~\"${workerEventTypeRegex}\"}[$__rate_interval]))",
           "legendFormat": "received/s",
           "range": true,
           "refId": "A"
@@ -284,11 +413,11 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 12,
-        "y": 4
+        "w": 3,
+        "x": 15,
+        "y": 0
       },
-      "id": 5,
+      "id": 6,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
@@ -312,7 +441,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum(git_worker_analysis_queue_inflight_messages{application=\"git-worker\"})",
+          "expr": "sum(analysis_queue_inflight{application=\"git-worker\"})",
           "legendFormat": "inflight",
           "range": true,
           "refId": "A"
@@ -350,83 +479,9 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 4,
-        "x": 16,
-        "y": 4
-      },
-      "id": 6,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(git_worker_analysis_queue_poll_errors_total{application=\"git-worker\"}[$__rate_interval]))",
-          "legendFormat": "poll errors/s",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Worker Poll Errors",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 300
-              },
-              {
-                "color": "orange",
-                "value": 800
-              },
-              {
-                "color": "red",
-                "value": 1500
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 20,
-        "y": 4
+        "w": 3,
+        "x": 18,
+        "y": 0
       },
       "id": 7,
       "options": {
@@ -452,13 +507,84 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "1000 * histogram_quantile(0.95, sum by (le) (rate(http_server_requests_seconds_bucket{application=\"capstone-main\",uri=~\"${mainUriRegex}\"}[$__rate_interval])))",
+          "expr": "sum(rate(analysis_queue_poll_errors_total{application=\"git-worker\"}[$__rate_interval]))",
+          "legendFormat": "poll errors/s",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Worker Poll Errors",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 21,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "1000 * histogram_quantile(0.95, sum by (le) (rate(analysis_queue_processing_duration_seconds_bucket{application=\"git-worker\",event_type=~\"${workerEventTypeRegex}\"}[$__rate_interval])))",
           "legendFormat": "p95",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Main P95",
+      "title": "Worker P95 Processing",
       "type": "stat"
     },
     {
@@ -485,11 +611,11 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 8,
         "x": 0,
-        "y": 9
+        "y": 5
       },
-      "id": 8,
+      "id": 9,
       "options": {
         "legend": {
           "calcs": [],
@@ -537,64 +663,6 @@
                 "value": null
               }
             ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 9
-      },
-      "id": 9,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum by (status) (rate(git_worker_analysis_queue_processed_messages_total{application=\"git-worker\",event_type=~\"${workerEventTypeRegex}\"}[$__rate_interval]))",
-          "legendFormat": "{{status}}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Worker Processed By Status",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
           },
           "unit": "ms"
         },
@@ -602,9 +670,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 17
+        "w": 8,
+        "x": 8,
+        "y": 5
       },
       "id": 10,
       "options": {
@@ -657,6 +725,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -666,15 +735,15 @@
               }
             ]
           },
-          "unit": "ms"
+          "unit": "percent"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 17
+        "w": 8,
+        "x": 16,
+        "y": 5
       },
       "id": 11,
       "options": {
@@ -697,13 +766,402 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "1000 * histogram_quantile(0.95, sum by (le, event_type) (rate(git_worker_analysis_queue_processing_duration_seconds_bucket{application=\"git-worker\",event_type=~\"${workerEventTypeRegex}\"}[$__rate_interval])))",
+          "expr": "100 * process_cpu_usage{application=\"capstone-main\"}",
+          "legendFormat": "process cpu",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "100 * sum(jvm_memory_used_bytes{application=\"capstone-main\",area=\"heap\"}) / clamp_min(sum(jvm_memory_max_bytes{application=\"capstone-main\",area=\"heap\"} > 0), 1)",
+          "legendFormat": "heap %",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "Main CPU And Heap",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 13
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "jvm_threads_live_threads{application=\"capstone-main\"}",
+          "legendFormat": "live threads",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "hikaricp_connections_active{application=\"capstone-main\"}",
+          "legendFormat": "active",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "hikaricp_connections_idle{application=\"capstone-main\"}",
+          "legendFormat": "idle",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Main Threads And DB Connections",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 13
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "topk(5, 1000 * histogram_quantile(0.95, sum by (le, uri) (rate(http_server_requests_seconds_bucket{application=\"capstone-main\",uri=~\"${mainUriRegex}\",uri!~\".*actuator.*\"}[$__rate_interval]))))",
+          "legendFormat": "{{uri}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Main Top 5 URI P95",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 13
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (status) (rate(analysis_queue_processed_messages_total{application=\"git-worker\",event_type=~\"${workerEventTypeRegex}\"}[$__rate_interval]))",
+          "legendFormat": "{{status}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Worker Processed By Status",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 21
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "1000 * histogram_quantile(0.95, sum by (le, event_type) (rate(analysis_queue_processing_duration_seconds_bucket{application=\"git-worker\",event_type=~\"${workerEventTypeRegex}\"}[$__rate_interval])))",
           "legendFormat": "{{event_type}}",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Worker P95 By Event Type",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 21
+      },
+      "id": 16,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "sum by (status) (rate(notification_queue_published_total{application=\"git-worker\",event_type=~\"${workerEventTypeRegex}\"}[$__rate_interval]))",
+          "legendFormat": "{{status}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Worker Notification Publish By Status",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 21
+      },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "process_resident_memory_bytes{application=\"git-worker\"}",
+          "legendFormat": "rss",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Worker Resident Memory",
       "type": "timeseries"
     },
     {
@@ -715,9 +1173,9 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 25
+        "y": 29
       },
-      "id": 12,
+      "id": 18,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
@@ -736,12 +1194,12 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"capstone-structured-http\", event_type=~\"HTTP_RESPONSE|HTTP_ERROR\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | duration >= ${minDurationMs} | line_format \"{{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "expr": "{job=\"capstone-structured-http\", event_type=~\"HTTP_RESPONSE|HTTP_ERROR\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | line_format \"{{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Main Slow Requests",
+      "title": "Main Recent Requests",
       "type": "logs"
     },
     {
@@ -753,9 +1211,9 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 25
+        "y": 29
       },
-      "id": 13,
+      "id": 19,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
@@ -774,7 +1232,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"git-worker-application\"} |= \"${workerContainsText}\" |= \"${traceId}\"",
+          "expr": "{job=\"git-worker-application\"} !~ \"^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:.]+ DEBUG \" |= \"${workerContainsText}\" |= \"${traceId}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -791,9 +1249,9 @@
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 39
       },
-      "id": 14,
+      "id": 20,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
@@ -829,9 +1287,9 @@
         "h": 10,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 39
       },
-      "id": 15,
+      "id": 21,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
@@ -850,12 +1308,88 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"git-worker-structured-http\", event_type=\"HTTP_ERROR\"} |= \"${traceId}\" | json method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.status}} {{.method}} {{.path}} {{.duration}}ms error={{.error_code}} trace={{.trace_id}} {{.error_message}}\"",
+          "expr": "{job=\"git-worker-structured-http\", event_type=\"HTTP_ERROR\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.status}} {{.method}} {{.path}} {{.duration}}ms error={{.error_code}} trace={{.trace_id}} {{.error_message}}\"",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Worker Recent HTTP Errors",
+      "title": "Worker HTTP Errors",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "id": 22,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "editorMode": "code",
+          "expr": "{job=\"capstone-structured-http\", event_type=~\"HTTP_RESPONSE|HTTP_ERROR\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | duration >= ${minDurationMs} | line_format \"{{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Main Slow Requests",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "id": 23,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "editorMode": "code",
+          "expr": "{job=\"git-worker-structured-http\", event_type=~\"HTTP_RESPONSE|HTTP_ERROR\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | duration >= ${minDurationMs} | line_format \"{{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Worker Slow HTTP Requests",
       "type": "logs"
     }
   ],
@@ -864,7 +1398,7 @@
   "style": "dark",
   "tags": [
     "capstone",
-    "unified",
+    "observability",
     "loki",
     "prometheus"
   ],
@@ -998,8 +1532,8 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Capstone Unified Overview",
-  "uid": "capstone-unified-overview",
+  "title": "Capstone Observability Overview",
+  "uid": "capstone-observability-overview",
   "version": 1,
   "weekStart": ""
 }

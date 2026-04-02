@@ -1,7 +1,7 @@
 apiVersion: 1
 
 providers:
-  - name: Capstone Logging
+  - name: Capstone Observability
     orgId: 1
     folder: Capstone
     type: file

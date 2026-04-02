@@ -52,6 +52,30 @@ loki.process "structured_http" {
   }
 }
 
+loki.process "git_worker_application" {
+  forward_to = [loki.write.local.receiver]
+
+  stage.match {
+    selector = "{job=\"git-worker-application\"} |~ \"^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:.]+ DEBUG \""
+    action   = "drop"
+  }
+
+  stage.regex {
+    expression = "^(?P<timestamp>\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\.\\d{3})\\s+(?P<level>TRACE|DEBUG|LOG|INFO|WARN|ERROR|FATAL)\\s+"
+  }
+
+  stage.labels {
+    values = {
+      level = "level",
+    }
+  }
+
+  stage.match {
+    selector = "{level=\"DEBUG\"}"
+    action   = "drop"
+  }
+}
+
 loki.source.file "structured_http" {
   targets = [
     {
@@ -89,7 +113,7 @@ loki.source.file "application" {
 loki.source.file "git_worker_structured_http" {
   targets = [
     {
-      __path__ = "/var/log/git-worker-root/.logs/structured-http.log",
+      __path__ = "/var/log/git-worker/structured-http.log",
       job      = "git-worker-structured-http",
       app      = "git-worker",
       env      = "local",
@@ -106,13 +130,13 @@ loki.source.file "git_worker_structured_http" {
 loki.source.file "git_worker_application" {
   targets = [
     {
-      __path__ = "/var/log/git-worker-root/.logs/application.log",
+      __path__ = "/var/log/git-worker/application.log",
       job      = "git-worker-application",
       app      = "git-worker",
       env      = "local",
     },
   ]
-  forward_to = [loki.write.local.receiver]
+  forward_to = [loki.process.git_worker_application.receiver]
   tail_from_end = true
   file_match {
     enabled = true

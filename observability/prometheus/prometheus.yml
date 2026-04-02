@@ -21,7 +21,7 @@ scrape_configs:
     metrics_path: /metrics
     static_configs:
       - targets:
-          - host.docker.internal:3000
+          - 172.19.228.23:3000
         labels:
           application: git-worker
           env: local
