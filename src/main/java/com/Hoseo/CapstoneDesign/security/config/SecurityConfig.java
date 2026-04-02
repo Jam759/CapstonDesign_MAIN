@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.github.util.GitHubWebhookUtil;
 import com.Hoseo.CapstoneDesign.security.filter.GithubWebhookSecurityFilter;
 import com.Hoseo.CapstoneDesign.security.filter.GlobalExceptionFilter;
 import com.Hoseo.CapstoneDesign.security.filter.JwtAuthenticationFilter;
+import com.Hoseo.CapstoneDesign.security.filter.TraceMdcFilter;
 import com.Hoseo.CapstoneDesign.security.handler.CustomAccessDeniedHandler;
 import com.Hoseo.CapstoneDesign.security.handler.CustomAuthenticationEntryPoint;
 import com.Hoseo.CapstoneDesign.security.handler.GithubOAuth2SuccessHandler;
@@ -11,6 +12,8 @@ import com.Hoseo.CapstoneDesign.security.service.AccessTokenBlackListService;
 import com.Hoseo.CapstoneDesign.security.service.impl.UserDetailServiceImpl;
 import com.Hoseo.CapstoneDesign.security.util.JwtUtil;
 import com.Hoseo.CapstoneDesign.user.entity.enums.SystemRole;
+import com.Hoseo.CapstoneDesign.global.logging.StructuredHttpLogger;
+import com.Hoseo.CapstoneDesign.global.logging.properties.LoggingProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -43,8 +46,13 @@ public class SecurityConfig {
     private final GithubOAuth2SuccessHandler githubOAuth2SuccessHandler;
 
     @Bean
-    public GlobalExceptionFilter globalExceptionFilter() {
-        return new GlobalExceptionFilter();
+    public GlobalExceptionFilter globalExceptionFilter(StructuredHttpLogger structuredHttpLogger) {
+        return new GlobalExceptionFilter(structuredHttpLogger);
+    }
+
+    @Bean
+    public TraceMdcFilter traceMdcFilter(LoggingProperties loggingProperties) {
+        return new TraceMdcFilter(loggingProperties);
     }
 
     @Bean
@@ -58,7 +66,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            TraceMdcFilter traceMdcFilter,
+            GlobalExceptionFilter globalExceptionFilter,
+            JwtAuthenticationFilter jwtAuthenticationFilter
+    ) throws Exception {
         http
                 //기본적인 설정
                 .csrf(AbstractHttpConfigurer::disable)
@@ -81,8 +94,9 @@ public class SecurityConfig {
                 .oauth2Login(oauth -> {
                     oauth.successHandler(githubOAuth2SuccessHandler);
                 })
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(globalExceptionFilter(), JwtAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(globalExceptionFilter, JwtAuthenticationFilter.class)
+                .addFilterBefore(traceMdcFilter, GlobalExceptionFilter.class);
         return http.build();
     }
 

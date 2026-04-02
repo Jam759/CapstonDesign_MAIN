@@ -17,5 +17,65 @@ services:
       --collation-server=utf8mb4_unicode_ci
       --default-authentication-plugin=mysql_native_password
 
+  loki:
+    image: grafana/loki:3.6.3
+    restart: unless-stopped
+    command: -config.file=/etc/loki/config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./observability/loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki_data:/loki
+
+  prometheus:
+    image: prom/prometheus:v3.9.1
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+
+  alloy:
+    image: grafana/alloy:latest
+    restart: unless-stopped
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data --disable-reporting /etc/alloy/config.alloy
+    depends_on:
+      - loki
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - ./.logs:/var/log/capstone
+      - alloy_data:/var/lib/alloy/data
+
+  grafana:
+    image: grafana/grafana:12.3.1
+    restart: unless-stopped
+    depends_on:
+      - loki
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+
 volumes:
   mysql_data:
+  loki_data:
+  prometheus_data:
+  alloy_data:
+  grafana_data:
