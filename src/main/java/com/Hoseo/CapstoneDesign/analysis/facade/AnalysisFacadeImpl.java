@@ -5,8 +5,10 @@ import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisHighlightsR
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisOverviewResponse;
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisScorecardResponse;
 import com.Hoseo.CapstoneDesign.analysis.dto.application.ProjectAnalysisUserViewResponse;
+import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectRoadMapResponse;
 import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisSectionDtoFactory;
 import com.Hoseo.CapstoneDesign.analysis.service.ProjectAnalysisReportService;
+import com.Hoseo.CapstoneDesign.analysis.service.ProjectRoadMapService;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsErrorCode;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsException;
@@ -23,6 +25,7 @@ public class AnalysisFacadeImpl implements AnalysisFacade {
     private final ProjectService projectService;
     private final ProjectMemberService projectMemberService;
     private final ProjectAnalysisReportService projectAnalysisReportService;
+    private final ProjectRoadMapService projectRoadMapService;
 
     @Override
     @Transactional(readOnly = true)
@@ -50,6 +53,12 @@ public class AnalysisFacadeImpl implements AnalysisFacade {
     public ProjectAnalysisScorecardResponse getScorecard(Users user, Long projectId, Integer version) {
         ProjectAnalysisUserViewResponse userView = getValidatedUserView(user, projectId, version);
         return AnalysisSectionDtoFactory.toScorecard(userView);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProjectRoadMapResponse getRoadMap(Users user, Long projectId) {
+        return projectRoadMapService.getRoadMap(projectId, user.getUserId());
     }
 
     private ProjectAnalysisUserViewResponse getValidatedUserView(Users user, Long projectId, Integer version) {

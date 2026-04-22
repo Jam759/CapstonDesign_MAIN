@@ -3,6 +3,7 @@ package com.Hoseo.CapstoneDesign.project.service;
 import com.Hoseo.CapstoneDesign.project.entity.ProjectMember;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
+import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectMemberRole;
 import com.Hoseo.CapstoneDesign.project.repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,15 @@ public class ProjectMemberService {
         return repository.existsByProjectProjectIdAndUserUserIdAndResponse(
                 projectId,
                 userId,
+                ProjectInviteStatus.ACCEPTED
+        );
+    }
+
+    public boolean isOwnerMember(Long projectId, Long userId) {
+        return repository.existsByProjectProjectIdAndUserUserIdAndProjectRoleAndResponse(
+                projectId,
+                userId,
+                ProjectMemberRole.OWNER,
                 ProjectInviteStatus.ACCEPTED
         );
     }

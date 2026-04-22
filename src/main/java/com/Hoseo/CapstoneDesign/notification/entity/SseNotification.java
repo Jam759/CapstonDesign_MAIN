@@ -35,10 +35,6 @@ public class SseNotification extends CreatableEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "type", nullable = false)
-    private CommonGroupDetail type;
-
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -51,6 +47,9 @@ public class SseNotification extends CreatableEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "link_type", nullable = false)
     private CommonGroupDetail linkType;
+
+    @Column(name = "sse_payload", nullable = false, length = 1000)
+    private String ssePayload;
 
     @Column(name = "link_id")
     private Long linkId;

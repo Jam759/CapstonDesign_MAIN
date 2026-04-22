@@ -23,6 +23,10 @@ public class UserService {
                 .orElseThrow( () -> new CustomUserException(UserErrorCode.USER_NOT_FOUND_ERROR));
     }
 
+    public Users getReferenceById(Long userId) {
+        return repository.getReferenceById(userId);
+    }
+
     public Users getOrCreateOauthUser(OauthType oauthType, String oauthProviderId, String oauthNickname) {
         Optional<Users> user =
                 repository.findByOauthTypeAndOauthProviderId(oauthType, oauthProviderId);

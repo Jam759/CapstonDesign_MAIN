@@ -42,7 +42,7 @@ public class NotificationSseService {
         return emitter;
     }
 
-    public void sendNotification(Long userId, SseBaseResponse<?> response) {
+    public void sendNotification(Long userId, SseBaseResponse response) {
         SseEmitter emitter = emitterRepository.get(userId);
         if (emitter == null) {
             return;

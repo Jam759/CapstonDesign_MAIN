@@ -30,7 +30,7 @@ public class ProjectAnalysisReport extends CreatableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "project_meta_reports_id", nullable = false)
+    @Column(name = "project_analysis_reports_id", nullable = false)
     private Long projectAnalysisReportId;
 
     @ManyToOne(fetch = FetchType.LAZY)

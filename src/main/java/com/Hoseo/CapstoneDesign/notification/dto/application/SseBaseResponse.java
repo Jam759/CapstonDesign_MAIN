@@ -12,10 +12,10 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SseBaseResponse<T> {
+public class SseBaseResponse {
 
     private UUID id;
     private String eventType;
     private LocalDateTime eventAt;
-    private T data;
+    private Object data;//각 상황에 맞는 DTO넣기
 }

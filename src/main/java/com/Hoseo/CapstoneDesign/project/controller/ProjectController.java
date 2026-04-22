@@ -67,6 +67,7 @@ public class ProjectController {
             @AuthenticationPrincipal UserDetailImpl userDetail,
             @RequestBody ProjectCreateRequest request
     ) {
+        // TODO : req에 맞게 로직 수정
         ProjectCreateResponse res = facade.createProject(request, userDetail.getUser());
         return ResponseEntity.ok(res);
     }
@@ -140,88 +141,6 @@ public class ProjectController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{projectId}/setting")
-    @Operation(
-            summary = "프로젝트 GitHub 설정 조회",
-            description = "프로젝트 소유자만 저장된 GitHub 설치/저장소/브랜치 설정을 조회할 수 있습니다."
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "프로젝트 설정 조회 성공",
-                    content = @Content(schema = @Schema(implementation = ProjectSettingResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "인증 실패",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "프로젝트 설정 조회 권한 없음",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "프로젝트를 찾을 수 없음",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
-            )
-    })
-    public ResponseEntity<ProjectSettingResponse> getProject(
-            @Parameter(description = "프로젝트 ID", example = "101")
-            @PathVariable Long projectId,
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal UserDetailImpl userDetail
-    ) {
-        ProjectSettingResponse response
-                = facade.getProjectSetting(projectId, userDetail.getUser());
-        return ResponseEntity.ok(response);
-    }
-
-    @PatchMapping("/{projectId}/setting")
-    @Operation(
-            summary = "프로젝트 GitHub 설정 저장",
-            description = "선택한 GitHub 저장소와 추적 브랜치를 연결하고, 전체 분석 작업을 큐에 발행합니다. 프로젝트 상태가 REPO_NOT_CONNECTED일 때만 성공합니다."
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "프로젝트 설정 저장 성공",
-                    content = @Content(schema = @Schema(implementation = ProjectSettingResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "이미 저장소가 연결된 프로젝트이거나 요청 값이 유효하지 않음",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "인증 실패",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "프로젝트 설정 수정 권한 없음",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "프로젝트 또는 GitHub 연동 정보를 찾을 수 없음",
-                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
-            )
-    })
-    public ResponseEntity<ProjectSettingResponse> updateProject(
-            @Parameter(description = "프로젝트 ID", example = "101")
-            @PathVariable Long projectId,
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal UserDetailImpl userDetail,
-            @RequestBody ProjectSettingRequest request
-    ) {
-        ProjectSettingResponse response
-                = facade.updateProject(projectId, userDetail.getUser(), request);
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/members")
     @Operation(
             summary = "프로젝트 멤버 초대",
@@ -293,7 +212,7 @@ public class ProjectController {
         return ResponseEntity.ok(res);
     }
 
-    @GetMapping("member")
+    @GetMapping("/member")
     @Operation(
             summary = "내 초대 상태 목록 조회",
             description = "현재 구현은 실제 DB 조회 대신 mock 초대 상태 목록을 반환합니다."

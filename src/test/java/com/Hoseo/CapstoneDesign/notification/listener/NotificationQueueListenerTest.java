@@ -35,7 +35,7 @@ class NotificationQueueListenerTest {
         String body = """
                 {
                   "traceId": "delivery-123",
-                  "jobId": "job-1",
+                  "jobId": 1,
                   "eventType": "NORMAL_ANALYSIS_REQUEST",
                   "status": "SUCCESS",
                   "data": {

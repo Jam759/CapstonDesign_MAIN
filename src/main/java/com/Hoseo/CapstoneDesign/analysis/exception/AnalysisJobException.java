@@ -6,6 +6,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class AnalysisException extends GlobalBaseException {
-    private final AnalysisErrorCode errorCode;
+public class AnalysisJobException extends GlobalBaseException {
+    private final AnalysisJobErrorCode errorCode;
 }

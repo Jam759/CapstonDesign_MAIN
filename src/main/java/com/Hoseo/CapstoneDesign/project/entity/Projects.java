@@ -4,7 +4,6 @@ import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
 import com.Hoseo.CapstoneDesign.github.entity.InstallationRepository;
 import com.Hoseo.CapstoneDesign.global.entity.LifecycleTimestampEntity;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectStatus;
-import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectType;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -33,6 +34,9 @@ public class Projects extends LifecycleTimestampEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private GithubAppInstallations GithubAppInstallations;
 
+    @Column(name = "tracked_branch", nullable = true)
+    private String trackedBranch;
+
     @JoinColumn(name = "installation_repository_id", nullable = true)
     @ManyToOne(fetch = FetchType.LAZY)
     private InstallationRepository installationRepository;
@@ -47,15 +51,14 @@ public class Projects extends LifecycleTimestampEntity {
     private String goal;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "project_type", nullable = false, length = 30)
-    private ProjectType projectType;
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "project_status", nullable = false)
     private ProjectStatus projectStatus;
 
-    @Column(name = "tracked_branch", nullable = true)
-    private String trackedBranch;
+    @Column(name = "start_date", nullable = false)
+    private LocalDateTime startDate;
+
+    @Column(name = "end_date", nullable = false)
+    private LocalDateTime endDate;
 
     public void setTrackedSetting(
             GithubAppInstallations installations,

@@ -6,12 +6,16 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "프로젝트 목록용 썸네일 정보")
 public class ProjectThumbnailResponse {
+
     @Schema(description = "프로젝트 ID", example = "101")
     private Long projectId;
 
@@ -20,4 +24,10 @@ public class ProjectThumbnailResponse {
 
     @Schema(description = "프로젝트 한 줄 설명", example = "백준 풀이 기록과 회고를 관리하는 프로젝트")
     private String description;
+
+    private LocalDateTime startDate;
+
+    private LocalDateTime endDate;
+
+    private List<String> techStack;
 }

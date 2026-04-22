@@ -31,7 +31,7 @@ class GamificationControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("GET /api/v1/gamification/xp/ranking 은 mock 랭킹 목록을 반환한다")
+    @DisplayName("GET /api/v1/gamification/xp/ranking returns ranking list")
     void getRankingReturnsMockList() throws Exception {
         mockMvc.perform(get("/api/v1/gamification/xp/ranking")
                         .param("page", "1")
@@ -45,7 +45,7 @@ class GamificationControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("GET /api/v1/gamification/xp 는 내 랭킹 mock 응답을 반환한다")
+    @DisplayName("GET /api/v1/gamification/xp returns my rank")
     void getMyRankReturnsMockResponse() throws Exception {
         mockMvc.perform(get("/api/v1/gamification/xp"))
                 .andExpect(status().isOk())
@@ -56,7 +56,7 @@ class GamificationControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("GET /api/v1/gamification/quests 는 상태별 mock 퀘스트를 반환한다")
+    @DisplayName("GET /api/v1/gamification/quests returns quests filtered by status")
     void getQuestResponseReturnsFilteredMockList() throws Exception {
         mockMvc.perform(get("/api/v1/gamification/quests")
                         .param("progressStatus", "ACTIVE"))
@@ -64,16 +64,5 @@ class GamificationControllerTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].progressStatus").value("ACTIVE"))
                 .andExpect(jsonPath("$[0].rewardExp").value(120));
-    }
-
-    @Test
-    @WithMockUserDetail
-    @DisplayName("GET /api/v1/gamification/badges 는 mock 뱃지 목록을 반환한다")
-    void getMyBadgesReturnsMockList() throws Exception {
-        mockMvc.perform(get("/api/v1/gamification/badges"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].badgeName").value("첫 분석 완료"))
-                .andExpect(jsonPath("$[1].badgeType").value("COLLABORATION"));
     }
 }

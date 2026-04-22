@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.user.entity;
 
+import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.global.entity.LifecycleTimestampEntity;
 import com.Hoseo.CapstoneDesign.user.entity.enums.OauthType;
 import com.Hoseo.CapstoneDesign.user.entity.enums.SystemRole;
@@ -45,6 +46,10 @@ public class Users extends LifecycleTimestampEntity {
 
     @Column(name = "oauth_nickname", nullable = false, length = 255)
     private String oauthNickname;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_goal_cmd_id", nullable = true)
+    private CommonGroupDetail userGoal;
 
     public Users updateOauthNickname(String oauthNickname) {
         this.oauthNickname = oauthNickname;

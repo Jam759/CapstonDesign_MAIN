@@ -21,7 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -49,22 +48,19 @@ class UserControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("PATCH /api/v1/users/me 성공 시 200과 응답 바디를 반환한다")
+    @DisplayName("PATCH /api/v1/users/me succeeds and returns response body")
     void updateUserProfileSuccess() throws Exception {
         UpdateUserInfoResponse response = new UpdateUserInfoResponse(
                 "new-service-nick",
-                Set.of(101L, 102L),
                 LocalDateTime.of(2026, 3, 12, 12, 0)
         );
 
         when(userFacade.updateUserProfile(any(), any())).thenReturn(response);
 
         mockMvc.perform(patch("/api/v1/users/me")
-                        .param("userServiceNickname", "new-service-nick")
-                        .param("equippedBadges", "101", "102"))
+                        .param("userServiceNickname", "new-service-nick"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serviceNickname").value("new-service-nick"))
-                .andExpect(jsonPath("$.equippedBadges.length()").value(2))
                 .andExpect(jsonPath("$.updateDate").exists());
 
         verify(userFacade).updateUserProfile(any(), any());
@@ -73,14 +69,13 @@ class UserControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("PATCH /api/v1/users/me 실패 시 GlobalExceptionResponse 포맷을 반환한다")
+    @DisplayName("PATCH /api/v1/users/me failure returns GlobalExceptionResponse")
     void updateUserProfileFailureReturnsGlobalExceptionResponse() throws Exception {
         when(userFacade.updateUserProfile(any(), any()))
                 .thenThrow(new CustomUserException(UserErrorCode.USER_NOT_FOUND_ERROR));
 
         mockMvc.perform(patch("/api/v1/users/me")
-                        .param("userServiceNickname", "any")
-                        .param("equippedBadges", "1"))
+                        .param("userServiceNickname", "any"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.errorCode").value(UserErrorCode.USER_NOT_FOUND_ERROR.getErrorCode()))
                 .andExpect(jsonPath("$.errorMessage").exists())
@@ -91,14 +86,13 @@ class UserControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("ModelAttribute 바인딩으로 facade에 요청 DTO가 전달된다")
+    @DisplayName("ModelAttribute binding passes request DTO to facade")
     void modelAttributeBindingContract() throws Exception {
         when(userFacade.updateUserProfile(any(), any()))
-                .thenReturn(new UpdateUserInfoResponse("bound", Set.of(1L), LocalDateTime.now()));
+                .thenReturn(new UpdateUserInfoResponse("bound", LocalDateTime.now()));
 
         mockMvc.perform(patch("/api/v1/users/me")
-                        .param("userServiceNickname", UserProfileUpdateRequestFactory.create("bound", Set.of(1L)).userServiceNickname())
-                        .param("equippedBadges", "1"))
+                        .param("userServiceNickname", UserProfileUpdateRequestFactory.create("bound").userServiceNickname()))
                 .andExpect(status().isOk());
 
         verify(userFacade).updateUserProfile(any(), any());

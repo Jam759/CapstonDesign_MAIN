@@ -3,8 +3,8 @@ package com.Hoseo.CapstoneDesign.analysis.service;
 import com.Hoseo.CapstoneDesign.analysis.dto.application.ProjectAnalysisUserViewResponse;
 import com.Hoseo.CapstoneDesign.analysis.entity.ProjectAnalysisReport;
 import com.Hoseo.CapstoneDesign.analysis.entity.enums.ReportType;
-import com.Hoseo.CapstoneDesign.analysis.exception.AnalysisErrorCode;
-import com.Hoseo.CapstoneDesign.analysis.exception.AnalysisException;
+import com.Hoseo.CapstoneDesign.analysis.exception.ProjectAnalysisReportErrorCode;
+import com.Hoseo.CapstoneDesign.analysis.exception.ProjectAnalysisReportException;
 import com.Hoseo.CapstoneDesign.analysis.repository.ProjectAnalysisReportRepository;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.Hoseo.CapstoneDesign.global.aws.properties.S3Properties;
@@ -42,7 +42,7 @@ public class ProjectAnalysisReportService {
                     s3Properties.bucketName()
             );
         } catch (IllegalArgumentException e) {
-            throw new AnalysisException(AnalysisErrorCode.ANALYSIS_REPORT_STORAGE_INVALID);
+            throw new ProjectAnalysisReportException(ProjectAnalysisReportErrorCode.ANALYSIS_REPORT_STORAGE_INVALID);
         }
 
         ProjectAnalysisUserViewResponse response = s3ObjectService.getObjectAsJson(
@@ -62,7 +62,7 @@ public class ProjectAnalysisReportService {
                             projectId,
                             ReportType.USER_VIEW
                     )
-                    .orElseThrow(() -> new AnalysisException(AnalysisErrorCode.ANALYSIS_USER_VIEW_NOT_FOUND));
+                    .orElseThrow(() -> new ProjectAnalysisReportException(ProjectAnalysisReportErrorCode.ANALYSIS_USER_VIEW_NOT_FOUND));
         }
 
         return repository
@@ -71,7 +71,7 @@ public class ProjectAnalysisReportService {
                         ReportType.USER_VIEW,
                         version
                 )
-                .orElseThrow(() -> new AnalysisException(AnalysisErrorCode.ANALYSIS_USER_VIEW_NOT_FOUND));
+                .orElseThrow(() -> new ProjectAnalysisReportException(ProjectAnalysisReportErrorCode.ANALYSIS_USER_VIEW_NOT_FOUND));
     }
 
     private ProjectAnalysisUserViewResponse getCachedUserView(Long projectId, Integer version) {

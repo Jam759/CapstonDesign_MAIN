@@ -1,6 +1,5 @@
 package com.Hoseo.CapstoneDesign.gamification.facade;
 
-import com.Hoseo.CapstoneDesign.gamification.dto.response.BadgeResponse;
 import com.Hoseo.CapstoneDesign.gamification.dto.response.QuestResponse;
 import com.Hoseo.CapstoneDesign.gamification.dto.response.RankingResponse;
 import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestApprovalStatus;
@@ -9,23 +8,20 @@ import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Facade
-public class GamificationFacadeImpl implements GamificationFacade{
+public class GamificationFacadeImpl implements GamificationFacade {
 
     @Override
     @Transactional(readOnly = true)
     public List<RankingResponse> getRanking(Integer page, Integer size) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
         return paginate(mockRanking(), page, size);
     }
 
     @Override
     @Transactional(readOnly = true)
     public RankingResponse getMyRank(Users user) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
         return RankingResponse.builder()
                 .rank(7)
                 .userId(resolveUserId(user))
@@ -37,39 +33,18 @@ public class GamificationFacadeImpl implements GamificationFacade{
 
     @Override
     @Transactional(readOnly = true)
-    public List<QuestResponse> getMyQuest(Users user, AiQuestProgressStatus progressStatus, Integer page, Integer size) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
+    public List<QuestResponse> getMyQuest(
+            Users user,
+            AiQuestProgressStatus progressStatus,
+            Integer page,
+            Integer size
+    ) {
         List<QuestResponse> filtered = mockQuests().stream()
                 .filter(quest -> progressStatus == null || quest.getProgressStatus() == progressStatus)
                 .toList();
         return paginate(filtered, page, size);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<BadgeResponse> getMyBadges(Users user) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
-        return List.of(
-                BadgeResponse.builder()
-                        .badgeId(501L)
-                        .badgeName("첫 분석 완료")
-                        .badgeDescription("첫 프로젝트 분석을 완료했습니다.")
-                        .badgeImageUrl("https://example.com/badges/first-analysis.png")
-                        .badgeType("ANALYSIS")
-                        .acquiredAt(LocalDateTime.of(2026, 3, 10, 14, 0))
-                        .build(),
-                BadgeResponse.builder()
-                        .badgeId(502L)
-                        .badgeName("협업 기여자")
-                        .badgeDescription("프로젝트 초대 응답과 협업 활동을 완료했습니다.")
-                        .badgeImageUrl("https://example.com/badges/collaboration.png")
-                        .badgeType("COLLABORATION")
-                        .acquiredAt(LocalDateTime.of(2026, 3, 24, 9, 30))
-                        .build()
-        );
-    }
-
-    // TODO : 추후 구현 현재는 mock데이터 반환
     private List<RankingResponse> mockRanking() {
         return List.of(
                 RankingResponse.builder().rank(1).userId(1001L).serviceNickname("commit-master").level(9).totalExp(4820L).build(),
@@ -83,7 +58,6 @@ public class GamificationFacadeImpl implements GamificationFacade{
         );
     }
 
-    // TODO : 추후 구현 현재는 mock데이터 반환
     private List<QuestResponse> mockQuests() {
         return List.of(
                 QuestResponse.builder()
@@ -99,7 +73,7 @@ public class GamificationFacadeImpl implements GamificationFacade{
                         .progressStatus(AiQuestProgressStatus.COMPLETED)
                         .approvalStatus(AiQuestApprovalStatus.CLEARED)
                         .title("예외 처리 정리")
-                        .description("GlobalExceptionHandler에 누락된 예외 응답 포맷을 맞추세요.")
+                        .description("GlobalExceptionHandler와 누락된 예외 응답 포맷을 맞추세요.")
                         .hint("도메인별 커스텀 예외를 하나의 응답 구조로 통일하면 됩니다.")
                         .aiGenerationReason("최근 분석에서 예외 응답 스키마 불일치가 발견되었습니다.")
                         .rewardExp((short) 180)

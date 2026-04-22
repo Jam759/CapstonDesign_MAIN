@@ -1,6 +1,6 @@
-package com.Hoseo.CapstoneDesign.gamification.entity;
+package com.Hoseo.CapstoneDesign.analysis.entity;
 
-import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
+import com.Hoseo.CapstoneDesign.global.entity.CreatableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,24 +21,21 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "badges")
-public class Badge {
+@Table(name = "project_phase_scope")
+public class ProjectPhaseScope extends CreatableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "badge_id", nullable = false)
-    private Long badgeId;
+    @Column(name = "project_phase_scope_id", nullable = false)
+    private Long projectPhaseScopeId;
 
-    @Column(name = "name", nullable = false, length = 50)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_phase_id", nullable = false)
+    private ProjectPhase phase;
 
-    @Column(name = "description", length = 255)
-    private String description;
+    @Column(name = "scope_order", nullable = false)
+    private Integer scopeOrder;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "type", nullable = false)
-    private CommonGroupDetail type;
-
-    @Column(name = "image_url", nullable = false, length = 255)
-    private String imageUrl;
+    @Column(name = "scope", columnDefinition = "TEXT", nullable = false)
+    private String scope;
 }

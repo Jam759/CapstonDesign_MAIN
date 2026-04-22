@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.project.entity;
 
+import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.global.entity.CreatableEntity;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectMemberRole;
@@ -47,6 +48,10 @@ public class ProjectMember extends CreatableEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "project_role", nullable = false)
     private ProjectMemberRole projectRole;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_position_cmd_id", nullable = true)
+    private CommonGroupDetail projectPositionCmd;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "response", nullable = false)

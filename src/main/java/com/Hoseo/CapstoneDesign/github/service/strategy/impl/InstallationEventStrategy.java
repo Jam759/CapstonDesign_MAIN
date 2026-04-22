@@ -69,8 +69,8 @@ public class InstallationEventStrategy implements GithubWebhookStrategy {
             return;
         }
 
-        GithubAppInstallations installation =
-                gitHubAppInstallationService.createOrRefresh(installationId, accountId, accountLogin);
+        gitHubAppInstallationService.createOrRefresh(installationId, accountId, accountLogin);
+        GithubAppInstallations installation = gitHubAppInstallationService.getReferenceById(installationId);
         installationRepositories.forEach(repository -> repository.markGithubAppInstallation(installation));
         installationRepositoryService.bulkInsert(installationRepositories);
     }
