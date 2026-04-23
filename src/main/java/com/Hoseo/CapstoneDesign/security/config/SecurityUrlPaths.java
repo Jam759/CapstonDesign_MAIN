@@ -19,6 +19,7 @@ public final class SecurityUrlPaths {
             ACTUATOR_HEALTH,
             ACTUATOR_PROMETHEUS,
             NOTIFICATION_SSE_SUBSCRIBE,
+            "/",
             "/public/**",
             "/tmp/oauth2/test",
             "/tmp/oauth2/config",
