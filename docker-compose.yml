@@ -68,7 +68,7 @@ services:
       - --web.enable-lifecycle
     volumes:
       # .env(prod: prometheus-prod.yml) / 기본값: local용 prometheus.yml
-      - ${PROMETHEUS_CONFIG:-./observability/prometheus/prometheus.yml}:/etc/prometheus/prometheus.yml:ro
+      - ${PROMETHEUS_SERVER_CONFIG:-./observability/prometheus/prometheus.yml}:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     networks:
       - app-net

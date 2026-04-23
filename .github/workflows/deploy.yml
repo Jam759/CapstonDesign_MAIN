@@ -96,8 +96,8 @@ jobs:
             APP_HOST_PORT=${{ secrets.APP_HOST_PORT }}
             DB_HOST_PORT=${{ secrets.DB_HOST_PORT }}
 
-            # [prometheus] prod 설정 파일 경로
-            PROMETHEUS_CONFIG=./observability/prometheus/prometheus-prod.yml
+            # [prometheus] prod 설정 파일 경로 (PROMETHEUS_CONFIG는 Prometheus Java 클라이언트가 선점하므로 다른 이름 사용)
+            PROMETHEUS_SERVER_CONFIG=./observability/prometheus/prometheus-prod.yml
 
             # [app] auth.jwt.cookie-secure / OAuth2 redirect
             COOKIE_SECURE=true
