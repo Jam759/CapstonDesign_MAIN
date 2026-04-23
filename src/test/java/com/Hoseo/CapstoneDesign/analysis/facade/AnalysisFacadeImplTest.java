@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisHighlightsR
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisOverviewResponse;
 import com.Hoseo.CapstoneDesign.analysis.dto.application.ProjectAnalysisUserViewResponse;
 import com.Hoseo.CapstoneDesign.analysis.service.ProjectAnalysisReportService;
+import com.Hoseo.CapstoneDesign.analysis.service.ProjectRoadMapService;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsErrorCode;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsException;
@@ -37,11 +38,19 @@ class AnalysisFacadeImplTest {
     @Mock
     private ProjectAnalysisReportService projectAnalysisReportService;
 
+    @Mock
+    private ProjectRoadMapService projectRoadMapService;
+
     private AnalysisFacadeImpl facade;
 
     @BeforeEach
     void setUp() {
-        facade = new AnalysisFacadeImpl(projectService, projectMemberService, projectAnalysisReportService);
+        facade = new AnalysisFacadeImpl(
+                projectService,
+                projectMemberService,
+                projectAnalysisReportService,
+                projectRoadMapService
+        );
     }
 
     @Test

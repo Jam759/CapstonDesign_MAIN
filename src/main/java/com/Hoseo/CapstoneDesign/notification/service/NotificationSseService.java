@@ -23,10 +23,7 @@ public class NotificationSseService {
         emitterRepository.save(userId, emitter);
 
         emitter.onCompletion(() -> emitterRepository.delete(userId));
-        emitter.onTimeout(() -> {
-            emitter.complete();
-            emitterRepository.delete(userId);
-        });
+        emitter.onTimeout(emitter::complete);
         emitter.onError((e) -> emitterRepository.delete(userId));
 
         try {
@@ -42,7 +39,7 @@ public class NotificationSseService {
         return emitter;
     }
 
-    public void sendNotification(Long userId, SseBaseResponse<?> response) {
+    public void sendNotification(Long userId, SseBaseResponse response) {
         SseEmitter emitter = emitterRepository.get(userId);
         if (emitter == null) {
             return;

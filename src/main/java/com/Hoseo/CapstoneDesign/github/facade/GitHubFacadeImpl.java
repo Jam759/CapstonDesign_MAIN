@@ -74,13 +74,15 @@ public class GitHubFacadeImpl implements GitHubFacade {
         Users user = userService.getByIdentityId(userIdentityId);
         GithubInstallationDetailResponse detail =
                 githubAppClientService.getInstallationDetail(installationId);
-        GithubAppInstallations githubAppInstallations = gitHubAppInstallationService.createOrRefresh(
+
+        gitHubAppInstallationService.createOrRefresh(
                 installationId,
                 detail.account().id(),
                 detail.account().login()
         );
 
-        UserGitHubInstallations userGitHubInstallation = GitHubEntityFactory.toUserGitHubInstallations(user, githubAppInstallations);
+        GithubAppInstallations installation = gitHubAppInstallationService.getReferenceById(installationId);
+        UserGitHubInstallations userGitHubInstallation = GitHubEntityFactory.toUserGitHubInstallations(user, installation);
         gitHubAppInstallationService.saveUserGitHubInstallations(userGitHubInstallation);
 
         return stateUtil.buildRedirectUri(state);

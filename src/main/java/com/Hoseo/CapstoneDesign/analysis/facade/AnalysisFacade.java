@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisAdviceRespo
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisHighlightsResponse;
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisOverviewResponse;
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisScorecardResponse;
+import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectRoadMapResponse;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 
 public interface AnalysisFacade {
@@ -14,4 +15,6 @@ public interface AnalysisFacade {
     ProjectAnalysisAdviceResponse getAdvice(Users user, Long projectId, Integer version);
 
     ProjectAnalysisScorecardResponse getScorecard(Users user, Long projectId, Integer version);
+
+    ProjectRoadMapResponse getRoadMap(Users user, Long projectId);
 }

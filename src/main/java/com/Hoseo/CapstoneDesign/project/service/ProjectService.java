@@ -23,8 +23,16 @@ public class ProjectService {
                 .orElseThrow( () -> new ProjectsException(ProjectsErrorCode.PROJECT_NOT_FOUND));
     }
 
+    public Projects getReferenceById(Long projectId) {
+        return repository.getReferenceById(projectId);
+    }
+
     public Projects getByInstallationRepository(InstallationRepository installationRepository) {
         return repository.findByInstallationRepository(installationRepository)
                 .orElseThrow( () -> new ProjectsException(ProjectsErrorCode.PROJECT_NOT_FOUND));
+    }
+
+    public void delete(Projects project) {
+        repository.delete(project);
     }
 }

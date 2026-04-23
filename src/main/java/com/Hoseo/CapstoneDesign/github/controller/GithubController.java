@@ -65,7 +65,7 @@ public class GithubController {
                     description = "설치 완료 후 프런트엔드에서 이동할 상대 경로",
                     example = "/projects/101/setting"
             )
-            @RequestParam(required = false, defaultValue = "/tmp/oauth2/test") String returnTo
+            @RequestParam(required = false, defaultValue = "/projects") String returnTo
     ) {
         InstallationsAvailableResponse response =
                 facade.getAvailable(userDetail.getUser(), returnTo);

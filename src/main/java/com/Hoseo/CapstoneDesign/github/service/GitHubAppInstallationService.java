@@ -56,17 +56,12 @@ public class GitHubAppInstallationService {
         repository.delete(installation);
     }
 
-    public GithubAppInstallations createOrRefresh(
+    public void createOrRefresh(
             Long installationId,
             Long accountId,
             String accountLogin
     ) {
         repository.upsertInstallation(installationId, accountId, accountLogin);
-
-        GithubAppInstallations loaded = getById(installationId);
-
-        validateAccount(loaded, accountId);
-        return loaded;
     }
 
     private void validateAccount(GithubAppInstallations installation, Long accountId) {

@@ -3,8 +3,8 @@ package com.Hoseo.CapstoneDesign.analysis.service;
 import com.Hoseo.CapstoneDesign.analysis.dto.application.ProjectAnalysisUserViewResponse;
 import com.Hoseo.CapstoneDesign.analysis.entity.ProjectAnalysisReport;
 import com.Hoseo.CapstoneDesign.analysis.entity.enums.ReportType;
-import com.Hoseo.CapstoneDesign.analysis.exception.AnalysisErrorCode;
-import com.Hoseo.CapstoneDesign.analysis.exception.AnalysisException;
+import com.Hoseo.CapstoneDesign.analysis.exception.ProjectAnalysisReportErrorCode;
+import com.Hoseo.CapstoneDesign.analysis.exception.ProjectAnalysisReportException;
 import com.Hoseo.CapstoneDesign.analysis.repository.ProjectAnalysisReportRepository;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.Hoseo.CapstoneDesign.global.aws.properties.S3Properties;
@@ -142,9 +142,9 @@ class ProjectAnalysisReportServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.getRecentUserView(1L))
-                .isInstanceOf(AnalysisException.class)
+                .isInstanceOf(ProjectAnalysisReportException.class)
                 .extracting("errorCode")
-                .isEqualTo(AnalysisErrorCode.ANALYSIS_USER_VIEW_NOT_FOUND);
+                .isEqualTo(ProjectAnalysisReportErrorCode.ANALYSIS_USER_VIEW_NOT_FOUND);
     }
 
     @Test
@@ -154,9 +154,9 @@ class ProjectAnalysisReportServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.getUserView(1L, 2))
-                .isInstanceOf(AnalysisException.class)
+                .isInstanceOf(ProjectAnalysisReportException.class)
                 .extracting("errorCode")
-                .isEqualTo(AnalysisErrorCode.ANALYSIS_USER_VIEW_NOT_FOUND);
+                .isEqualTo(ProjectAnalysisReportErrorCode.ANALYSIS_USER_VIEW_NOT_FOUND);
     }
 
     @Test
@@ -168,9 +168,9 @@ class ProjectAnalysisReportServiceTest {
                 .thenReturn(Optional.of(report));
 
         assertThatThrownBy(() -> service.getRecentUserView(1L))
-                .isInstanceOf(AnalysisException.class)
+                .isInstanceOf(ProjectAnalysisReportException.class)
                 .extracting("errorCode")
-                .isEqualTo(AnalysisErrorCode.ANALYSIS_REPORT_STORAGE_INVALID);
+                .isEqualTo(ProjectAnalysisReportErrorCode.ANALYSIS_REPORT_STORAGE_INVALID);
     }
 
     private ProjectAnalysisReport report(String bucketName, String storedUrl) {

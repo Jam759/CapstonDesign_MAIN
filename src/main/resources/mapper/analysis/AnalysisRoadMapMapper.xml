@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.Hoseo.CapstoneDesign.analysis.mapper.AnalysisRoadMapMapper">
+
+    <select id="findRoadMapRows"
+            resultType="com.Hoseo.CapstoneDesign.analysis.dto.query.ProjectRoadMapQueryRow">
+
+        SELECT
+            p.project_id                                   AS projectId,
+            accepted_member.project_member_id              AS projectMemberId,
+            pp.project_phase_id                             AS phaseId,
+            pp.phase_order                                  AS phaseOrder,
+            pp.phase_name                                   AS phaseName,
+            pp.phase_objective                              AS phaseObjective,
+            pp.phase_outcome                                AS phaseOutcome,
+            pp.exit_criteria                                AS exitCriteria,
+            pp.status                                       AS phaseStatus,
+            pps.project_phase_scope_id                      AS phaseScopeId,
+            pps.scope_order                                 AS scopeOrder,
+            pps.scope                                       AS scope,
+            pm.project_milestone_id                         AS milestoneId,
+            pm.milestone_name                               AS milestoneName,
+            pm.milestone_intent                             AS milestoneIntent,
+            pm.trigger_condition                            AS triggerCondition,
+            pm.expected_state                               AS expectedState,
+            pm.completion_rule                              AS completionRule,
+            pm.status                                       AS milestoneStatus,
+            pmoe.project_milestone_observable_evidence_id   AS observableEvidenceId,
+            pmoe.evidence_order                             AS evidenceOrder,
+            pmoe.evidence                                   AS evidence
+        FROM projects p
+                 LEFT JOIN (
+                     SELECT
+                         project_id,
+                         MIN(project_member_id) AS project_member_id
+                     FROM project_member
+                     WHERE user_id = #{userId}
+                       AND response = 'ACCEPTED'
+                     GROUP BY project_id
+                 ) accepted_member
+                           ON accepted_member.project_id = p.project_id
+                 LEFT JOIN project_phase pp
+                           ON pp.project_id = p.project_id
+                 LEFT JOIN project_phase_scope pps
+                           ON pps.project_phase_id = pp.project_phase_id
+                 LEFT JOIN project_milestone pm
+                           ON pm.phase_id = pp.project_phase_id
+                          AND pm.project_id = p.project_id
+                 LEFT JOIN project_milestone_observable_evidence pmoe
+                           ON pmoe.project_milestone_id = pm.project_milestone_id
+        WHERE p.project_id = #{projectId}
+        ORDER BY pp.phase_order ASC,
+                 pp.project_phase_id ASC,
+                 pps.scope_order ASC,
+                 pps.project_phase_scope_id ASC,
+                 pm.project_milestone_id ASC,
+                 pmoe.evidence_order ASC,
+                 pmoe.project_milestone_observable_evidence_id ASC
+
+    </select>
+
+</mapper>

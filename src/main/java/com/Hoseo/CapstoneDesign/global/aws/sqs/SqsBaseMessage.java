@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public final class SqsBaseMessage {
     private String traceId;
+    private Long userId;
     private String jobId;
-    private String type;// commonTable 에서 불러올것
-    private Object data;
+    private String type;
+    private Object data; //필요시 사용
 }

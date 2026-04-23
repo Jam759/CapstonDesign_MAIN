@@ -1,9 +1,8 @@
 package com.Hoseo.CapstoneDesign.github.service.strategy.impl;
 
 import com.Hoseo.CapstoneDesign.analysis.entity.AnalysisJob;
-import com.Hoseo.CapstoneDesign.analysis.entity.enums.AnalysisJobStatus;
-import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisDtoFactory;
 import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisJobEntityFactory;
+import com.Hoseo.CapstoneDesign.analysis.enums.AnalysisEventType;
 import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.github.dto.application.PullRequestWebhookContext;
 import com.Hoseo.CapstoneDesign.github.dto.query.GitHubWebhookValidationQueryResult;
@@ -15,9 +14,8 @@ import com.Hoseo.CapstoneDesign.github.service.GithubAppClientService;
 import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
 import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
 import com.Hoseo.CapstoneDesign.github.util.GitHubWebhookPayloadUtil;
-import com.Hoseo.CapstoneDesign.global.aws.properties.SqsProperties;
-import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsBaseMessage;
-import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsMessageSender;
+import com.Hoseo.CapstoneDesign.project.service.ProjectService;
+import com.Hoseo.CapstoneDesign.user.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
@@ -31,9 +29,9 @@ public class PullRequestStrategy implements GithubWebhookStrategy {
     private final GithubAppClientService githubAppClientService;
     private final GitHubAppInstallationService gitHubAppInstallationService;
     private final InstallationRepositoryService installationRepositoryService;
-    private final SqsMessageSender sqsMessageSender;
-    private final SqsProperties sqsProperties;
     private final AnalysisJobService analysisJobService;
+    private final ProjectService projectService;
+    private final UserService userService;
 
     @Override
     public boolean supports(String eventType) {
@@ -83,26 +81,24 @@ public class PullRequestStrategy implements GithubWebhookStrategy {
         }
 
         AnalysisJob job = AnalysisJobEntityFactory.toAnalysisJob(
+                projectService.getReferenceById(validateResult.projectId()),
+                userService.getReferenceById(validateResult.userId()),
                 gitHubAppInstallationService.getReferenceById(validateResult.matchedInstallationId()),
                 installationRepositoryService.getReferenceById(validateResult.installationRepositoryId()),
                 afterCommit,
                 beforeCommit,
                 branchName,
-                context.deliveryId()
+                context.deliveryId(),
+                AnalysisEventType.NORMAL_ANALYSIS_REQUEST,
+                Boolean.TRUE.equals(validateResult.isPrivate()),
+                true
         );
 
-        AnalysisJob savedJob;
         try {
-            savedJob = analysisJobService.create(job);
+            analysisJobService.createPendingJob(job);
         } catch (DuplicateKeyException e) {
             return;
         }
-
-        SqsBaseMessage message =
-                AnalysisDtoFactory.toSqsAnalysisQueueMessage(savedJob, validateResult);
-        sqsMessageSender.send(sqsProperties.analysisQueue(), message);
-        savedJob.updateJobStatus(AnalysisJobStatus.ANALYSIS_JOB_QUEUED);
-        analysisJobService.create(savedJob);
     }
 
     private PullRequestWebhookContext parse(JsonNode payload, String deliveryId) {

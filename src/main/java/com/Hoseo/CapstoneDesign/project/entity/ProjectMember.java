@@ -1,6 +1,8 @@
 package com.Hoseo.CapstoneDesign.project.entity;
 
+import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.global.entity.CreatableEntity;
+import com.Hoseo.CapstoneDesign.global.util.TimeUtil;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectMemberRole;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
@@ -48,10 +50,23 @@ public class ProjectMember extends CreatableEntity {
     @Column(name = "project_role", nullable = false)
     private ProjectMemberRole projectRole;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_position_cmd_id", nullable = true)
+    private CommonGroupDetail projectPositionCmd;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "response", nullable = false)
     private ProjectInviteStatus response;
 
     @Column(name = "response_at")
     private LocalDateTime responseAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invited_by")
+    private Users invitedBy;
+
+    public void respond(ProjectInviteStatus response) {
+        this.response = response;
+        this.responseAt = TimeUtil.getNowSeoulLocalDateTime();
+    }
 }

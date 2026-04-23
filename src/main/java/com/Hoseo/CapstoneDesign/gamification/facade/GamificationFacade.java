@@ -1,6 +1,5 @@
 package com.Hoseo.CapstoneDesign.gamification.facade;
 
-import com.Hoseo.CapstoneDesign.gamification.dto.response.BadgeResponse;
 import com.Hoseo.CapstoneDesign.gamification.dto.response.QuestResponse;
 import com.Hoseo.CapstoneDesign.gamification.dto.response.RankingResponse;
 import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestProgressStatus;
@@ -13,7 +12,16 @@ public interface GamificationFacade {
 
     RankingResponse getMyRank(Users user);
 
-    List<QuestResponse> getMyQuest(Users user, AiQuestProgressStatus progressStatus, Integer page, Integer size);
+    List<QuestResponse> getMyQuest(
+            Users user,
+            Long projectId,
+            AiQuestProgressStatus progressStatus,
+            String status,
+            Integer page,
+            Integer size
+    );
 
-    List<BadgeResponse> getMyBadges(Users user);
+    QuestResponse acceptQuest(Users user, Long questId);
+
+    QuestResponse declineQuest(Users user, Long questId);
 }

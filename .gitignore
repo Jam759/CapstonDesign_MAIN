@@ -36,6 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
+### AI setting ###
+.claude
 
 ### DateGrip ###
 queries/
@@ -43,3 +45,5 @@ queries/
 ### Local logs ###
 .logs/*
 !.logs/.gitkeep
+.worker-logs/*
+!.worker-logs/.gitkeep

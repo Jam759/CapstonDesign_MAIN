@@ -7,22 +7,36 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "프로젝트 생성 결과")
+@Schema(description = "Project create response")
 public class ProjectCreateResponse {
-    @Schema(description = "생성된 프로젝트 ID", example = "101")
+    @Schema(description = "Created project id", example = "101")
     private Long projectId;
 
-    @Schema(description = "프로젝트 제목", example = "캡스톤 디자인")
+    @Schema(description = "Project title", example = "DevXP")
     private String title;
 
-    @Schema(description = "프로젝트 설명", example = "GitHub 분석 기반 협업 보조 서비스 메인 프로젝트")
+    @Schema(description = "Project description", example = "GitHub analysis based developer growth service")
     private String description;
 
-    @Schema(description = "프로젝트 생성 시각", example = "2026-03-30T10:15:00")
+    @Schema(description = "Connected repository id", example = "3001")
+    private Long installationRepositoryId;
+
+    @Schema(description = "Connected repository full name", example = "Jam759/CapstoneDesign")
+    private String repositoryFullName;
+
+    @Schema(description = "Tracked branch name", example = "main")
+    private String trackedBranch;
+
+    @Schema(description = "Invited member user ids", example = "[2, 3]")
+    private List<Long> invitedMemberIds;
+
+    @Schema(description = "Project created datetime", example = "2026-03-30T10:15:00")
     private LocalDateTime createdAt;
+
 }

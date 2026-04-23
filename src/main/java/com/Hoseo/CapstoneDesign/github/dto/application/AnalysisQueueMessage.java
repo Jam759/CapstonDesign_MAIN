@@ -1,6 +1,7 @@
 package com.Hoseo.CapstoneDesign.github.dto.application;
 
 public record AnalysisQueueMessage(
+        Long jobId,
         long pushUserInstallationId,
         long repositoryId,
         String repositoryFullName,
@@ -9,6 +10,6 @@ public record AnalysisQueueMessage(
         String branchName,
         boolean isPrivate,
         long projectId,
-        long pushUserId
+        boolean isMerge
 ) {
 }

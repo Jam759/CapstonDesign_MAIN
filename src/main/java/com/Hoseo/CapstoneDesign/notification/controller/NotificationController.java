@@ -18,8 +18,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.Hoseo.CapstoneDesign.notification.dto.request.MarkNotificationsReadRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,7 +32,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/notification")
-@Tag(name = "Notification", description = "알림 조회 및 SSE 구독 API")
+@Tag(name = "Notification", description = "Notification query and SSE subscription APIs")
 @SecurityRequirement(name = "bearerAuth")
 public class NotificationController {
 
@@ -39,13 +41,13 @@ public class NotificationController {
 
     @GetMapping(value = "/sse/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(
-            summary = "알림 SSE 구독",
-            description = "60초 타임아웃의 SSE 연결을 생성합니다. 최초 연결 시 connect 이벤트가 전송됩니다."
+            summary = "Subscribe notification SSE",
+            description = "Creates an SSE connection for the current user and sends an initial connect event."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "SSE 연결 생성 성공",
+                    description = "SSE connection created",
                     content = @Content(
                             mediaType = MediaType.TEXT_EVENT_STREAM_VALUE,
                             schema = @Schema(
@@ -56,7 +58,7 @@ public class NotificationController {
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
@@ -67,77 +69,76 @@ public class NotificationController {
         return notificationSseService.subscribe(userDetail.getUser());
     }
 
-    @GetMapping()
+    @GetMapping
     @Operation(
-            summary = "알림 목록 조회",
-            description = "현재 구현은 실제 알림 저장소 대신 mock 알림 목록을 페이지 단위로 반환합니다."
+            summary = "Get notifications",
+            description = "Returns the current user's persisted notifications in newest-first order."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "알림 목록 조회 성공",
+                    description = "Notifications returned",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = NotificationResponse.class)))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
     public ResponseEntity<List<NotificationResponse>> getNotificationList(
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail,
-            @Parameter(description = "페이지 번호(1부터 시작)", example = "1")
+            @Parameter(description = "Page number starting from 1", example = "1")
             @RequestParam(defaultValue = "1") Integer page,
-            @Parameter(description = "페이지 크기", example = "20")
+            @Parameter(description = "Page size", example = "20")
             @RequestParam(defaultValue = "20") Integer size
     ) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
-//        List<NotificationResponse> res
-//                = facade.getNotification(userDetail.getUser(), page, size);
-        List<NotificationResponse> res = paginate(mockNotifications(), page, size);
+        List<NotificationResponse> res = facade.getNotification(userDetail.getUser().getUserId(), page, size);
         return ResponseEntity.ok(res);
     }
 
-    @PatchMapping()
+    @PatchMapping
     @Operation(
-            summary = "알림 읽음 처리",
-            description = "현재 구현은 실제 읽음 저장 없이 200 응답만 반환합니다."
+            summary = "Mark notification as read",
+            description = "Marks one notification owned by the current user as read."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "읽음 처리 요청 성공"),
+            @ApiResponse(responseCode = "200", description = "Notification marked as read"),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Notification not found",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
     public ResponseEntity<Void> markAsRead(
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail,
-            @Parameter(description = "읽음 처리할 알림 ID", example = "9001")
-            @RequestParam("notificationId") Long notificationId
+            @RequestBody MarkNotificationsReadRequest body
     ) {
-
-        // TODO : 추후 구현 현재는 mock데이터 반환
-//        facade.readNotification(userDetail.getUser(),notificationId);
+        facade.readNotifications(userDetail.getUser().getUserId(), body.getIds());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/unread")
     @Operation(
-            summary = "읽지 않은 알림 목록 조회",
-            description = "현재 구현은 실제 미읽음 저장소 대신 mock 미읽음 알림 목록을 반환합니다."
+            summary = "Get unread notifications",
+            description = "Returns unread notifications owned by the current user."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "미읽음 알림 목록 조회 성공",
+                    description = "Unread notifications returned",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = NotificationResponse.class)))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
@@ -145,58 +146,7 @@ public class NotificationController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
-//        List<NotificationResponse> res = facade.getUnReadNotification(userDetail.getUser());
-        List<NotificationResponse> res = List.of(
-                NotificationResponse.builder()
-                        .notificationId(9001L)
-                        .title("분석 완료")
-                        .message("캡스톤 디자인 프로젝트의 최신 분석이 완료되었습니다.")
-                        .linkType("PROJECT")
-                        .linkId("102")
-                        .build(),
-                NotificationResponse.builder()
-                        .notificationId(9002L)
-                        .title("퀘스트 갱신")
-                        .message("새로운 AI 퀘스트 2개가 생성되었습니다.")
-                        .linkType("QUEST")
-                        .linkId("3201")
-                        .build()
-        );
+        List<NotificationResponse> res = facade.getUnReadNotification(userDetail.getUser().getUserId());
         return ResponseEntity.ok(res);
-    }
-
-    private List<NotificationResponse> mockNotifications() {
-        return List.of(
-                NotificationResponse.builder()
-                        .notificationId(9001L)
-                        .title("분석 완료")
-                        .message("캡스톤 디자인 프로젝트의 최신 분석이 완료되었습니다.")
-                        .linkType("PROJECT")
-                        .linkId("102")
-                        .build(),
-                NotificationResponse.builder()
-                        .notificationId(9002L)
-                        .title("퀘스트 갱신")
-                        .message("새로운 AI 퀘스트 2개가 생성되었습니다.")
-                        .linkType("QUEST")
-                        .linkId("3201")
-                        .build(),
-                NotificationResponse.builder()
-                        .notificationId(9003L)
-                        .title("초대 도착")
-                        .message("알고리즘 스터디 프로젝트에 초대되었습니다.")
-                        .linkType("INVITE")
-                        .linkId("201")
-                        .build()
-        );
-    }
-
-    private <T> List<T> paginate(List<T> values, Integer page, Integer size) {
-        int safePage = page == null || page < 1 ? 1 : page;
-        int safeSize = size == null || size < 1 ? values.size() : size;
-        int fromIndex = Math.min((safePage - 1) * safeSize, values.size());
-        int toIndex = Math.min(fromIndex + safeSize, values.size());
-        return values.subList(fromIndex, toIndex);
     }
 }

@@ -1,10 +1,8 @@
 package com.Hoseo.CapstoneDesign.analysis.controller;
 
-import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisAdviceResponse;
-import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisHighlightsResponse;
-import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisOverviewResponse;
-import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisScorecardResponse;
+import com.Hoseo.CapstoneDesign.analysis.dto.response.*;
 import com.Hoseo.CapstoneDesign.analysis.facade.AnalysisFacade;
+import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionResponse;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AnalysisController {
 
     private final AnalysisFacade facade;
+    private final AnalysisJobService analysisJobService;
 
     @GetMapping("/{projectId}/overview")
     @Operation(
@@ -153,7 +153,7 @@ public class AnalysisController {
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
-    public ProjectAnalysisScorecardResponse getScorecard(
+    public ResponseEntity<ProjectAnalysisScorecardResponse> getScorecard(
             @Parameter(description = "프로젝트 ID", example = "101")
             @PathVariable Long projectId,
             @Parameter(hidden = true)
@@ -161,6 +161,61 @@ public class AnalysisController {
             @Parameter(description = "조회할 분석 리포트 버전. 생략하면 최신 버전을 반환합니다.", example = "2")
             @RequestParam(required = false) Integer version
     ) {
-        return facade.getScorecard(userDetail.getUser(), projectId, version);
+        ProjectAnalysisScorecardResponse response = facade.getScorecard(userDetail.getUser(), projectId, version);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{projectId}/road-map")
+    @Operation(
+            summary = "프로젝트 로드맵 조회",
+            description = "프로젝트에 고정 저장된 페이즈와 마일스톤 로드맵을 조회합니다. 프로젝트 멤버만 조회할 수 있습니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "프로젝트 로드맵 조회 성공",
+                    content = @Content(schema = @Schema(implementation = ProjectRoadMapResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "프로젝트 멤버가 아님",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "프로젝트를 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
+            )
+    })
+    public ResponseEntity<ProjectRoadMapResponse> getProjectRoadMap(
+            @Parameter(description = "프로젝트 ID", example = "101")
+            @PathVariable Long projectId,
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        ProjectRoadMapResponse response = facade.getRoadMap(userDetail.getUser(), projectId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{projectId}/ready")
+    @Operation(
+            summary = "프로젝트 분석 완료 여부 확인",
+            description = "해당 프로젝트에 대해 NOTIFICATION_COMPLETED 상태의 분석 Job 이 1건이라도 존재하면 ready=true. 대시보드/로드맵/리포트 진입 전에 호출해 분석 대기 팝업 여부를 결정합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = AnalysisReadyResponse.class))
+            )
+    })
+    public ResponseEntity<AnalysisReadyResponse> isAnalysisReady(
+            @Parameter(description = "프로젝트 ID", example = "101")
+            @PathVariable Long projectId,
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        boolean ready = analysisJobService.hasCompletedAnalysis(projectId);
+        return ResponseEntity.ok(new AnalysisReadyResponse(ready));
     }
 }

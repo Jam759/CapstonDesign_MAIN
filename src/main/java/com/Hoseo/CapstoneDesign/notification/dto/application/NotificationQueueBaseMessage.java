@@ -14,7 +14,8 @@ import lombok.NoArgsConstructor;
 public class NotificationQueueBaseMessage {
 
     private String traceId;
-    private String jobId;
+    private Long jobId;
+    private Long userId;
     private AnalysisEventType eventType;
     private AnalysisStatus status;
     private Object data;

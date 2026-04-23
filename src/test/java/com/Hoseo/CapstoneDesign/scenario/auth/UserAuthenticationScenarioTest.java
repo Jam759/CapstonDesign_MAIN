@@ -28,8 +28,7 @@ class UserAuthenticationScenarioTest {
     @DisplayName("인증 없이 사용자 수정 API 호출 시 401 + GlobalExceptionResponse를 반환한다")
     void updateUserWithoutAuthenticationFailsWithGlobalExceptionResponse() throws Exception {
         mockMvc.perform(patch("/api/v1/users/me")
-                        .param("userServiceNickname", "unauthorized")
-                        .param("equippedBadges", "1"))
+                        .param("userServiceNickname", "unauthorized"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.errorCode").value(401))
                 .andExpect(jsonPath("$.errorMessage").exists())

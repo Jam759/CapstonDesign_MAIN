@@ -25,6 +25,11 @@ spring:
     show-sql: false
     defer-datasource-initialization: true
 
+  sql:
+    init:
+      mode: always
+      continue-on-error: false   # 진단용: seed 실패 원인 노출. 확인 후 true 로 되돌리세요.
+
   security:
     oauth2:
       client:
@@ -101,7 +106,7 @@ auth:
     cookie-http-only: true
     cookie-secure: false    # https면 true
     cookie-samesite: "Lax"
-    front-redirect-url: "http://localhost:8080/tmp/oauth2/test"  #prod -> os var
+    front-redirect-url: "${FRONTEND_REDIRECT_URL:http://localhost:5173/install-app}"
 
 logging:
   level:

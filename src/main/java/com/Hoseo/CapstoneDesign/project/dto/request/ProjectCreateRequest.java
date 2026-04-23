@@ -1,14 +1,48 @@
 package com.Hoseo.CapstoneDesign.project.dto.request;
 
-import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectType;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "프로젝트 생성 요청")
+import java.time.LocalDate;
+import java.util.List;
+
+@Schema(description = "Project create request")
 public record ProjectCreateRequest(
-        @Schema(description = "프로젝트 유형", example = "PROJECT")
-        ProjectType projectType,
-        @Schema(description = "프로젝트 제목", example = "캡스톤 디자인")
-        String projectTitle,
-        @Schema(description = "프로젝트 설명", example = "GitHub 분석 기반 협업 보조 서비스 메인 프로젝트")
-        String description
-) {}
+
+        @JsonAlias("projectTitle")
+        @Schema(description = "Project name shown in the frontend", example = "DevXP")
+        String name,
+
+        @Schema(description = "Project description", example = "GitHub analysis based developer growth service")
+        String description,
+
+        @Schema(description = "Project goal", example = "Ship MVP by the end of semester")
+        String goal,
+
+        @Schema(description = "Project start date from frontend date input", example = "2026-04-01")
+        LocalDate startDate,
+
+        @Schema(description = "Project end date from frontend date input", example = "2026-06-30")
+        LocalDate endDate,
+
+        @Schema(description = "Owner role selected in frontend", example = "backend")
+        String role,
+
+        @JsonAlias("useTechStackCmdList")
+        @Schema(description = "Tech stack common detail ids", example = "[\"react\", \"spring\"]")
+        List<String> stacks,
+
+        @JsonAlias("inviteMemberIdList")
+        @Schema(description = "Friend user ids to invite as project members", example = "[2, 3]")
+        List<Long> teamMemberIds,
+
+        @Schema(
+                description = "Repository id from GET /api/v1/github/repositories",
+                example = "3001"
+        )
+        Long installationRepositoryId,
+
+        @Schema(description = "Tracked branch name", example = "main")
+        String trackedBranch
+) {
+}
