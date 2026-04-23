@@ -3,6 +3,7 @@ package com.Hoseo.CapstoneDesign.user.controller;
 import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionResponse;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import com.Hoseo.CapstoneDesign.user.dto.request.UserProfileUpdateRequest;
+import com.Hoseo.CapstoneDesign.user.dto.response.MyInfoResponse;
 import com.Hoseo.CapstoneDesign.user.dto.response.UpdateUserInfoResponse;
 import com.Hoseo.CapstoneDesign.user.facade.UserFacade;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,28 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserFacade facade;
+
+    @GetMapping("/me")
+    @Operation(summary = "내 정보 조회", description = "프론트 user store 초기화를 위한 현재 사용자 요약 정보를 반환합니다.")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = MyInfoResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 실패",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
+            )
+    })
+    public ResponseEntity<MyInfoResponse> getMyInfo(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        return ResponseEntity.ok(facade.getMyInfo(userDetail.getUser()));
+    }
 
     @PatchMapping("/me")
     @Operation(summary = "내 정보 수정", description = "서비스 닉네임과 대표 배지를 수정합니다.")

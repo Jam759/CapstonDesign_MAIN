@@ -60,4 +60,14 @@ public class AnalysisJobService {
                 new AnalysisJobDispatchRequestedEvent(jobId, MDC.get(TRACE_ID))
         );
     }
+
+    /**
+     * 프로젝트에 대해 NOTIFICATION_COMPLETED 상태의 분석 Job 이 1건이라도 존재하는지.
+     * 첫 분석 완료 여부를 확인하는 UI 가드용.
+     */
+    public boolean hasCompletedAnalysis(Long projectId) {
+        return repository.existsByProject_ProjectIdAndJobStatus(
+                projectId, AnalysisJobStatus.NOTIFICATION_COMPLETED
+        );
+    }
 }

@@ -31,4 +31,8 @@ public class ProjectService {
         return repository.findByInstallationRepository(installationRepository)
                 .orElseThrow( () -> new ProjectsException(ProjectsErrorCode.PROJECT_NOT_FOUND));
     }
+
+    public void delete(Projects project) {
+        repository.delete(project);
+    }
 }

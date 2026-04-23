@@ -6,6 +6,8 @@ import com.Hoseo.CapstoneDesign.notification.dto.application.FailMessage;
 import com.Hoseo.CapstoneDesign.notification.dto.application.NotificationQueueBaseMessage;
 import com.Hoseo.CapstoneDesign.notification.dto.application.SseBaseResponse;
 import com.Hoseo.CapstoneDesign.notification.dto.application.SuccessMessage;
+import com.Hoseo.CapstoneDesign.notification.dto.response.NotificationResponse;
+import com.Hoseo.CapstoneDesign.notification.entity.SseNotification;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -23,6 +25,17 @@ public class NotificationDtoFactory {
                 .eventType(eventType)
                 .eventAt(LocalDateTime.now())
                 .data(data)
+                .build();
+    }
+
+    public static NotificationResponse toNotificationResponse(SseNotification notification) {
+        return NotificationResponse.builder()
+                .id(notification.getSseNotificationId())
+                .type(notification.getLinkType().getCommonGroupDetailId())
+                .message(notification.getMessage())
+                .read(notification.getIsRead())
+                .createdAt(notification.getCreatedAt())
+                .linkId(notification.getLinkId() == null ? null : notification.getLinkId().toString())
                 .build();
     }
 

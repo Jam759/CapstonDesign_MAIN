@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.analysis.controller;
 
 import com.Hoseo.CapstoneDesign.analysis.dto.response.*;
 import com.Hoseo.CapstoneDesign.analysis.facade.AnalysisFacade;
+import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionResponse;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AnalysisController {
 
     private final AnalysisFacade facade;
+    private final AnalysisJobService analysisJobService;
 
     @GetMapping("/{projectId}/overview")
     @Operation(
@@ -193,5 +195,27 @@ public class AnalysisController {
     ) {
         ProjectRoadMapResponse response = facade.getRoadMap(userDetail.getUser(), projectId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{projectId}/ready")
+    @Operation(
+            summary = "프로젝트 분석 완료 여부 확인",
+            description = "해당 프로젝트에 대해 NOTIFICATION_COMPLETED 상태의 분석 Job 이 1건이라도 존재하면 ready=true. 대시보드/로드맵/리포트 진입 전에 호출해 분석 대기 팝업 여부를 결정합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = AnalysisReadyResponse.class))
+            )
+    })
+    public ResponseEntity<AnalysisReadyResponse> isAnalysisReady(
+            @Parameter(description = "프로젝트 ID", example = "101")
+            @PathVariable Long projectId,
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        boolean ready = analysisJobService.hasCompletedAnalysis(projectId);
+        return ResponseEntity.ok(new AnalysisReadyResponse(ready));
     }
 }

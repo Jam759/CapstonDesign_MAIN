@@ -14,14 +14,11 @@ import java.util.List;
 @RequestMapping("/api/v1/common")
 public class CommonController {
 
-    private final CommonGroupDetailService commonGroupDetailService;;
+    private final CommonGroupDetailService commonGroupDetailService;
 
     @GetMapping("/tech-stacks")
     public ResponseEntity<List<String>> getTechStack() {
-        //TODO : 공통 테이블에서 테크 스텍 가져오기
-        return ResponseEntity.ok(
-                List.of("Java","JavaScript","Python","Spring","MySQL","NestJS","React","Vue")
-        );
+        return ResponseEntity.ok(commonGroupDetailService.getProjectTechStackIds());
     }
 
 }

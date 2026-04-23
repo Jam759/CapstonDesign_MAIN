@@ -10,6 +10,7 @@ import com.Hoseo.CapstoneDesign.notification.dto.application.FailMessage;
 import com.Hoseo.CapstoneDesign.notification.dto.application.NotificationQueueBaseMessage;
 import com.Hoseo.CapstoneDesign.notification.dto.application.SseBaseResponse;
 import com.Hoseo.CapstoneDesign.notification.dto.application.SuccessMessage;
+import com.Hoseo.CapstoneDesign.notification.dto.response.NotificationResponse;
 import com.Hoseo.CapstoneDesign.notification.factory.NotificationDtoFactory;
 import com.Hoseo.CapstoneDesign.notification.factory.NotificationEntityFactory;
 import com.Hoseo.CapstoneDesign.notification.service.NotificationService;
@@ -20,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Facade
@@ -34,6 +37,34 @@ public class NotificationFacadeImpl implements NotificationFacade {
     private final CommonGroupDetailService commonGroupDetailService;
     private final UserService userService;
     private final ObjectMapper objectMapper;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getNotification(Long userId, Integer page, Integer size) {
+        return notificationService.getNotifications(userId, page, size).stream()
+                .map(NotificationDtoFactory::toNotificationResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getUnReadNotification(Long userId) {
+        return notificationService.getUnreadNotifications(userId).stream()
+                .map(NotificationDtoFactory::toNotificationResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void readNotification(Long userId, Long notificationId) {
+        notificationService.readNotification(userId, notificationId);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void readNotifications(Long userId, List<Long> ids) {
+        notificationService.readNotifications(userId, ids);
+    }
 
     @Override
     @Transactional(readOnly = false)

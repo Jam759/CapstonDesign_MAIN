@@ -10,6 +10,7 @@ import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectMemberRole;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectStatus;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 
+import java.time.LocalTime;
 import java.util.List;
 
 public class ProjectEntityFactory {
@@ -19,22 +20,46 @@ public class ProjectEntityFactory {
 
         return Projects.builder()
                 .user(user)
-                .title(request.projectTitle())
+                .title(request.name())
                 .description(request.description())
                 .goal(request.goal())
-                .startDate(request.startDate())
-                .endDate(request.endDate())
+                .startDate(request.startDate() == null ? null : request.startDate().atStartOfDay())
+                .endDate(request.endDate() == null ? null : request.endDate().atTime(LocalTime.MAX))
                 .projectStatus(ProjectStatus.REPO_NOT_CONNECTED)
                 .build();
     }
 
     public static ProjectMember toProjectsMember(Users user, Projects project, ProjectMemberRole role, ProjectInviteStatus status) {
+        return toProjectsMember(user, project, role, status, null);
+    }
+
+    public static ProjectMember toProjectsMember(
+            Users user,
+            Projects project,
+            ProjectMemberRole role,
+            ProjectInviteStatus status,
+            CommonGroupDetail projectPositionCmd
+    ) {
         return ProjectMember.builder()
                 .projectRole(role)
                 .project(project)
                 .user(user)
+                .projectPositionCmd(projectPositionCmd)
                 .response(status)
                 .responseAt(role == ProjectMemberRole.OWNER ? project.getCreatedAt() : null)
+                .invitedBy(null)
+                .build();
+    }
+
+    public static ProjectMember toInvitedMember(Users invitedUser, Projects project, Users invitedBy) {
+        return ProjectMember.builder()
+                .projectRole(ProjectMemberRole.MEMBER)
+                .project(project)
+                .user(invitedUser)
+                .projectPositionCmd(null)
+                .response(ProjectInviteStatus.INVITED)
+                .responseAt(null)
+                .invitedBy(invitedBy)
                 .build();
     }
 

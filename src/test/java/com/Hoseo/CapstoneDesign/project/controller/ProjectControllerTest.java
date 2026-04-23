@@ -1,5 +1,9 @@
 package com.Hoseo.CapstoneDesign.project.controller;
 
+import com.Hoseo.CapstoneDesign.project.dto.response.InviteStatusResponse;
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteResponse;
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectThumbnailResponse;
+import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
 import com.Hoseo.CapstoneDesign.project.facade.ProjectFacade;
 import com.Hoseo.CapstoneDesign.support.fixture.auth.WithMockUserDetail;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +17,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,20 +43,49 @@ class ProjectControllerTest {
 
     @Test
     @WithMockUserDetail
-    @DisplayName("GET /api/v1/projects 는 프로젝트 썸네일 mock 목록을 반환한다")
-    void getMyProjectReturnsMockList() throws Exception {
+    @DisplayName("GET /api/v1/projects returns project thumbnails from facade")
+    void getMyProjectReturnsFacadeList() throws Exception {
+        when(facade.getMyProject(any())).thenReturn(List.of(
+                ProjectThumbnailResponse.builder()
+                        .projectId(101L)
+                        .id(101L)
+                        .title("Algorithm Study")
+                        .name("Algorithm Study")
+                        .description("Project for tracking weekly algorithm practice")
+                        .build(),
+                ProjectThumbnailResponse.builder()
+                        .projectId(102L)
+                        .id(102L)
+                        .title("Capstone Design")
+                        .name("Capstone Design")
+                        .description("Main GitHub analysis project")
+                        .build(),
+                ProjectThumbnailResponse.builder()
+                        .projectId(103L)
+                        .id(103L)
+                        .title("TypeScript Practice")
+                        .name("TypeScript Practice")
+                        .description("Personal project for TypeScript exercises")
+                        .build()
+        ));
+
         mockMvc.perform(get("/api/v1/projects"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(3))
                 .andExpect(jsonPath("$[0].projectId").value(101))
-                .andExpect(jsonPath("$[0].title").value("알고리즘 스터디"))
-                .andExpect(jsonPath("$[2].description").value("언어 학습용 미니 미션과 실습 코드를 모아둔 프로젝트"));
+                .andExpect(jsonPath("$[0].id").value(101))
+                .andExpect(jsonPath("$[0].name").value("Algorithm Study"))
+                .andExpect(jsonPath("$[2].description").value("Personal project for TypeScript exercises"));
     }
 
     @Test
     @WithMockUserDetail
-    @DisplayName("POST /api/v1/projects/members 는 초대 mock 응답을 반환한다")
-    void inviteProjectReturnsMockResponse() throws Exception {
+    @DisplayName("POST /api/v1/projects/members returns invite response from facade")
+    void inviteProjectReturnsFacadeResponse() throws Exception {
+        when(facade.inviteProject(any(), any())).thenReturn(
+                new ProjectInviteResponse(1L, 3001L, ProjectInviteStatus.INVITED)
+        );
+
         mockMvc.perform(post("/api/v1/projects/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -58,15 +95,19 @@ class ProjectControllerTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.projectMemberId").value(23101))
+                .andExpect(jsonPath("$.projectMemberId").value(1))
                 .andExpect(jsonPath("$.invitedUserId").value(3001))
                 .andExpect(jsonPath("$.status").value("INVITED"));
     }
 
     @Test
     @WithMockUserDetail
-    @DisplayName("PATCH /api/v1/projects/member 는 초대 응답 mock 데이터를 반환한다")
-    void responseInviteReturnsMockResponse() throws Exception {
+    @DisplayName("PATCH /api/v1/projects/member returns invite decision from facade")
+    void responseInviteReturnsFacadeResponse() throws Exception {
+        when(facade.responseInvite(any(), any())).thenReturn(
+                new ProjectInviteResponse(2L, 2001L, ProjectInviteStatus.DECLINED)
+        );
+
         mockMvc.perform(patch("/api/v1/projects/member")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -76,15 +117,30 @@ class ProjectControllerTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.projectMemberId").value(22201))
+                .andExpect(jsonPath("$.projectMemberId").value(2))
                 .andExpect(jsonPath("$.invitedUserId").value(2001))
                 .andExpect(jsonPath("$.status").value("DECLINED"));
     }
 
     @Test
     @WithMockUserDetail
-    @DisplayName("GET /api/v1/projects/member 는 초대 상태 mock 목록을 반환한다")
-    void getMyInvitedListReturnsMockList() throws Exception {
+    @DisplayName("GET /api/v1/projects/member returns invite list from facade")
+    void getMyInvitedListReturnsFacadeList() throws Exception {
+        when(facade.getMyInvitedList(any())).thenReturn(List.of(
+                InviteStatusResponse.builder()
+                        .projectId(201L)
+                        .status(ProjectInviteStatus.INVITED)
+                        .build(),
+                InviteStatusResponse.builder()
+                        .projectId(202L)
+                        .status(ProjectInviteStatus.ACCEPTED)
+                        .build(),
+                InviteStatusResponse.builder()
+                        .projectId(203L)
+                        .status(ProjectInviteStatus.DECLINED)
+                        .build()
+        ));
+
         mockMvc.perform(get("/api/v1/projects/member"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(3))

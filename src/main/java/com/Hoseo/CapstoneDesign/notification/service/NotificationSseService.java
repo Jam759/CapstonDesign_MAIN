@@ -23,10 +23,7 @@ public class NotificationSseService {
         emitterRepository.save(userId, emitter);
 
         emitter.onCompletion(() -> emitterRepository.delete(userId));
-        emitter.onTimeout(() -> {
-            emitter.complete();
-            emitterRepository.delete(userId);
-        });
+        emitter.onTimeout(emitter::complete);
         emitter.onError((e) -> emitterRepository.delete(userId));
 
         try {

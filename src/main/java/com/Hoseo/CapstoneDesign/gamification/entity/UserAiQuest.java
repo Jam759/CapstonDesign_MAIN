@@ -1,5 +1,7 @@
 package com.Hoseo.CapstoneDesign.gamification.entity;
 
+import com.Hoseo.CapstoneDesign.analysis.entity.ProjectMilestone;
+import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestProgressStatus;
 import com.Hoseo.CapstoneDesign.global.entity.CreatableEntity;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
@@ -45,6 +47,10 @@ public class UserAiQuest extends CreatableEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "related_milestone_id")
+    private ProjectMilestone relatedMilestone;
+
     @Column(name = "reward_exp", nullable = false)
     private Short rewardExp;
 
@@ -80,4 +86,12 @@ public class UserAiQuest extends CreatableEntity {
     @Column(name = "expired_at", nullable = false)
     private LocalDateTime expiredAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ai_quest_category_cmd")
+    private CommonGroupDetail category;
+
+    public void updateStatus(AiQuestApprovalStatus approvalStatus, AiQuestProgressStatus progressStatus) {
+        this.approvalStatus = approvalStatus;
+        this.progressStatus = progressStatus;
+    }
 }

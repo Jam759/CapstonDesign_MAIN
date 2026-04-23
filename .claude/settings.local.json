@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep *)",
+      "Bash(./gradlew compileJava -q)",
+      "Bash(npx tsc *)",
+      "Bash(grep -iE \"\\\\.\\(png|jpg|jpeg|gif|webp\\)$\")",
+      "Read(//mnt/c/Users/3379p/OneDrive/Desktop/intelliJ/**)",
+      "Bash(./gradlew compileJava)",
+      "Bash(./gradlew.bat compileJava)",
+      "Bash(xargs ls *)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")"
+    ]
+  }
+}

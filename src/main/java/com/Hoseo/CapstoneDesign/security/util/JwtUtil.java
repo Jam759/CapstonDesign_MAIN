@@ -157,6 +157,15 @@ public class JwtUtil {
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7).trim();
         }
+        // SSE 엔드포인트는 EventSource 가 Authorization 헤더를 보낼 수 없어
+        // 예외적으로 ?token= 쿼리 파라미터로 전달된 토큰을 수용한다.
+        String uri = request.getRequestURI();
+        if (uri != null && uri.startsWith("/api/v1/notification/sse/")) {
+            String queryToken = request.getParameter("token");
+            if (queryToken != null && !queryToken.isBlank()) {
+                return queryToken.trim();
+            }
+        }
         return null;
     }
 

@@ -53,4 +53,8 @@ public class SseNotification extends CreatableEntity {
 
     @Column(name = "link_id")
     private Long linkId;
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }

@@ -13,21 +13,48 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "프로젝트 목록용 썸네일 정보")
+@Schema(description = "Project thumbnail response")
 public class ProjectThumbnailResponse {
 
-    @Schema(description = "프로젝트 ID", example = "101")
+    @Schema(description = "Project id", example = "101")
     private Long projectId;
 
-    @Schema(description = "프로젝트 제목", example = "알고리즘 스터디")
+    @Schema(description = "Frontend-friendly project id alias", example = "101")
+    private Long id;
+
+    @Schema(description = "Project title", example = "DevXP")
     private String title;
 
-    @Schema(description = "프로젝트 한 줄 설명", example = "백준 풀이 기록과 회고를 관리하는 프로젝트")
+    @Schema(description = "Frontend-friendly project name alias", example = "DevXP")
+    private String name;
+
+    @Schema(description = "Project type used by frontend cards", example = "team")
+    private String type;
+
+    @Schema(description = "Current user's frontend project role", example = "backend")
+    private String role;
+
+    @Schema(description = "Project description", example = "GitHub analysis based developer growth service")
     private String description;
 
+    @Schema(description = "Project start datetime", example = "2026-04-01T00:00:00")
     private LocalDateTime startDate;
 
+    @Schema(description = "Project end datetime", example = "2026-06-30T23:59:59")
     private LocalDateTime endDate;
 
+    @Schema(description = "Tech stack ids")
     private List<String> techStack;
+
+    @Schema(description = "Frontend-friendly tech stack alias", example = "[\"react\", \"spring\"]")
+    private List<String> stacks;
+
+    @Schema(description = "Connected repository full name", example = "Jam759/CapstoneDesign")
+    private String githubRepo;
+
+    @Schema(description = "Tracked branch name", example = "main")
+    private String githubBranch;
+
+    @Schema(description = "Project member display names", example = "[\"alice\", \"bob\"]")
+    private List<String> teamMembers;
 }

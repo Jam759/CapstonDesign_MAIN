@@ -4,13 +4,11 @@ import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionResponse;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectCreateRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteResponseRequest;
-import com.Hoseo.CapstoneDesign.project.dto.request.ProjectSettingRequest;
 import com.Hoseo.CapstoneDesign.project.dto.response.InviteStatusResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectCreateResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectThumbnailResponse;
-import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
 import com.Hoseo.CapstoneDesign.project.facade.ProjectFacade;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,26 +37,26 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/projects")
-@Tag(name = "Project", description = "프로젝트 생성, 설정, 초대 API")
+@Tag(name = "Project", description = "Project create, list, GitHub setting, and invite APIs")
 @SecurityRequirement(name = "bearerAuth")
 public class ProjectController {
 
     private final ProjectFacade facade;
 
-    @PostMapping()
+    @PostMapping
     @Operation(
-            summary = "프로젝트 생성",
-            description = "새 프로젝트를 생성하고 요청 사용자를 OWNER 멤버로 등록합니다."
+            summary = "Create project",
+            description = "Creates a project for a GitHub App installed user and stores repository, branch, tech stacks, and friend invites in one transaction."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "프로젝트 생성 성공",
+                    description = "Project created",
                     content = @Content(schema = @Schema(implementation = ProjectCreateResponse.class))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
@@ -67,25 +65,24 @@ public class ProjectController {
             @AuthenticationPrincipal UserDetailImpl userDetail,
             @RequestBody ProjectCreateRequest request
     ) {
-        // TODO : req에 맞게 로직 수정
         ProjectCreateResponse res = facade.createProject(request, userDetail.getUser());
         return ResponseEntity.ok(res);
     }
 
-    @GetMapping()
+    @GetMapping
     @Operation(
-            summary = "내 프로젝트 목록 조회",
-            description = "현재 구현은 facade 연동 전 단계로 mock 프로젝트 썸네일 목록을 반환합니다."
+            summary = "Get my projects",
+            description = "Returns projects where the current user is an accepted member."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "프로젝트 목록 조회 성공",
+                    description = "Projects returned",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProjectThumbnailResponse.class)))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
@@ -93,102 +90,105 @@ public class ProjectController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
-//        List<ProjectThumbnailResponse> res = facade.getMyProject(userDetail.getUser());
-
-        List<ProjectThumbnailResponse> res = List.of(
-                ProjectThumbnailResponse.builder()
-                        .projectId(101L)
-                        .title("알고리즘 스터디")
-                        .description("백준 풀이 기록과 회고를 관리하는 프로젝트")
-                        .build(),
-                ProjectThumbnailResponse.builder()
-                        .projectId(102L)
-                        .title("캡스톤 디자인")
-                        .description("GitHub 분석 기반 협업 보조 서비스 메인 프로젝트")
-                        .build(),
-                ProjectThumbnailResponse.builder()
-                        .projectId(103L)
-                        .title("TypeScript 연습장")
-                        .description("언어 학습용 미니 미션과 실습 코드를 모아둔 프로젝트")
-                        .build()
-        );
+        List<ProjectThumbnailResponse> res = facade.getMyProject(userDetail.getUser());
         return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/{projectId}/setting")
+    @Operation(
+            summary = "Get project GitHub setting",
+            description = "Returns repository and branch fixed at project creation time. Update API is intentionally not exposed."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Project GitHub setting returned",
+                    content = @Content(schema = @Schema(implementation = ProjectSettingResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication failed",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Project owner required",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
+            )
+    })
+    public ResponseEntity<ProjectSettingResponse> getProjectSetting(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetailImpl userDetail,
+            @Parameter(description = "Project id", example = "101")
+            @PathVariable Long projectId
+    ) {
+        ProjectSettingResponse response = facade.getProjectSetting(projectId, userDetail.getUser());
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{projectId}")
     @Operation(
-            summary = "프로젝트 삭제",
-            description = "현재 구현은 실제 삭제를 수행하지 않고 빈 200 응답만 반환합니다."
+            summary = "Delete project",
+            description = "Soft-deletes a project owned by the current user."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "삭제 요청 처리 성공"),
+            @ApiResponse(responseCode = "200", description = "Delete request accepted"),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
     public ResponseEntity<Void> deleteProject(
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail,
-            @Parameter(description = "프로젝트 ID", example = "101")
+            @Parameter(description = "Project id", example = "101")
             @PathVariable Long projectId
     ) {
-
-        // TODO : 추후 구현 현재는 mock데이터 반환
-//        facade.deleteProject(userDetail.getUser(), projectId);
+        facade.deleteProject(projectId, userDetail.getUser());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/members")
     @Operation(
-            summary = "프로젝트 멤버 초대",
-            description = "현재 구현은 실제 초대 저장 없이 mock 초대 응답을 반환합니다."
+            summary = "Invite project members",
+            description = "Invites one or more friends to a project. Only project owners can invite members. Already-existing members are skipped silently."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "초대 응답 반환 성공",
-                    content = @Content(schema = @Schema(implementation = ProjectInviteResponse.class))
+                    description = "Invite results returned",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProjectInviteResponse.class)))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
-    public ResponseEntity<ProjectInviteResponse> inviteProject(
+    public ResponseEntity<List<ProjectInviteResponse>> inviteProject(
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail,
             @RequestBody ProjectInviteRequest request
     ) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
-//        ProjectInviteResponse res = facade.inviteProject(userDetail.getUser(),request);
-
-        Long invitedUserId = request.getInviteMemberId() != null ? request.getInviteMemberId() : 2001L;
-        ProjectInviteResponse res = new ProjectInviteResponse(
-                mockProjectMemberId(request.getProjectId(), invitedUserId),
-                invitedUserId,
-                ProjectInviteStatus.INVITED
-        );
+        List<ProjectInviteResponse> res = facade.inviteProject(request, userDetail.getUser());
         return ResponseEntity.ok(res);
     }
 
     @PatchMapping("/member")
     @Operation(
-            summary = "프로젝트 초대 응답",
-            description = "현재 구현은 실제 상태 변경 없이 mock 초대 응답 결과를 반환합니다."
+            summary = "Respond to project invite",
+            description = "Accepts or declines a pending invite owned by the current user."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "초대 응답 결과 반환 성공",
+                    description = "Invite response result returned",
                     content = @Content(schema = @Schema(implementation = ProjectInviteResponse.class))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
@@ -197,35 +197,24 @@ public class ProjectController {
             @AuthenticationPrincipal UserDetailImpl userDetail,
             @RequestBody ProjectInviteResponseRequest request
     ) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
-//        ProjectInviteResponse res = facade.responseInvite(userDetail.getUser(), request);
-
-        Long invitedUserId = resolveUserId(userDetail);
-        ProjectInviteStatus status = request.getResponseStatus() != null
-                ? request.getResponseStatus()
-                : ProjectInviteStatus.ACCEPTED;
-        ProjectInviteResponse res = new ProjectInviteResponse(
-                mockProjectMemberId(request.getProjectId(), invitedUserId),
-                invitedUserId,
-                status
-        );
+        ProjectInviteResponse res = facade.responseInvite(request, userDetail.getUser());
         return ResponseEntity.ok(res);
     }
 
     @GetMapping("/member")
     @Operation(
-            summary = "내 초대 상태 목록 조회",
-            description = "현재 구현은 실제 DB 조회 대신 mock 초대 상태 목록을 반환합니다."
+            summary = "Get my project invites",
+            description = "Returns project invite membership rows for the current user."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "초대 상태 목록 조회 성공",
+                    description = "Invite list returned",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = InviteStatusResponse.class)))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
@@ -233,36 +222,7 @@ public class ProjectController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        // TODO : 추후 구현 현재는 mock데이터 반환
-//        List<InviteStatusResponse> res = facade.getMyInvited(userDetail.getUser());
-
-        List<InviteStatusResponse> res = List.of(
-                InviteStatusResponse.builder()
-                        .projectId(201L)
-                        .status(ProjectInviteStatus.INVITED)
-                        .build(),
-                InviteStatusResponse.builder()
-                        .projectId(202L)
-                        .status(ProjectInviteStatus.ACCEPTED)
-                        .build(),
-                InviteStatusResponse.builder()
-                        .projectId(203L)
-                        .status(ProjectInviteStatus.DECLINED)
-                        .build()
-        );
+        List<InviteStatusResponse> res = facade.getMyInvitedList(userDetail.getUser());
         return ResponseEntity.ok(res);
-    }
-
-    private Long mockProjectMemberId(Long projectId, Long userId) {
-        long resolvedProjectId = projectId != null ? projectId : 999L;
-        long resolvedUserId = userId != null ? userId : 2001L;
-        return resolvedProjectId * 100 + resolvedUserId;
-    }
-
-    private Long resolveUserId(UserDetailImpl userDetail) {
-        if (userDetail == null || userDetail.getUser() == null || userDetail.getUser().getUserId() == null) {
-            return 2001L;
-        }
-        return userDetail.getUser().getUserId();
     }
 }

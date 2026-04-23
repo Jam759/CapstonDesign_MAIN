@@ -124,16 +124,21 @@ public class ProjectRoadMapService {
     private record PhaseAccumulator(
             ProjectRoadMapQueryRow row,
             List<String> phaseScopes,
-            Set<Long> phaseScopeIds
+            Set<Long> phaseScopeIds,
+            List<Long> milestoneIds,
+            Set<Long> milestoneIdSet
     ) {
 
         private PhaseAccumulator(ProjectRoadMapQueryRow row) {
-            this(row, new ArrayList<>(), new HashSet<>());
+            this(row, new ArrayList<>(), new HashSet<>(), new ArrayList<>(), new HashSet<>());
         }
 
         private void addScope(ProjectRoadMapQueryRow row) {
             if (row.phaseScopeId() != null && phaseScopeIds.add(row.phaseScopeId())) {
                 phaseScopes.add(row.scope());
+            }
+            if (row.milestoneId() != null && milestoneIdSet.add(row.milestoneId())) {
+                milestoneIds.add(row.milestoneId());
             }
         }
 
@@ -146,6 +151,7 @@ public class ProjectRoadMapService {
                     .phaseOutcome(row.phaseOutcome())
                     .phaseScope(List.copyOf(phaseScopes))
                     .exitCriteria(row.exitCriteria())
+                    .milestoneIds(List.copyOf(milestoneIds))
                     .status(row.phaseStatus())
                     .build();
         }

@@ -2,116 +2,84 @@ package com.Hoseo.CapstoneDesign.gamification.facade;
 
 import com.Hoseo.CapstoneDesign.gamification.dto.response.QuestResponse;
 import com.Hoseo.CapstoneDesign.gamification.dto.response.RankingResponse;
+import com.Hoseo.CapstoneDesign.gamification.entity.UserAiQuest;
 import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestApprovalStatus;
 import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestProgressStatus;
+import com.Hoseo.CapstoneDesign.gamification.factory.GamificationDtoFactory;
+import com.Hoseo.CapstoneDesign.gamification.service.UserAiQuestService;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
+import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
+import com.Hoseo.CapstoneDesign.user.service.UserMetaInformationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Facade
+@RequiredArgsConstructor
 public class GamificationFacadeImpl implements GamificationFacade {
+
+    private final UserAiQuestService questService;
+    private final UserMetaInformationService metaService;
 
     @Override
     @Transactional(readOnly = true)
     public List<RankingResponse> getRanking(Integer page, Integer size) {
-        return paginate(mockRanking(), page, size);
+        List<UserMetaInformation> sorted = metaService.getAllMetaInfoByExpDesc();
+        return paginate(GamificationDtoFactory.toRankingList(sorted), page, size);
     }
 
     @Override
     @Transactional(readOnly = true)
     public RankingResponse getMyRank(Users user) {
-        return RankingResponse.builder()
-                .rank(7)
-                .userId(resolveUserId(user))
-                .serviceNickname(resolveDisplayName(user))
-                .level(3)
-                .totalExp(1280L)
-                .build();
+        UserMetaInformation meta = metaService.getMetaInfo(user);
+        int rank = (int) metaService.countUsersAbove(meta.getTotalExp()) + 1;
+        return GamificationDtoFactory.toRankingResponse(rank, meta);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<QuestResponse> getMyQuest(
             Users user,
+            Long projectId,
             AiQuestProgressStatus progressStatus,
+            String status,
             Integer page,
             Integer size
     ) {
-        List<QuestResponse> filtered = mockQuests().stream()
-                .filter(quest -> progressStatus == null || quest.getProgressStatus() == progressStatus)
+        List<QuestResponse> quests = questService.getQuestsByUserAndProject(user, projectId).stream()
+                .filter(q -> progressStatus == null || q.getProgressStatus() == progressStatus)
+                .filter(q -> status == null || status.isBlank()
+                        || GamificationDtoFactory.toFrontendStatus(q.getApprovalStatus()).equalsIgnoreCase(status))
+                .map(GamificationDtoFactory::toQuestResponse)
                 .toList();
-        return paginate(filtered, page, size);
+        return paginate(quests, page, size);
     }
 
-    private List<RankingResponse> mockRanking() {
-        return List.of(
-                RankingResponse.builder().rank(1).userId(1001L).serviceNickname("commit-master").level(9).totalExp(4820L).build(),
-                RankingResponse.builder().rank(2).userId(1002L).serviceNickname("branch-hunter").level(8).totalExp(4380L).build(),
-                RankingResponse.builder().rank(3).userId(1003L).serviceNickname("merge-wizard").level(7).totalExp(4010L).build(),
-                RankingResponse.builder().rank(4).userId(1004L).serviceNickname("code-reviewer").level(6).totalExp(3560L).build(),
-                RankingResponse.builder().rank(5).userId(1005L).serviceNickname("daily-pusher").level(5).totalExp(3200L).build(),
-                RankingResponse.builder().rank(6).userId(1006L).serviceNickname("issue-tamer").level(4).totalExp(2710L).build(),
-                RankingResponse.builder().rank(7).userId(1007L).serviceNickname("service-user").level(3).totalExp(1280L).build(),
-                RankingResponse.builder().rank(8).userId(1008L).serviceNickname("test-runner").level(3).totalExp(1190L).build()
+    @Override
+    @Transactional(readOnly = false)
+    public QuestResponse acceptQuest(Users user, Long questId) {
+        UserAiQuest quest = questService.updateQuestStatus(
+                questId, AiQuestApprovalStatus.REQUEST_ACCEPT, AiQuestProgressStatus.ACTIVE
         );
+        return GamificationDtoFactory.toQuestResponse(quest);
     }
 
-    private List<QuestResponse> mockQuests() {
-        return List.of(
-                QuestResponse.builder()
-                        .progressStatus(AiQuestProgressStatus.ACTIVE)
-                        .approvalStatus(AiQuestApprovalStatus.REQUEST_PENDING)
-                        .title("README 개선")
-                        .description("프로젝트 README에 실행 방법과 구조 설명을 보강하세요.")
-                        .hint("설치, 실행, 주요 패키지 설명 순서로 정리하면 됩니다.")
-                        .aiGenerationReason("최근 커밋에서 신규 온보딩 정보가 부족하게 감지되었습니다.")
-                        .rewardExp((short) 120)
-                        .build(),
-                QuestResponse.builder()
-                        .progressStatus(AiQuestProgressStatus.COMPLETED)
-                        .approvalStatus(AiQuestApprovalStatus.CLEARED)
-                        .title("예외 처리 정리")
-                        .description("GlobalExceptionHandler와 누락된 예외 응답 포맷을 맞추세요.")
-                        .hint("도메인별 커스텀 예외를 하나의 응답 구조로 통일하면 됩니다.")
-                        .aiGenerationReason("최근 분석에서 예외 응답 스키마 불일치가 발견되었습니다.")
-                        .rewardExp((short) 180)
-                        .build(),
-                QuestResponse.builder()
-                        .progressStatus(AiQuestProgressStatus.EXPIRED)
-                        .approvalStatus(AiQuestApprovalStatus.REQUEST_REJECT)
-                        .title("테스트 커버리지 보강")
-                        .description("프로젝트 컨트롤러 contract 테스트를 추가하세요.")
-                        .hint("MockMvc 기반으로 200 응답과 필드 매핑을 확인하면 됩니다.")
-                        .aiGenerationReason("컨트롤러 주요 경로에 회귀 방지 테스트가 부족했습니다.")
-                        .rewardExp((short) 150)
-                        .build()
+    @Override
+    @Transactional(readOnly = false)
+    public QuestResponse declineQuest(Users user, Long questId) {
+        UserAiQuest quest = questService.updateQuestStatus(
+                questId, AiQuestApprovalStatus.REQUEST_REJECT, AiQuestProgressStatus.ARCHIVED
         );
-    }
-
-    private String resolveDisplayName(Users user) {
-        if (user == null) {
-            return "service-user";
-        }
-        if (user.getServiceNickname() != null && !user.getServiceNickname().isBlank()) {
-            return user.getServiceNickname();
-        }
-        if (user.getOauthNickname() != null && !user.getOauthNickname().isBlank()) {
-            return user.getOauthNickname();
-        }
-        return "service-user";
-    }
-
-    private Long resolveUserId(Users user) {
-        return user != null && user.getUserId() != null ? user.getUserId() : 1007L;
+        return GamificationDtoFactory.toQuestResponse(quest);
     }
 
     private <T> List<T> paginate(List<T> values, Integer page, Integer size) {
         int safePage = page == null || page < 1 ? 1 : page;
         int safeSize = size == null || size < 1 ? values.size() : size;
         int fromIndex = Math.min((safePage - 1) * safeSize, values.size());
-        int toIndex = Math.min(fromIndex + safeSize, values.size());
+        int toIndex   = Math.min(fromIndex + safeSize, values.size());
         return values.subList(fromIndex, toIndex);
     }
 }

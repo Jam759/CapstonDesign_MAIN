@@ -8,32 +8,57 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "AI 퀘스트 응답")
+@Schema(description = "AI quest response")
 public class QuestResponse {
 
-    @Schema(description = "현재 퀘스트 진행 상태", example = "ACTIVE")
-    private AiQuestProgressStatus progressStatus;
+    @Schema(description = "Quest id", example = "1")
+    private Long id;
 
-    @Schema(description = "퀘스트 승인 상태", example = "REQUEST_PENDING")
-    private AiQuestApprovalStatus approvalStatus;
+    @Schema(description = "Related roadmap milestone id", example = "10")
+    private Long relatedMilestoneId;
 
-    @Schema(description = "퀘스트 제목", example = "README 개선")
+    @Schema(description = "Quest title", example = "Improve README")
     private String title;
 
-    @Schema(description = "퀘스트 설명", example = "프로젝트 README에 실행 방법과 구조 설명을 보강하세요.")
+    @Schema(description = "Quest description", example = "Add setup and run instructions to README.")
     private String description;
 
-    @Schema(description = "퀘스트 수행 힌트", example = "설치, 실행, 주요 패키지 설명 순서로 정리하면 됩니다.")
+    @Schema(description = "Frontend category", example = "COLLABORATION")
+    private String category;
+
+    @Schema(description = "Reward experience", example = "120")
+    private Short xp;
+
+    @Schema(description = "Frontend status: pending, accepted, declined, completed", example = "pending")
+    private String status;
+
+    @Schema(description = "Quest creator", example = "AI")
+    private String createdBy;
+
+    @Schema(description = "Quest expiration datetime", example = "2026-04-30T23:59:59")
+    private LocalDateTime expiresAt;
+
+    @Schema(description = "Quest created datetime", example = "2026-04-22T10:15:00")
+    private LocalDateTime createdAt;
+
+    @Schema(description = "Execution hint", example = "Start with installation and run instructions.")
     private String hint;
 
-    @Schema(description = "AI가 이 퀘스트를 생성한 이유", example = "최근 커밋에서 신규 온보딩 정보가 부족하게 감지되었습니다.")
+    @Schema(description = "AI generation reason", example = "Recent commits showed missing onboarding docs.")
     private String aiGenerationReason;
 
-    @Schema(description = "퀘스트 보상 경험치", example = "120")
-    private Short rewardExp;
+    @Schema(description = "Legacy progress status", example = "ACTIVE")
+    private AiQuestProgressStatus progressStatus;
 
+    @Schema(description = "Legacy approval status", example = "REQUEST_PENDING")
+    private AiQuestApprovalStatus approvalStatus;
+
+    @Schema(description = "Legacy reward experience", example = "120")
+    private Short rewardExp;
 }

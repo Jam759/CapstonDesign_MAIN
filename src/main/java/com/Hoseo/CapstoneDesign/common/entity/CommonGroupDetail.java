@@ -34,10 +34,10 @@ public class CommonGroupDetail extends LifecycleTimestampEntity {
     private CommonGroup commonGroup;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
+    @JoinColumn(name = "created_by")
     private Users createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "deleted_by", nullable = false)
+    @JoinColumn(name = "deleted_by")
     private Users deletedBy;
 }
