@@ -4,7 +4,9 @@ import com.Hoseo.CapstoneDesign.global.logging.StructuredHttpLogger;
 import com.Hoseo.CapstoneDesign.global.logging.dto.ErrorInfo;
 import com.Hoseo.CapstoneDesign.global.logging.support.HttpEventType;
 import com.Hoseo.CapstoneDesign.global.logging.support.LogCategory;
+import com.Hoseo.CapstoneDesign.security.exception.JwtUtilException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
@@ -90,6 +92,44 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
                 .body(response);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResourceFound(
+            NoResourceFoundException e,
+            HttpServletRequest request
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        response.put("message", "요청한 리소스를 찾을 수 없습니다.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(JwtUtilException.class)
+    public ResponseEntity<GlobalExceptionResponse> handleJwtUtilException(
+            JwtUtilException exception,
+            HttpServletRequest request
+    ) {
+        var errorCode = exception.getErrorCode();
+        GlobalExceptionResponse response = new GlobalExceptionResponse(errorCode);
+
+        if (canWriteStructuredLog(request)) {
+            request.setAttribute(ERROR_ALREADY_LOGGED, true);
+            structuredHttpLogger.error(
+                    LogCategory.HTTP.name(),
+                    HttpEventType.HTTP_ERROR.name(),
+                    getClassName(request),
+                    getMethodName(request),
+                    "JWT exception occurred",
+                    null,
+                    request,
+                    errorCode.getHttpStatus().value(),
+                    structuredHttpLogger.resolveDurationMs(request),
+                    structuredHttpLogger.toErrorInfo(errorCode)
+            );
+        }
+
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(Exception.class)
