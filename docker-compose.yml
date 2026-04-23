@@ -1,0 +1,123 @@
+# local: docker compose up -d
+# prod:  docker compose --profile prod up -d
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: capstone-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}  # .env(prod) / 기본값 root(local)
+      MYSQL_DATABASE: capstone_design
+      TZ: Asia/Seoul
+    ports:
+      - "${DB_HOST_PORT:-3316}:3306"  # .env(prod) / 기본값 3316(local) — 외부 EC2 접근용
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+
+  app:
+    profiles: [prod]
+    image: ${DOCKERHUB_USERNAME}/capstone-design:latest  # .env — Docker Hub 이미지
+    container_name: capstone-app
+    restart: always
+    ports:
+      - "127.0.0.1:${APP_HOST_PORT}:8080"  # .env — EC2 호스트 포트(nginx가 프록시)
+    environment:
+      # .env(DB_URL 설정 시) / 기본값: Docker 내부 네트워크로 mysql:3306 직접 접근
+      DB_URL: ${DB_URL:-jdbc:mysql://mysql:3306/capstone_design?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true}
+    volumes:
+      - app-logs:/app/.logs
+    env_file:
+      - .env  # 나머지 모든 앱 환경변수 주입 (DB_USERNAME, JWT_*, AWS_*, GITHUB_* 등)
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-net
+
+  loki:
+    image: grafana/loki:3.6.3
+    container_name: capstone-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./observability/loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki-data:/loki
+    networks:
+      - app-net
+
+  prometheus:
+    image: prom/prometheus:v3.9.1
+    container_name: capstone-prometheus
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9090:9090"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    volumes:
+      # .env(prod: prometheus-prod.yml) / 기본값: local용 prometheus.yml
+      - ${PROMETHEUS_CONFIG:-./observability/prometheus/prometheus.yml}:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - app-net
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: capstone-alloy
+    restart: unless-stopped
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data --disable-reporting /etc/alloy/config.alloy
+    depends_on:
+      - loki
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - app-logs:/var/log/capstone  # app 로그를 alloy가 읽어 loki로 전송
+      - alloy-data:/var/lib/alloy/data
+    networks:
+      - app-net
+
+  grafana:
+    image: grafana/grafana:12.3.1
+    container_name: capstone-grafana
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${GRAFANA_HOST_PORT:-3001}:3000"  # .env(prod: 3000) / 기본값 3001(local)
+    depends_on:
+      - loki
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}        # .env(prod) / 기본값 admin(local)
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_ROOT_URL: ${GF_SERVER_ROOT_URL:-http://localhost:3001}          # .env(prod: 도메인/grafana/) / 기본값 localhost
+      GF_SERVER_SERVE_FROM_SUB_PATH: ${GF_SERVER_SERVE_FROM_SUB_PATH:-false}   # .env(prod: true) / 기본값 false(local)
+    volumes:
+      - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    networks:
+      - app-net
+
+volumes:
+  mysql-data:
+  app-logs:
+  loki-data:
+  prometheus-data:
+  alloy-data:
+  grafana-data:
+
+networks:
+  app-net:
+    driver: bridge

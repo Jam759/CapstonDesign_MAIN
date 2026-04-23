@@ -82,22 +82,23 @@ class ProjectControllerTest {
     @WithMockUserDetail
     @DisplayName("POST /api/v1/projects/members returns invite response from facade")
     void inviteProjectReturnsFacadeResponse() throws Exception {
-        when(facade.inviteProject(any(), any())).thenReturn(
+        when(facade.inviteProject(any(), any())).thenReturn(List.of(
                 new ProjectInviteResponse(1L, 3001L, ProjectInviteStatus.INVITED)
-        );
+        ));
 
         mockMvc.perform(post("/api/v1/projects/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
                                   "projectId": 201,
-                                  "inviteMemberId": 3001
+                                  "friendIds": [3001]
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.projectMemberId").value(1))
-                .andExpect(jsonPath("$.invitedUserId").value(3001))
-                .andExpect(jsonPath("$.status").value("INVITED"));
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].projectMemberId").value(1))
+                .andExpect(jsonPath("$[0].invitedUserId").value(3001))
+                .andExpect(jsonPath("$[0].status").value("INVITED"));
     }
 
     @Test
@@ -112,8 +113,8 @@ class ProjectControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "projectId": 202,
-                                  "responseStatus": "DECLINED"
+                                  "inviteId": 2,
+                                  "accepted": false
                                 }
                                 """))
                 .andExpect(status().isOk())
@@ -128,23 +129,30 @@ class ProjectControllerTest {
     void getMyInvitedListReturnsFacadeList() throws Exception {
         when(facade.getMyInvitedList(any())).thenReturn(List.of(
                 InviteStatusResponse.builder()
-                        .projectId(201L)
-                        .status(ProjectInviteStatus.INVITED)
+                        .id(201L)
+                        .from("Alice")
+                        .projectName("Algorithm Study")
+                        .status("INVITED")
                         .build(),
                 InviteStatusResponse.builder()
-                        .projectId(202L)
-                        .status(ProjectInviteStatus.ACCEPTED)
+                        .id(202L)
+                        .from("Bob")
+                        .projectName("Capstone Design")
+                        .status("ACCEPTED")
                         .build(),
                 InviteStatusResponse.builder()
-                        .projectId(203L)
-                        .status(ProjectInviteStatus.DECLINED)
+                        .id(203L)
+                        .from("Charlie")
+                        .projectName("TypeScript Practice")
+                        .status("DECLINED")
                         .build()
         ));
 
         mockMvc.perform(get("/api/v1/projects/member"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[0].projectId").value(201))
+                .andExpect(jsonPath("$[0].id").value(201))
+                .andExpect(jsonPath("$[0].projectName").value("Algorithm Study"))
                 .andExpect(jsonPath("$[0].status").value("INVITED"))
                 .andExpect(jsonPath("$[2].status").value("DECLINED"));
     }

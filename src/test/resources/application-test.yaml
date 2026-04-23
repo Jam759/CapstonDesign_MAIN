@@ -12,6 +12,16 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
     show-sql: false
+  sql:
+    init:
+      mode: never
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+      credentials:
+        access-key: test-access-key
+        secret-key: test-secret-key
   security:
     oauth2:
       client:
@@ -19,6 +29,52 @@ spring:
           github:
             client-id: test-client-id
             client-secret: test-client-secret
+
+app:
+  frontend:
+    baseUrl: http://localhost:5173
+  aws:
+    sqs:
+      analysis-queue: test-analysis-queue
+      dlq-queue: test-dlq-queue
+      notification-queue: test-notification-queue
+    s3:
+      bucket-name: test-bucket
+
+github:
+  app:
+    app-id: 1
+    private-key: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEpAIBAAKCAQEApaHPTkufo8spTotbAhB8phiZmEk94V7DilGLPWalytCkL0Jz
+      YFuuJqurlOkBGb1eOgkcPeYzbFOHqZ0k2BVBQcIF2+qgJ2J1LrmWnCRchkna4X1A
+      8lx2V0CALsTJZA+1LdgWoAan1WiaclP+LkfOOYakpkuuJMPBJ12dPKMah9yRsJco
+      6R9AQVdGhhoQ2AYfkKZ7DVwI4HaVrG7yOMvztoR8i5IcQfY8eq0wS8ztH+FkSrwy
+      7Lf9YDfAOpJuRV03S0NBFtvz8X0sNwWfmcGBVYlYV9VVCPDob1ptKt9RbGsY/WAe
+      j2ptRw/o9aZUM5hmUdHex2/lMeTXEObTLIbdgQIDAQABAoIBABNGmISpImQCgcUl
+      TKsZ1hfSZxWk+HGhAKq5QLYdmw/WZjUly52cLdFMS0SiNUGUm0Gvy7ycbMGfmvsv
+      UZlgJ98KQHpOfOL4f2C3soJrbOUn9TQmyocqIY+X7xMCTdm6RkCWlFN9UszwRoEl
+      q0AhlSt2svSzfAnFSlZVe7YR2UWUQt0wyg/RujeyaFBXr3LGmmy2pdVTXE5msC/0
+      bkn3FHUmTyb60+t1quIWzV/zwojM5z2+caNgBLHMwZB9lfFQUc1sNgdwdA/Vy/o+
+      psTYJyaOYT2Uu/0v6x4+gEgA8GW1RyEuKhT7zS/AfwSBwCUS9xBaCsaRJlVAZ9Ov
+      +69lUC0CgYEA1holCKaOH52vZEwMONq/GUC6B4sREzKPgCV+YM5NaPG2qMzQbyhk
+      ISxbFoKkeQPJVPFEYmf/2Oqqf0M2kMUfZWtSIN++x/cfD45NUbzE20Pfe1H5Y19X
+      SrGzpZSs1QAuNShJHT/bEkQpXjJkF+mkzB4PytNCVi8liWlmXEBmL78CgYEAxgt3
+      BJ2aJ72lzWQtmmpt0av00vf3D0OJFRpNgFFxRQvvne5JA3PxBFJ1spTtKVd9Qcah
+      wgZCDvvUf/4zeNfNvhSBEiE2oXqw9OIYTKv8FAmfqpwQL33mzitr9MgibbMaue2M
+      gdwRHKmg3nCpwvUYfFGYBErHMFgUBMgZiraGQr8CgYEAl/nG//T6PYb40QEKS/E6
+      ZPqFEoWsgSwKoLP8mUrXt/6b4gZAjiblrIaHwdrKVPxTFXCNUizwd1Fb5SoYuXqz
+      ZpJfoeYwzlCkQ66HQ9XzBpGPOUJe/CLZG7Q4CPkYFbojEqid/Z0uLDEmDC9IzZCT
+      4jAUlayQEg01X+zpM+KippECgYEAs4edIvAD2NbQwPp5ZKvqVdI+JClpK8sbL6gi
+      bZpmxiLl2xMx2RF3gWWHEJZ0z69h+winho3JwG+F2WmFG5z2A8PupZK6RXRFihiT
+      0p1t7HQ066KCAatuWaN/P+1VWICuT7IKV4Y5dPRIwpz7J6Krybblya5IF4kgzJzg
+      mqCP4V0CgYBgdxRhUg28MKIkLEzodWvQmClZiSGOw8+UoUhJnqbW9mrulOQ3pjSE
+      OdKd/usPViGsKjjWfc4/6l+CiGS12KWy2ucUtUjC971qtrUCDpzbY77FK+Lf2lUL
+      LhZMALYVBrN50GfACzpPSarDMkyTT1741VRnndxQ8DsQiVO3IRZYVw==
+      -----END RSA PRIVATE KEY-----
+    state-secret: test-state-secret
+  webhook:
+    secret: test-webhook-secret
 
 auth:
   jwt:
