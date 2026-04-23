@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisHighlightsR
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisOverviewResponse;
 import com.Hoseo.CapstoneDesign.analysis.dto.application.ProjectAnalysisUserViewResponse;
 import com.Hoseo.CapstoneDesign.analysis.facade.AnalysisFacade;
+import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionHandler;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsErrorCode;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsException;
@@ -41,6 +42,9 @@ class AnalysisControllerTest {
 
     @MockBean
     private AnalysisFacade analysisFacade;
+
+    @MockBean
+    private AnalysisJobService analysisJobService;
 
     @MockBean
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;

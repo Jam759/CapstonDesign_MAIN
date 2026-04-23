@@ -1,0 +1,15 @@
+.gradle/
+build/
+.idea/
+.vscode/
+.claude/
+out/
+bin/
+.logs/
+.worker-logs/
+queries/
+src/test/
+*.iws
+*.iml
+*.ipr
+*.md

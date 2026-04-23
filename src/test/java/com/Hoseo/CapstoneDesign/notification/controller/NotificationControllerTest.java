@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @WebMvcTest(NotificationController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -48,17 +49,15 @@ class NotificationControllerTest {
     void getNotificationListReturnsFacadeList() throws Exception {
         when(facade.getNotification(any(), eq(1), eq(2))).thenReturn(List.of(
                 NotificationResponse.builder()
-                        .notificationId(9001L)
-                        .title("Analysis completed")
+                        .id(9001L)
                         .message("Latest analysis is complete.")
-                        .linkType("PROJECT")
+                        .type("PROJECT")
                         .linkId("102")
                         .build(),
                 NotificationResponse.builder()
-                        .notificationId(9002L)
-                        .title("Quest updated")
+                        .id(9002L)
                         .message("New AI quests were created.")
-                        .linkType("QUEST")
+                        .type("QUEST")
                         .linkId("3201")
                         .build()
         ));
@@ -68,8 +67,8 @@ class NotificationControllerTest {
                         .param("size", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].notificationId").value(9001))
-                .andExpect(jsonPath("$[1].title").value("Quest updated"));
+                .andExpect(jsonPath("$[0].id").value(9001))
+                .andExpect(jsonPath("$[1].message").value("New AI quests were created."));
     }
 
     @Test
@@ -78,17 +77,15 @@ class NotificationControllerTest {
     void getUnreadNotificationReturnsFacadeList() throws Exception {
         when(facade.getUnReadNotification(any())).thenReturn(List.of(
                 NotificationResponse.builder()
-                        .notificationId(9001L)
-                        .title("Analysis completed")
+                        .id(9001L)
                         .message("Latest analysis is complete.")
-                        .linkType("PROJECT")
+                        .type("PROJECT")
                         .linkId("102")
                         .build(),
                 NotificationResponse.builder()
-                        .notificationId(9002L)
-                        .title("Quest updated")
+                        .id(9002L)
                         .message("New AI quests were created.")
-                        .linkType("QUEST")
+                        .type("QUEST")
                         .linkId("3201")
                         .build()
         ));
@@ -96,7 +93,7 @@ class NotificationControllerTest {
         mockMvc.perform(get("/api/v1/notification/unread"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].linkType").value("PROJECT"))
+                .andExpect(jsonPath("$[0].type").value("PROJECT"))
                 .andExpect(jsonPath("$[1].linkId").value("3201"));
     }
 
@@ -105,9 +102,14 @@ class NotificationControllerTest {
     @DisplayName("PATCH /api/v1/notification delegates read request to facade")
     void markAsReadReturnsOk() throws Exception {
         mockMvc.perform(patch("/api/v1/notification")
-                        .param("notificationId", "9001"))
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "ids": [9001]
+                                }
+                                """))
                 .andExpect(status().isOk());
 
-        verify(facade).readNotification(any(), eq(9001L));
+        verify(facade).readNotifications(any(), eq(List.of(9001L)));
     }
 }

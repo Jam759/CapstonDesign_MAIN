@@ -37,10 +37,13 @@ out/
 .vscode/
 
 ### AI setting ###
-.claude
+.claude/
 
 ### DateGrip ###
 queries/
+
+### Secrets ###
+.env
 
 ### Local logs ###
 .logs/*
