@@ -50,6 +50,8 @@ services:
     container_name: capstone-loki
     restart: unless-stopped
     command: -config.file=/etc/loki/config.yaml
+    ports:
+      - "3100:3100"  # 워커 서버에서 로그 push 수신
     volumes:
       - ./observability/loki/config.yaml:/etc/loki/config.yaml:ro
       - loki-data:/loki
