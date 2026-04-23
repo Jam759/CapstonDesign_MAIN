@@ -78,6 +78,8 @@ services:
     container_name: capstone-alloy
     restart: unless-stopped
     command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data --disable-reporting /etc/alloy/config.alloy
+    environment:
+      APP_ENV: ${APP_ENV:-local}  # .env(prod: prod) / 기본값 local
     depends_on:
       - loki
     volumes:

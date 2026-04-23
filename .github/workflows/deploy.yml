@@ -98,6 +98,8 @@ jobs:
 
             # [prometheus] prod 설정 파일 경로 (PROMETHEUS_CONFIG는 Prometheus Java 클라이언트가 선점하므로 다른 이름 사용)
             PROMETHEUS_SERVER_CONFIG=./observability/prometheus/prometheus-prod.yml
+            # [alloy] 로그 env 라벨
+            APP_ENV=prod
 
             # [app] auth.jwt.cookie-secure / OAuth2 redirect
             COOKIE_SECURE=true

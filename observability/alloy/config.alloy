@@ -59,7 +59,7 @@ loki.source.file "structured_http" {
       __path__ = "/var/log/capstone/structured-http.log",
       job      = "capstone-structured-http",
       app      = "capstone-main",
-      env      = "local",
+      env      = env("APP_ENV"),
     },
   ]
   forward_to = [loki.process.structured_http.receiver]
@@ -76,7 +76,7 @@ loki.source.file "application" {
       __path__ = "/var/log/capstone/application.log",
       job      = "capstone-application",
       app      = "capstone-main",
-      env      = "local",
+      env      = env("APP_ENV"),
     },
   ]
   forward_to = [loki.write.local.receiver]
@@ -93,7 +93,7 @@ loki.source.file "git_worker_structured_http" {
       __path__ = "/var/log/git-worker/structured-http.log",
       job      = "git-worker-structured-http",
       app      = "git-worker",
-      env      = "local",
+      env      = env("APP_ENV"),
     },
   ]
   forward_to = [loki.process.structured_http.receiver]

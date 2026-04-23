@@ -93,7 +93,7 @@ app:
       - /actuator/health
       - /actuator/prometheus
     debug-aspect:
-      enabled: false
+      enabled: true
       max-string-length: 120
       max-collection-size: 10
       log-return-value: true
