@@ -92,6 +92,7 @@ app:
       - /favicon.ico
       - /actuator/health
       - /actuator/prometheus
+      - /
     debug-aspect:
       enabled: true
       max-string-length: 120
