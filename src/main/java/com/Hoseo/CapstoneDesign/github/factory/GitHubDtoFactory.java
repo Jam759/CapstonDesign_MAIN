@@ -30,7 +30,7 @@ public class GitHubDtoFactory {
             String state =
                     stateUtil.createState(user.getIdentityId(),returnTo);
             installUrl =
-                    "https://github.com/apps/projectERPERP/installations/new?state="
+                    "https://github.com/apps/projectlxp/installations/new?state="
                             + URLEncoder.encode(state, StandardCharsets.UTF_8);
 
         }
