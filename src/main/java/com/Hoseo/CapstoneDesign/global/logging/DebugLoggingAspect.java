@@ -98,8 +98,7 @@ public class DebugLoggingAspect {
                     null,
                     new AppErrorInfo(
                             ex.getClass().getSimpleName(),
-                            sanitizer.sanitizeMessage(ex.getMessage())
-                    )
+                            sanitizer.sanitizeMessage(ex.getMessage()))
             );
             throw ex;
         }

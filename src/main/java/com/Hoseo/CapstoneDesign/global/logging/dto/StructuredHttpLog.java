@@ -15,6 +15,7 @@ public record StructuredHttpLog(
         String traceId,
         String className,
         String method,
+        String source,
         String message,
         Map<String, Object> args,
         HttpInfo http,

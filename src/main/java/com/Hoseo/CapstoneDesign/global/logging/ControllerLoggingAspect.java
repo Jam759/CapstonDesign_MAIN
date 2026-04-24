@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.global.logging;
 
 import com.Hoseo.CapstoneDesign.global.exception.GlobalBaseException;
 import com.Hoseo.CapstoneDesign.global.exception.GlobalErrorCode;
+import com.Hoseo.CapstoneDesign.security.exception.AuthBaseException;
 import com.Hoseo.CapstoneDesign.global.logging.dto.ErrorInfo;
 import com.Hoseo.CapstoneDesign.global.logging.support.HttpEventType;
 import com.Hoseo.CapstoneDesign.global.logging.support.LogCategory;
@@ -220,12 +221,11 @@ public class ControllerLoggingAspect {
 
     private ErrorInfo resolveErrorInfo(Throwable ex) {
         if (ex instanceof GlobalBaseException globalBaseException) {
-            GlobalErrorCode errorCode = globalBaseException.getErrorCode();
-            return new ErrorInfo(
-                    errorCode.getMessage(),
-                    errorCode.getErrorCode(),
-                    errorCode.getHttpStatus().value()
-            );
+            return toErrorInfo(globalBaseException.getErrorCode());
+        }
+
+        if (ex instanceof AuthBaseException authBaseException) {
+            return toErrorInfo(authBaseException.getErrorCode());
         }
 
         ResponseStatus responseStatus = AnnotatedElementUtils.findMergedAnnotation(ex.getClass(), ResponseStatus.class);
@@ -247,6 +247,14 @@ public class ControllerLoggingAspect {
                 ex.getMessage(),
                 500,
                 500
+        );
+    }
+
+    private ErrorInfo toErrorInfo(GlobalErrorCode errorCode) {
+        return new ErrorInfo(
+                errorCode.getMessage(),
+                errorCode.getErrorCode(),
+                errorCode.getHttpStatus().value()
         );
     }
 }

@@ -3,6 +3,8 @@ package com.Hoseo.CapstoneDesign.global.logging;
 import com.Hoseo.CapstoneDesign.global.logging.dto.ErrorInfo;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsErrorCode;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsException;
+import com.Hoseo.CapstoneDesign.security.exception.JwtUtilErrorCode;
+import com.Hoseo.CapstoneDesign.security.exception.JwtUtilException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -137,6 +139,34 @@ class ControllerLoggingAspectTest {
         assertThat(request.getAttribute(ERROR_ALREADY_LOGGED)).isEqualTo(true);
     }
 
+    @Test
+    @DisplayName("JWT 예외도 실제 인증 에러 코드와 상태로 구조화 로그에 남긴다")
+    void logsJwtExceptionWithAuthHttpStatus() {
+        MockHttpServletRequest request = bindRequest("POST", "/api/v1/auth/reissue");
+        when(structuredHttpLogger.resolveDurationMs(request)).thenReturn(25L);
+
+        ArgumentCaptor<ErrorInfo> errorCaptor = ArgumentCaptor.forClass(ErrorInfo.class);
+
+        assertThatThrownBy(() -> proxy.failJwt())
+                .isInstanceOf(JwtUtilException.class);
+
+        verify(structuredHttpLogger).error(
+                eq("HTTP"),
+                eq("HTTP_ERROR"),
+                eq("SampleController"),
+                eq("failJwt"),
+                eq("Request failed"),
+                isNull(),
+                same(request),
+                eq(JwtUtilErrorCode.TOKEN_IS_NULL.getHttpStatus().value()),
+                eq(25L),
+                errorCaptor.capture()
+        );
+
+        assertThat(errorCaptor.getValue().code()).isEqualTo(JwtUtilErrorCode.TOKEN_IS_NULL.getErrorCode());
+        assertThat(errorCaptor.getValue().httpStatus()).isEqualTo(JwtUtilErrorCode.TOKEN_IS_NULL.getHttpStatus().value());
+    }
+
     private MockHttpServletRequest bindRequest(String method, String uri) {
         MockHttpServletRequest request = new MockHttpServletRequest(method, uri);
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
@@ -156,6 +186,10 @@ class ControllerLoggingAspectTest {
 
         String fail() {
             throw new ProjectsException(ProjectsErrorCode.PROJECT_FORBIDDEN);
+        }
+
+        String failJwt() {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_IS_NULL);
         }
     }
 }

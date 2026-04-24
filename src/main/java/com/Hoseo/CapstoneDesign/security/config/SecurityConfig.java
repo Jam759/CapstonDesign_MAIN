@@ -7,6 +7,7 @@ import com.Hoseo.CapstoneDesign.security.filter.JwtAuthenticationFilter;
 import com.Hoseo.CapstoneDesign.security.filter.TraceMdcFilter;
 import com.Hoseo.CapstoneDesign.security.handler.CustomAccessDeniedHandler;
 import com.Hoseo.CapstoneDesign.security.handler.CustomAuthenticationEntryPoint;
+import com.Hoseo.CapstoneDesign.security.handler.GithubOAuth2FailureHandler;
 import com.Hoseo.CapstoneDesign.security.handler.GithubOAuth2SuccessHandler;
 import com.Hoseo.CapstoneDesign.security.service.AccessTokenBlackListService;
 import com.Hoseo.CapstoneDesign.security.service.impl.UserDetailServiceImpl;
@@ -44,6 +45,7 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final GithubOAuth2SuccessHandler githubOAuth2SuccessHandler;
+    private final GithubOAuth2FailureHandler githubOAuth2FailureHandler;
 
     @Bean
     public GlobalExceptionFilter globalExceptionFilter(StructuredHttpLogger structuredHttpLogger) {
@@ -93,6 +95,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .oauth2Login(oauth -> {
                     oauth.successHandler(githubOAuth2SuccessHandler);
+                    oauth.failureHandler(githubOAuth2FailureHandler);
                 })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(globalExceptionFilter, JwtAuthenticationFilter.class)

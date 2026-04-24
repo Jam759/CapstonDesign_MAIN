@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.global.logging.dto.AppErrorInfo;
 import com.Hoseo.CapstoneDesign.global.logging.dto.StructuredAppLog;
 import com.Hoseo.CapstoneDesign.global.logging.properties.LoggingProperties;
 import com.Hoseo.CapstoneDesign.global.logging.support.LogCategory;
+import com.Hoseo.CapstoneDesign.global.logging.support.LogSourceContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -108,6 +109,7 @@ public class StructuredAppLogger {
             Object result,
             AppErrorInfo errorInfo
     ) {
+        String source = formatSource(className, methodName);
         StructuredAppLog payload = new StructuredAppLog(
                 now(),
                 level,
@@ -118,6 +120,7 @@ public class StructuredAppLogger {
                 MDC.get(TRACE_ID),
                 className,
                 methodName,
+                source,
                 message,
                 args,
                 durationMs,
@@ -126,13 +129,15 @@ public class StructuredAppLogger {
         );
 
         String json = toJson(payload);
-        switch (level) {
-            case "TRACE" -> log.trace(json);
-            case "DEBUG" -> log.debug(json);
-            case "INFO" -> log.info(json);
-            case "WARN" -> log.warn(json);
-            case "ERROR" -> log.error(json);
-            default -> throw new IllegalArgumentException("Unsupported log level: " + level);
+        try (LogSourceContext ignored = LogSourceContext.open(source)) {
+            switch (level) {
+                case "TRACE" -> log.trace(json);
+                case "DEBUG" -> log.debug(json);
+                case "INFO" -> log.info(json);
+                case "WARN" -> log.warn(json);
+                case "ERROR" -> log.error(json);
+                default -> throw new IllegalArgumentException("Unsupported log level: " + level);
+            }
         }
     }
 
@@ -146,5 +151,9 @@ public class StructuredAppLogger {
         } catch (JsonProcessingException e) {
             return "{\"message\":\"structured app logging serialization failed\"}";
         }
+    }
+
+    private String formatSource(String className, String methodName) {
+        return className + "#" + methodName;
     }
 }

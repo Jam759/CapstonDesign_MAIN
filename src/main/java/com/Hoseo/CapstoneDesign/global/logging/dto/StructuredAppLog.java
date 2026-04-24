@@ -15,6 +15,7 @@ public record StructuredAppLog(
         String traceId,
         String className,
         String method,
+        String source,
         String message,
         Map<String, Object> args,
         Long durationMs,

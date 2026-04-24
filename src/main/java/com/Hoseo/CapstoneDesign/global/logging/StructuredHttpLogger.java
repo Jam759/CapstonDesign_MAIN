@@ -5,6 +5,7 @@ import com.Hoseo.CapstoneDesign.global.logging.dto.ErrorInfo;
 import com.Hoseo.CapstoneDesign.global.logging.dto.HttpInfo;
 import com.Hoseo.CapstoneDesign.global.logging.dto.StructuredHttpLog;
 import com.Hoseo.CapstoneDesign.global.logging.properties.LoggingProperties;
+import com.Hoseo.CapstoneDesign.global.logging.support.LogSourceContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +49,7 @@ public class StructuredHttpLogger {
             Integer status,
             Long durationMs
     ) {
+        String source = formatSource(className, methodName);
         StructuredHttpLog payload = new StructuredHttpLog(
                 now(),
                 "INFO",
@@ -58,6 +60,7 @@ public class StructuredHttpLogger {
                 MDC.get(TRACE_ID),
                 className,
                 methodName,
+                source,
                 message,
                 args,
                 new HttpInfo(
@@ -69,7 +72,9 @@ public class StructuredHttpLogger {
                 null
         );
 
-        log.info(toJson(payload));
+        try (LogSourceContext ignored = LogSourceContext.open(source)) {
+            log.info(toJson(payload));
+        }
     }
 
     public void error(
@@ -84,6 +89,7 @@ public class StructuredHttpLogger {
             Long durationMs,
             ErrorInfo errorInfo
     ) {
+        String source = formatSource(className, methodName);
         StructuredHttpLog payload = new StructuredHttpLog(
                 now(),
                 "ERROR",
@@ -94,6 +100,7 @@ public class StructuredHttpLogger {
                 MDC.get(TRACE_ID),
                 className,
                 methodName,
+                source,
                 message,
                 args,
                 new HttpInfo(
@@ -105,7 +112,9 @@ public class StructuredHttpLogger {
                 errorInfo
         );
 
-        log.error(toJson(payload));
+        try (LogSourceContext ignored = LogSourceContext.open(source)) {
+            log.error(toJson(payload));
+        }
     }
 
     public long resolveDurationMs(HttpServletRequest request) {
@@ -144,5 +153,9 @@ public class StructuredHttpLogger {
         } catch (JsonProcessingException e) {
             return "{\"message\":\"structured logging serialization failed\"}";
         }
+    }
+
+    private String formatSource(String className, String methodName) {
+        return className + "#" + methodName;
     }
 }

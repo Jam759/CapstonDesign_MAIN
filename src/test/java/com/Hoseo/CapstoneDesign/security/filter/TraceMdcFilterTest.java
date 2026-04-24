@@ -1,11 +1,13 @@
 package com.Hoseo.CapstoneDesign.security.filter;
 
 import com.Hoseo.CapstoneDesign.global.logging.properties.LoggingProperties;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,6 +17,11 @@ import static com.Hoseo.CapstoneDesign.global.logging.support.LoggingConstants.T
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TraceMdcFilterTest {
+
+    @AfterEach
+    void tearDown() {
+        MDC.clear();
+    }
 
     @Test
     @DisplayName("일반 요청은 traceId와 시작 시각을 설정하고 응답 헤더로 내려준다")
@@ -61,5 +68,23 @@ class TraceMdcFilterTest {
         assertThat(traceSeenInChain.get()).isNull();
         assertThat(startTimeSeenInChain.get()).isNull();
         assertThat(response.getHeader("X-Trace-Id")).isNull();
+    }
+
+    @Test
+    @DisplayName("traceId 헤더가 없으면 새 traceId를 발급한다")
+    void generatesTraceIdWhenHeaderMissing() throws Exception {
+        LoggingProperties properties = new LoggingProperties();
+        TraceMdcFilter filter = new TraceMdcFilter(properties);
+
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/projects");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        AtomicReference<String> traceSeenInChain = new AtomicReference<>();
+
+        filter.doFilter(request, response, (req, res) -> traceSeenInChain.set(MDC.get(TRACE_ID)));
+
+        assertThat(StringUtils.hasText(traceSeenInChain.get())).isTrue();
+        assertThat(response.getHeader("X-Trace-Id")).isEqualTo(traceSeenInChain.get());
+        assertThat(MDC.get(TRACE_ID)).isNull();
     }
 }

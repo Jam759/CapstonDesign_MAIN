@@ -8,14 +8,17 @@ import com.Hoseo.CapstoneDesign.global.logging.dto.AppErrorInfo;
 import com.Hoseo.CapstoneDesign.global.logging.properties.LoggingProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import static com.Hoseo.CapstoneDesign.global.logging.support.LoggingConstants.TRACE_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class StructuredAppLoggerTest {
@@ -27,6 +30,7 @@ class StructuredAppLoggerTest {
 
     @BeforeEach
     void setUp() {
+        MDC.clear();
         LoggingProperties properties = new LoggingProperties();
         Logger logger = (Logger) LoggerFactory.getLogger("STRUCTURED_APP");
         logger.detachAndStopAllAppenders();
@@ -40,8 +44,15 @@ class StructuredAppLoggerTest {
         structuredAppLogger = new StructuredAppLogger(objectMapper, properties);
     }
 
+    @AfterEach
+    void tearDown() {
+        MDC.clear();
+    }
+
     @Test
     void writesAllSupportedLevelsAsStructuredJson() throws IOException {
+        MDC.put(TRACE_ID, "trace-123");
+
         structuredAppLogger.trace("TRACE_EVENT", "SampleClass", "traceMethod", "trace", Map.of("k", "v"), 1L, null, null);
         structuredAppLogger.debug("DEBUG_EVENT", "SampleClass", "debugMethod", "debug", null, 2L, null, null);
         structuredAppLogger.info("INFO_EVENT", "SampleClass", "infoMethod", "info", null, 3L, Map.of("ok", true), null);
@@ -61,6 +72,8 @@ class StructuredAppLoggerTest {
 
         assertThat(logs).hasSize(5);
         assertThat(logs.get(0).get("level").asText()).isEqualTo("TRACE");
+        assertThat(logs.get(0).get("traceId").asText()).isEqualTo("trace-123");
+        assertThat(logs.get(0).get("source").asText()).isEqualTo("SampleClass#traceMethod");
         assertThat(logs.get(1).get("level").asText()).isEqualTo("DEBUG");
         assertThat(logs.get(2).get("level").asText()).isEqualTo("INFO");
         assertThat(logs.get(2).at("/result/ok").asBoolean()).isTrue();

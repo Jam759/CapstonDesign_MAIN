@@ -2,11 +2,9 @@ package com.Hoseo.CapstoneDesign.security.handler;
 
 import com.Hoseo.CapstoneDesign.github.exception.GitHubErrorCode;
 import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
-import com.Hoseo.CapstoneDesign.global.util.TimeUtil;
 import com.Hoseo.CapstoneDesign.security.properties.JwtProperties;
 import com.Hoseo.CapstoneDesign.security.service.RefreshTokenService;
 import com.Hoseo.CapstoneDesign.security.service.SecurityCookieService;
-import com.Hoseo.CapstoneDesign.security.util.JwtUtil;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.entity.enums.OauthType;
 import com.Hoseo.CapstoneDesign.user.service.UserService;
@@ -14,7 +12,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -22,14 +19,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
 public class GithubOAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    private final JwtUtil jwtUtil;
     private final JwtProperties jwtProperties;
     private final UserService userService;
     private final RefreshTokenService refreshTokenService;
@@ -56,19 +50,7 @@ public class GithubOAuth2SuccessHandler implements AuthenticationSuccessHandler 
 
         Users user = userService.getOrCreateOauthUser(OauthType.GITHUB, githubProviderId, githubLogin);
         String refreshToken = refreshTokenService.createAndSaveInitial(user);
-        Date refreshTokenExpDate = jwtUtil.getExpirationFromRefreshToken(refreshToken);
-        Duration refreshTokenExpDuration = TimeUtil.toDuration(refreshTokenExpDate);
 
-        ResponseCookie.ResponseCookieBuilder cb = ResponseCookie.from(jwtProperties.cookieName(), refreshToken)
-                .httpOnly(true)
-                .secure(jwtProperties.cookieSecure())
-                .path("/api/v1/auth/refresh")
-                .sameSite(jwtProperties.cookieSamesite())
-                .maxAge(refreshTokenExpDuration);
-
-        if (jwtProperties.cookieDomain() != null && !jwtProperties.cookieDomain().isBlank()) {
-            cb.domain(jwtProperties.cookieDomain());
-        }
         securityCookieService.createRefreshTokenCookie(response, refreshToken);
         response.sendRedirect(jwtProperties.frontRedirectUrl().toString());
     }

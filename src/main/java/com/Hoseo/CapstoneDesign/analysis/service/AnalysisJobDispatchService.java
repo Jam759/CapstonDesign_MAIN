@@ -6,6 +6,7 @@ import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisDtoFactory;
 import com.Hoseo.CapstoneDesign.global.aws.properties.SqsProperties;
 import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsBaseMessage;
 import com.Hoseo.CapstoneDesign.global.aws.sqs.SqsMessageSender;
+import com.Hoseo.CapstoneDesign.global.logging.support.TraceIdContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,26 +22,23 @@ public class AnalysisJobDispatchService {
     private final SqsMessageSender sqsMessageSender;
     private final SqsProperties sqsProperties;
 
-    // facade에서는 사용 금지
     @Transactional
     public void dispatchIfPending(Long jobId, String traceId) {
-        AnalysisJob job = analysisJobService.getByIdForUpdate(jobId);
-        if (!job.isPending()) {
-            return;
-        }
+        String effectiveTraceId = StringUtils.hasText(traceId) ? traceId : UUID.randomUUID().toString();
 
-        SqsBaseMessage message = AnalysisDtoFactory.toSqsAnalysisQueueMessage(job);
-        if (StringUtils.hasText(traceId)) {
-            message = message.toBuilder()
-                    .traceId(traceId)
-                    .build();
-        } else {
-            message = message.toBuilder()
-                    .traceId(UUID.randomUUID().toString())
-                    .build();
-        }
+        try (TraceIdContext ignored = TraceIdContext.open(effectiveTraceId)) {
+            AnalysisJob job = analysisJobService.getByIdForUpdate(jobId);
+            if (!job.isPending()) {
+                return;
+            }
 
-        sqsMessageSender.send(sqsProperties.analysisQueue(), message);
-        job.updateJobStatus(AnalysisJobStatus.ANALYSIS_JOB_QUEUED);
+            SqsBaseMessage message = AnalysisDtoFactory.toSqsAnalysisQueueMessage(job)
+                    .toBuilder()
+                    .traceId(effectiveTraceId)
+                    .build();
+
+            sqsMessageSender.send(sqsProperties.analysisQueue(), message);
+            job.updateJobStatus(AnalysisJobStatus.ANALYSIS_JOB_QUEUED);
+        }
     }
 }
