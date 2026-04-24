@@ -186,12 +186,42 @@ public class JwtUtil {
 
     private Claims parseAccess(String rawToken) {
         String token = stripBearerPrefix(rawToken);
-        return accessTokenParser.parseSignedClaims(token).getPayload();
+        try {
+            return accessTokenParser.parseSignedClaims(token).getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_EXPIRED);
+        } catch (UnsupportedJwtException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_UNSUPPORTED);
+        } catch (SignatureException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_BAD_SIGNATURE);
+        } catch (MalformedJwtException | io.jsonwebtoken.io.DecodingException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_MALFORMED);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_ILLEGAL_ARGUMENT);
+        } catch (JwtException e) {
+            log.error("[JWT_EXCEPTION] Unknown JWT exception -> {}", e.getMessage(), e);
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_OTHER);
+        }
     }
 
     private Claims parseRefresh(String rawToken) {
         String token = stripBearerPrefix(rawToken);
-        return refreshTokenParser.parseSignedClaims(token).getPayload();
+        try {
+            return refreshTokenParser.parseSignedClaims(token).getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_EXPIRED);
+        } catch (UnsupportedJwtException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_UNSUPPORTED);
+        } catch (SignatureException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_BAD_SIGNATURE);
+        } catch (MalformedJwtException | io.jsonwebtoken.io.DecodingException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_MALFORMED);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_ILLEGAL_ARGUMENT);
+        } catch (JwtException e) {
+            log.error("[JWT_EXCEPTION] Unknown JWT exception -> {}", e.getMessage(), e);
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_OTHER);
+        }
     }
 
     public String stripBearerPrefix(String token) {
