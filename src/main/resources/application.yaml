@@ -110,8 +110,8 @@ auth:
     refresh-ttl: 7 # days
     cookie-name: "REFRESH_TOKEN"  #prod -> os var
     cookie-http-only: true
-    cookie-secure: ${COOKIE_SECURE:false}
-    cookie-samesite: "Lax"
+    cookie-secure: ${COOKIE_SECURE:true}
+    cookie-samesite: "None"
     front-redirect-url: "${FRONTEND_REDIRECT_URL:http://localhost:5173/install-app}"
 
 logging:
