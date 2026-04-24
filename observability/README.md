@@ -2,7 +2,7 @@
 
 This project ships a local observability stack for:
 
-- Spring application logs and metrics
+- Spring structured logs and metrics
 - GitWorker logs and metrics
 - Loki, Prometheus, Alloy, and Grafana
 
@@ -30,25 +30,33 @@ Grafana default credentials:
 
 ## Dashboard
 
-Grafana provisions a single dashboard:
+Grafana provisions these dashboards:
 
 - `Capstone / Capstone Observability Overview`
+- `Capstone / Capstone Main Server`
+- `Capstone / Capstone Worker Server`
 
-Use the dashboard variables at the top to filter by:
+Common dashboard filters:
 
 - `traceId`
+- `minDurationMs`
+
+Main server dashboard filters:
+
 - `mainUriRegex`
 - `mainPathFilter`
+- `mainLogContainsText`
+
+Worker server dashboard filters:
+
 - `workerEventTypeRegex`
 - `workerContainsText`
-- `minDurationMs`
 
 ## Log Jobs
 
 - Main structured HTTP logs: `job="capstone-structured-http"`
-- Main application logs: `job="capstone-application"`
+- Main structured app logs: `job="capstone-structured-app"`
 - GitWorker structured HTTP logs: `job="git-worker-structured-http"`
-- GitWorker application logs: `job="git-worker-application"`
 
 ## Metrics Targets
 
@@ -57,10 +65,9 @@ Use the dashboard variables at the top to filter by:
 
 ## Notes
 
-- Spring writes logs to `./.logs/application.log` and `./.logs/structured-http.log`.
-- GitWorker writes logs to `./.worker-logs/application.log` and `./.worker-logs/structured-http.log`.
+- Spring writes structured logs to `./.logs/structured-http.log` and `./.logs/structured-app.log`.
+- GitWorker writes logs to `./.worker-logs/structured-http.log`.
 - Alloy reads `./.worker-logs` directly from the Windows workspace.
-- Alloy drops `DEBUG` from `git-worker-application` before sending logs to Loki.
 - Prometheus scrapes Spring from `host.docker.internal:8080/actuator/prometheus`.
 - Prometheus scrapes GitWorker from the current WSL IP configured in `observability/prometheus/prometheus.yml`.
 - Logging policy and SQS trace rules are documented in [LOGGING_POLICY.md](./LOGGING_POLICY.md).

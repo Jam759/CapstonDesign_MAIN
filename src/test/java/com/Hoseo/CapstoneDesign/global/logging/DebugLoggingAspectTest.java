@@ -1,28 +1,36 @@
 package com.Hoseo.CapstoneDesign.global.logging;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.Hoseo.CapstoneDesign.global.logging.properties.LoggingProperties;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@ExtendWith(OutputCaptureExtension.class)
 class DebugLoggingAspectTest {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private SampleService proxy;
     private SampleRepository repositoryProxy;
     private SampleMapper mapperProxy;
+    private ListAppender<ILoggingEvent> appender;
 
     @BeforeEach
     void setUp() {
@@ -32,7 +40,17 @@ class DebugLoggingAspectTest {
         properties.getDebugAspect().setMaxCollectionSize(3);
         properties.getDebugAspect().setLogReturnValue(true);
 
-        DebugLoggingAspect aspect = new DebugLoggingAspect(properties);
+        Logger logger = (Logger) LoggerFactory.getLogger("STRUCTURED_APP");
+        logger.detachAndStopAllAppenders();
+        logger.setAdditive(false);
+        logger.setLevel(Level.TRACE);
+
+        appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+
+        StructuredAppLogger structuredAppLogger = new StructuredAppLogger(objectMapper, properties);
+        DebugLoggingAspect aspect = new DebugLoggingAspect(properties, structuredAppLogger);
 
         AspectJProxyFactory serviceFactory = new AspectJProxyFactory(new SampleService());
         serviceFactory.addAspect(aspect);
@@ -48,8 +66,8 @@ class DebugLoggingAspectTest {
     }
 
     @Test
-    @DisplayName("민감값은 마스킹되고 일반 문자열은 길이 제한으로 줄여서 로그한다")
-    void masksSensitiveValuesAndTruncatesLongStrings(CapturedOutput output) {
+    @DisplayName("민감값을 마스킹하고 긴 문자열과 컬렉션을 잘라 구조화 로그에 남긴다")
+    void masksSensitiveValuesAndTruncatesLongStrings() throws IOException {
         SamplePayload payload = new SamplePayload(
                 "api-secret-value",
                 "n".repeat(40),
@@ -58,44 +76,60 @@ class DebugLoggingAspectTest {
 
         proxy.process("refresh-token-value", "a".repeat(30), payload);
 
-        String logs = output.getOut();
+        List<JsonNode> logs = readStructuredLogs();
 
-        assertThat(logs).contains("ENTER] SampleService.process");
-        assertThat(logs).contains("refreshTokenRaw=<redacted>");
-        assertThat(logs).contains("note=aaaaaaaaaaaaaaaaaaaa...(len=30)");
-        assertThat(logs).contains("apiKey=<redacted>");
-        assertThat(logs).contains("comments=[first, second, third, <+1 more>]");
-        assertThat(logs).contains("EXIT] SampleService.process");
-        assertThat(logs).contains("durationMs=");
-        assertThat(logs).contains("accessToken=<redacted>");
+        assertThat(logs).hasSize(2);
+        assertThat(logs.get(0).get("eventType").asText()).isEqualTo("METHOD_ENTER");
+        assertThat(logs.get(0).get("className").asText()).isEqualTo("SampleService");
+        assertThat(logs.get(0).get("method").asText()).isEqualTo("process");
+        assertThat(logs.get(0).at("/args/refreshTokenRaw").asText()).isEqualTo("<redacted>");
+        assertThat(logs.get(0).at("/args/note").asText()).isEqualTo("aaaaaaaaaaaaaaaaaaaa...(len=30)");
+        assertThat(logs.get(0).at("/args/payload/apiKey").asText()).isEqualTo("<redacted>");
+        assertThat(logs.get(0).at("/args/payload/comments/3").asText()).isEqualTo("<+1 more>");
+
+        assertThat(logs.get(1).get("eventType").asText()).isEqualTo("METHOD_EXIT");
+        assertThat(logs.get(1).get("durationMs").asLong()).isGreaterThanOrEqualTo(0L);
+        assertThat(logs.get(1).at("/result/accessToken").asText()).isEqualTo("<redacted>");
     }
 
     @Test
-    @DisplayName("예외가 발생하면 예외 타입과 메시지를 길이 제한으로 남긴다")
-    void logsThrownException(CapturedOutput output) {
+    @DisplayName("예외 발생 시 타입과 메시지를 구조화 로그에 남긴다")
+    void logsThrownException() throws IOException {
         assertThatThrownBy(() -> proxy.fail("refresh-token-value"))
                 .isInstanceOf(IllegalStateException.class);
 
-        String logs = output.getOut();
-        assertThat(logs).contains("ENTER] SampleService.fail");
-        assertThat(logs).contains("THROW] SampleService.fail");
-        assertThat(logs).contains("exception=IllegalStateException");
-        assertThat(logs).contains("xxxxxxxxxxxxxxxxxxxx...(len=45)");
+        List<JsonNode> logs = readStructuredLogs();
+
+        assertThat(logs).hasSize(2);
+        assertThat(logs.get(0).get("eventType").asText()).isEqualTo("METHOD_ENTER");
+        assertThat(logs.get(1).get("eventType").asText()).isEqualTo("METHOD_THROW");
+        assertThat(logs.get(1).at("/error/type").asText()).isEqualTo("IllegalStateException");
+        assertThat(logs.get(1).at("/error/message").asText()).isEqualTo("xxxxxxxxxxxxxxxxxxxx...(len=45)");
     }
 
     @Test
-    @DisplayName("repository와 mapper 호출도 디버그 aspect가 추적한다")
-    void logsRepositoryAndMapperCalls(CapturedOutput output) {
+    @DisplayName("repository와 mapper 호출도 구조화 로그로 남긴다")
+    void logsRepositoryAndMapperCalls() throws IOException {
         repositoryProxy.findSecretByToken("refresh-token-value");
         mapperProxy.selectByState("oauth-state-secret");
 
-        String logs = output.getOut();
-        assertThat(logs).contains("ENTER] SampleRepository.findSecretByToken");
-        assertThat(logs).contains("rawToken=<redacted>");
-        assertThat(logs).contains("EXIT] SampleRepository.findSecretByToken");
-        assertThat(logs).contains("ENTER] SampleMapper.selectByState");
-        assertThat(logs).contains("state=<redacted>");
-        assertThat(logs).contains("EXIT] SampleMapper.selectByState");
+        List<JsonNode> logs = readStructuredLogs();
+
+        assertThat(logs).hasSize(4);
+        assertThat(logs.get(0).get("className").asText()).isEqualTo("SampleRepository");
+        assertThat(logs.get(0).at("/args/rawToken").asText()).isEqualTo("<redacted>");
+        assertThat(logs.get(1).get("eventType").asText()).isEqualTo("METHOD_EXIT");
+        assertThat(logs.get(2).get("className").asText()).isEqualTo("SampleMapper");
+        assertThat(logs.get(2).at("/args/state").asText()).isEqualTo("<redacted>");
+        assertThat(logs.get(3).get("eventType").asText()).isEqualTo("METHOD_EXIT");
+    }
+
+    private List<JsonNode> readStructuredLogs() throws IOException {
+        List<JsonNode> logs = new ArrayList<>();
+        for (ILoggingEvent event : appender.list) {
+            logs.add(objectMapper.readTree(event.getFormattedMessage()));
+        }
+        return logs;
     }
 
     @Service

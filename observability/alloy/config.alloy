@@ -57,6 +57,44 @@ loki.process "structured_http" {
   }
 }
 
+loki.process "structured_app" {
+  forward_to = [loki.write.local.receiver]
+
+  stage.json {
+    expressions = {
+      timestamp      = "timestamp",
+      level          = "level",
+      service        = "service",
+      server_type    = "serverType",
+      category       = "category",
+      event_type     = "eventType",
+      trace_id       = "traceId",
+      class_name     = "className",
+      handler_method = "method",
+      message        = "message",
+      duration_ms    = "durationMs",
+      error_type     = "error.type",
+      error_message  = "error.message",
+    }
+    drop_malformed = true
+  }
+
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339"
+  }
+
+  stage.labels {
+    values = {
+      service     = "service",
+      server_type = "server_type",
+      level       = "level",
+      category    = "category",
+      event_type  = "event_type",
+    }
+  }
+}
+
 
 loki.source.file "structured_http" {
   targets = [
@@ -75,16 +113,16 @@ loki.source.file "structured_http" {
   }
 }
 
-loki.source.file "application" {
+loki.source.file "structured_app" {
   targets = [
     {
-      __path__ = "/var/log/capstone/application.log",
-      job      = "capstone-application",
+      __path__ = "/var/log/capstone/structured-app.log",
+      job      = "capstone-structured-app",
       app      = "capstone-main",
       env      = env("APP_ENV"),
     },
   ]
-  forward_to = [loki.write.local.receiver]
+  forward_to = [loki.process.structured_app.receiver]
   tail_from_end = true
   file_match {
     enabled = true

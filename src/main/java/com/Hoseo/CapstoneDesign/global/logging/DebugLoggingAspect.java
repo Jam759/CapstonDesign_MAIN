@@ -1,12 +1,12 @@
 package com.Hoseo.CapstoneDesign.global.logging;
 
+import com.Hoseo.CapstoneDesign.global.logging.dto.AppErrorInfo;
 import com.Hoseo.CapstoneDesign.global.logging.properties.LoggingProperties;
+import com.Hoseo.CapstoneDesign.global.logging.support.AppEventType;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -19,15 +19,16 @@ import java.util.Set;
 @ConditionalOnProperty(prefix = "app.logging.debug-aspect", name = "enabled", havingValue = "true")
 public class DebugLoggingAspect {
 
-    private static final Logger log = LoggerFactory.getLogger("[DEBUG_ASPECT]");
     private static final Set<String> OBJECT_METHOD_NAMES = Set.of("toString", "hashCode", "equals");
 
     private final LoggingProperties loggingProperties;
     private final DebugLogSanitizer sanitizer;
+    private final StructuredAppLogger structuredAppLogger;
 
-    public DebugLoggingAspect(LoggingProperties loggingProperties) {
+    public DebugLoggingAspect(LoggingProperties loggingProperties, StructuredAppLogger structuredAppLogger) {
         this.loggingProperties = loggingProperties;
         this.sanitizer = new DebugLogSanitizer(loggingProperties.getDebugAspect());
+        this.structuredAppLogger = structuredAppLogger;
     }
 
     @Around("""
@@ -51,7 +52,16 @@ public class DebugLoggingAspect {
         String methodName = method.getName();
         Map<String, Object> args = sanitizer.sanitizeArgs(signature.getParameterNames(), joinPoint.getArgs());
 
-        log.info("[ENTER] {}.{} args={}", className, methodName, args);
+        structuredAppLogger.trace(
+                AppEventType.METHOD_ENTER.name(),
+                className,
+                methodName,
+                "Method entered",
+                args,
+                null,
+                null,
+                null
+        );
 
         long startNanos = System.nanoTime();
 
@@ -59,28 +69,37 @@ public class DebugLoggingAspect {
             Object result = joinPoint.proceed();
             long durationMs = (System.nanoTime() - startNanos) / 1_000_000L;
 
-            if (loggingProperties.getDebugAspect().isLogReturnValue()) {
-                log.info(
-                        "[EXIT] {}.{} durationMs={} result={}",
-                        className,
-                        methodName,
-                        durationMs,
-                        sanitizer.sanitizeReturnValue(result)
-                );
-            } else {
-                log.info("[EXIT] {}.{} durationMs={}", className, methodName, durationMs);
-            }
+            Object sanitizedResult = loggingProperties.getDebugAspect().isLogReturnValue()
+                    ? sanitizer.sanitizeReturnValue(result)
+                    : null;
+
+            structuredAppLogger.trace(
+                    AppEventType.METHOD_EXIT.name(),
+                    className,
+                    methodName,
+                    "Method completed",
+                    null,
+                    durationMs,
+                    sanitizedResult,
+                    null
+            );
 
             return result;
         } catch (Throwable ex) {
             long durationMs = (System.nanoTime() - startNanos) / 1_000_000L;
-            log.info(
-                    "[THROW] {}.{} durationMs={} exception={} message={}",
+
+            structuredAppLogger.error(
+                    AppEventType.METHOD_THROW.name(),
                     className,
                     methodName,
+                    "Method threw exception",
+                    null,
                     durationMs,
-                    ex.getClass().getSimpleName(),
-                    sanitizer.sanitizeMessage(ex.getMessage())
+                    null,
+                    new AppErrorInfo(
+                            ex.getClass().getSimpleName(),
+                            sanitizer.sanitizeMessage(ex.getMessage())
+                    )
             );
             throw ex;
         }

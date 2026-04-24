@@ -103,7 +103,7 @@
 출력 위치:
 
 - 콘솔
-- `./.logs/application.log`
+- 평문 `application.log` 는 더 이상 사용하지 않음
 
 형식:
 
@@ -413,7 +413,7 @@ SQS analysis result received. traceId=23c17112-5410-455d-89ca-8a58c4a195a9, jobI
 
 ### 3. 일반 애플리케이션 로그는 아직 구조화 JSON이 아님
 
-현재 `application.log` 는 텍스트 로그이며, `traceId` 로 grep/검색은 쉽지만 로그 스키마 기반 집계는 구조화 HTTP 로그보다 제한적이다.
+현재 운영 관측 기준 로그 파일은 구조화 로그(`structured-http.log`, `structured-app.log`)만 사용한다.
 
 ## 운영 기준 권장 사용법
 

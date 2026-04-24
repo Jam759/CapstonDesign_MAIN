@@ -11,6 +11,8 @@ public class LoggingProperties {
     private String service = "capstone-main";
     private String serverType = "spring";
     private String directory = "./.logs";
+    private boolean consoleEnabled = true;
+    private boolean structuredEnabled = false;
     private List<String> excludePaths = new ArrayList<>();
     private DebugAspect debugAspect = new DebugAspect();
 
@@ -36,6 +38,22 @@ public class LoggingProperties {
 
     public void setDirectory(String directory) {
         this.directory = directory;
+    }
+
+    public boolean isConsoleEnabled() {
+        return consoleEnabled;
+    }
+
+    public void setConsoleEnabled(boolean consoleEnabled) {
+        this.consoleEnabled = consoleEnabled;
+    }
+
+    public boolean isStructuredEnabled() {
+        return structuredEnabled;
+    }
+
+    public void setStructuredEnabled(boolean structuredEnabled) {
+        this.structuredEnabled = structuredEnabled;
     }
 
     public List<String> getExcludePaths() {

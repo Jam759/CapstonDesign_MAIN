@@ -1,24 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <springProperty scope="context" name="LOG_DIR" source="app.logging.directory" defaultValue=".logs"/>
+    <springProperty scope="context" name="CONSOLE_ENABLED" source="app.logging.console-enabled" defaultValue="true"/>
+    <springProperty scope="context" name="STRUCTURED_ENABLED" source="app.logging.structured-enabled" defaultValue="false"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [traceId=%X{traceId:-}] %logger - %msg%n</pattern>
         </encoder>
-    </appender>
-
-    <appender name="APPLICATION_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR}/application.log</file>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [traceId=%X{traceId:-}] %logger - %msg%n</pattern>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_DIR}/archive/application.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>20MB</maxFileSize>
-            <maxHistory>14</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
     </appender>
 
     <appender name="STRUCTURED_JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -34,13 +23,80 @@
         </rollingPolicy>
     </appender>
 
-    <logger name="STRUCTURED_HTTP" level="INFO" additivity="false">
-        <appender-ref ref="STRUCTURED_JSON_FILE"/>
-    </logger>
+    <appender name="STRUCTURED_APP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/structured-app.log</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/archive/structured-app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>20MB</maxFileSize>
+            <maxHistory>14</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
 
-    <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="APPLICATION_FILE"/>
-    </root>
+    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+        <key>CONSOLE_ENABLED</key>
+        <value>true</value>
+    </condition>
+    <if>
+        <then>
+            <root level="INFO">
+                <appender-ref ref="CONSOLE"/>
+            </root>
+        </then>
+        <else>
+            <root level="INFO"/>
+        </else>
+    </if>
+
+    <condition class="ch.qos.logback.core.boolex.ExpressionPropertyCondition">
+        <expression>propertyEquals("CONSOLE_ENABLED", "true") &amp;&amp; propertyEquals("STRUCTURED_ENABLED", "true")</expression>
+    </condition>
+    <if>
+        <then>
+            <logger name="STRUCTURED_HTTP" level="INFO">
+                <appender-ref ref="STRUCTURED_JSON_FILE"/>
+            </logger>
+            <logger name="STRUCTURED_APP" level="TRACE">
+                <appender-ref ref="STRUCTURED_APP_FILE"/>
+            </logger>
+        </then>
+    </if>
+
+    <condition class="ch.qos.logback.core.boolex.ExpressionPropertyCondition">
+        <expression>propertyEquals("CONSOLE_ENABLED", "true") &amp;&amp; !propertyEquals("STRUCTURED_ENABLED", "true")</expression>
+    </condition>
+    <if>
+        <then>
+            <logger name="STRUCTURED_HTTP" level="INFO"/>
+            <logger name="STRUCTURED_APP" level="TRACE"/>
+        </then>
+    </if>
+
+    <condition class="ch.qos.logback.core.boolex.ExpressionPropertyCondition">
+        <expression>!propertyEquals("CONSOLE_ENABLED", "true") &amp;&amp; propertyEquals("STRUCTURED_ENABLED", "true")</expression>
+    </condition>
+    <if>
+        <then>
+            <logger name="STRUCTURED_HTTP" level="INFO" additivity="false">
+                <appender-ref ref="STRUCTURED_JSON_FILE"/>
+            </logger>
+            <logger name="STRUCTURED_APP" level="TRACE" additivity="false">
+                <appender-ref ref="STRUCTURED_APP_FILE"/>
+            </logger>
+        </then>
+    </if>
+
+    <condition class="ch.qos.logback.core.boolex.ExpressionPropertyCondition">
+        <expression>!propertyEquals("CONSOLE_ENABLED", "true") &amp;&amp; !propertyEquals("STRUCTURED_ENABLED", "true")</expression>
+    </condition>
+    <if>
+        <then>
+            <logger name="STRUCTURED_HTTP" level="INFO" additivity="false"/>
+            <logger name="STRUCTURED_APP" level="TRACE" additivity="false"/>
+        </then>
+    </if>
 
 </configuration>
