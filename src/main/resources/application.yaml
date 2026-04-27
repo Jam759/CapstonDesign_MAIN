@@ -121,8 +121,6 @@ logging:
 
 mybatis:
   mapper-locations: classpath:/mapper/**/*.xml
-  type-handlers-package: com.jam.socialNetworkService.global.handler
-  type-aliases-package: com.example.domain
   configuration:
     map-underscore-to-camel-case: true
 
