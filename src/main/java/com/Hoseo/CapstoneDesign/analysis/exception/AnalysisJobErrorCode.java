@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum AnalysisJobErrorCode implements GlobalErrorCode {
 
-    ANALYSIS_JOB_NOT_FOUND(HttpStatus.NOT_FOUND, 3004, "존재하지 않는 JOB");
+    ANALYSIS_JOB_NOT_FOUND(HttpStatus.NOT_FOUND, 3001, "존재하지 않는 JOB");
 
 
     private final HttpStatus httpStatus;

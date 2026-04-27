@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum AccessTokenBlackListErrorCode implements GlobalErrorCode {
 
-    TOKEN_IS_BLACK_LIST(HttpStatus.BAD_REQUEST, 5001, "로그아웃된 유저입니다.");
+    TOKEN_IS_BLACK_LIST(HttpStatus.UNAUTHORIZED, 1201, "로그아웃된 유저입니다.");
 
     private final HttpStatus httpStatus;
     private final int errorCode;

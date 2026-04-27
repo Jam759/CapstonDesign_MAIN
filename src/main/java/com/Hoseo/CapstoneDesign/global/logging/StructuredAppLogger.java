@@ -1,5 +1,7 @@
 package com.Hoseo.CapstoneDesign.global.logging;
 
+import com.Hoseo.CapstoneDesign.common.exception.CommonException;
+import com.Hoseo.CapstoneDesign.common.exception.CommonErrorCode;
 import com.Hoseo.CapstoneDesign.global.logging.dto.AppErrorInfo;
 import com.Hoseo.CapstoneDesign.global.logging.dto.StructuredAppLog;
 import com.Hoseo.CapstoneDesign.global.logging.properties.LoggingProperties;
@@ -136,7 +138,7 @@ public class StructuredAppLogger {
                 case "INFO" -> log.info(json);
                 case "WARN" -> log.warn(json);
                 case "ERROR" -> log.error(json);
-                default -> throw new IllegalArgumentException("Unsupported log level: " + level);
+                default -> throw new CommonException(CommonErrorCode.INVALID_INPUT);
             }
         }
     }
