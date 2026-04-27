@@ -22,9 +22,12 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
             ProjectMemberRole projectRole
     );
 
-    Optional<ProjectMember> findByProjectMemberIdAndUserUserId(Long projectMemberId, Long userId);
+    Optional<ProjectMember> findByProjectMemberIdAndUserUserIdAndProjectDeletedAtIsNull(
+            Long projectMemberId,
+            Long userId
+    );
 
-    Optional<ProjectMember> findByProjectProjectIdAndUserUserIdAndResponse(
+    Optional<ProjectMember> findByProjectProjectIdAndProjectDeletedAtIsNullAndUserUserIdAndResponse(
             Long projectId,
             Long userId,
             ProjectInviteStatus response

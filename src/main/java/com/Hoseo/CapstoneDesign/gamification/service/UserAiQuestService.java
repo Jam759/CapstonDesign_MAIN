@@ -19,19 +19,20 @@ public class UserAiQuestService {
     private final UserPersonalQuestRepository repository;
 
     public List<UserAiQuest> getQuestsByUser(Users user) {
-        return repository.findByUser(user);
+        return repository.findByUserAndProjectDeletedAtIsNull(user);
     }
 
     public List<UserAiQuest> getQuestsByUserAndProject(Users user, Long projectId) {
-        return repository.findByUserAndProject_ProjectId(user, projectId);
+        return repository.findByUserAndProjectProjectIdAndProjectDeletedAtIsNull(user, projectId);
     }
 
     public UserAiQuest updateQuestStatus(
+            Users user,
             Long questId,
             AiQuestApprovalStatus approvalStatus,
             AiQuestProgressStatus progressStatus
     ) {
-        UserAiQuest quest = repository.findById(questId)
+        UserAiQuest quest = repository.findByUserAiQuestIdAndUserAndProjectDeletedAtIsNull(questId, user)
                 .orElseThrow(() -> new GamificationException(GamificationErrorCode.QUEST_NOT_FOUND));
         quest.updateStatus(approvalStatus, progressStatus);
         return repository.save(quest);

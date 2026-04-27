@@ -45,12 +45,12 @@ public class ProjectMemberService {
     }
 
     public ProjectMember getByIdAndUserId(Long projectMemberId, Long userId) {
-        return repository.findByProjectMemberIdAndUserUserId(projectMemberId, userId)
+        return repository.findByProjectMemberIdAndUserUserIdAndProjectDeletedAtIsNull(projectMemberId, userId)
                 .orElseThrow(() -> new ProjectsException(ProjectsErrorCode.PROJECT_INVITE_NOT_FOUND));
     }
 
     public ProjectMember getPendingInvite(Long projectId, Long userId) {
-        return repository.findByProjectProjectIdAndUserUserIdAndResponse(
+        return repository.findByProjectProjectIdAndProjectDeletedAtIsNullAndUserUserIdAndResponse(
                         projectId,
                         userId,
                         ProjectInviteStatus.INVITED
