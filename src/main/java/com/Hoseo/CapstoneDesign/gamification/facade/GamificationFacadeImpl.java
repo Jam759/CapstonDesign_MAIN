@@ -61,7 +61,7 @@ public class GamificationFacadeImpl implements GamificationFacade {
     @Transactional(readOnly = false)
     public QuestResponse acceptQuest(Users user, Long questId) {
         UserAiQuest quest = questService.updateQuestStatus(
-                questId, AiQuestApprovalStatus.REQUEST_ACCEPT, AiQuestProgressStatus.ACTIVE
+                user, questId, AiQuestApprovalStatus.REQUEST_ACCEPT, AiQuestProgressStatus.ACTIVE
         );
         return GamificationDtoFactory.toQuestResponse(quest);
     }
@@ -70,7 +70,7 @@ public class GamificationFacadeImpl implements GamificationFacade {
     @Transactional(readOnly = false)
     public QuestResponse declineQuest(Users user, Long questId) {
         UserAiQuest quest = questService.updateQuestStatus(
-                questId, AiQuestApprovalStatus.REQUEST_REJECT, AiQuestProgressStatus.ARCHIVED
+                user, questId, AiQuestApprovalStatus.REQUEST_REJECT, AiQuestProgressStatus.ARCHIVED
         );
         return GamificationDtoFactory.toQuestResponse(quest);
     }

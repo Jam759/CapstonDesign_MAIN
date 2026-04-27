@@ -1,4 +1,4 @@
-{
+﻿{
     "annotations":  {
                         "list":  [
                                      {
@@ -1262,7 +1262,7 @@
                                                               "uid":  "loki"
                                                           },
                                            "editorMode":  "code",
-                                           "expr":  "{job=\"capstone-structured-http\", level=\"INFO\", event_type=\"HTTP_RESPONSE\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json level=\"level\", method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | line_format \"{{.level}} {{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+                                           "expr":  "{job=\"capstone-structured-http\", level=\"INFO\", event_type=\"HTTP_RESPONSE\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json level=\"level\", method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\" | line_format \"{{.level}} {{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
                                            "queryType":  "range",
                                            "refId":  "A"
                                        }
@@ -1300,7 +1300,7 @@
                                                               "uid":  "loki"
                                                           },
                                            "editorMode":  "code",
-                                           "expr":  "{job=\"git-worker-structured-http\", level=\"INFO\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} {{.duration}}ms {{.error_code}} {{.error_message}}\"",
+                                           "expr":  "{job=\"git-worker-structured-http\", level=\"INFO\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}} {{.duration}}ms {{.error_code}} {{.error_message}}\"",
                                            "queryType":  "range",
                                            "refId":  "A"
                                        }
@@ -1338,7 +1338,7 @@
                                                               "uid":  "loki"
                                                           },
                                            "editorMode":  "code",
-                                           "expr":  "{job=\"capstone-structured-http\", level=\"ERROR\", event_type=\"HTTP_ERROR\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json level=\"level\", method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", error_code=\"error.code\", error_message=\"error.message\", msg=\"message\" | line_format \"{{.level}} {{.status}} {{.method}} {{.path}} {{.duration}}ms error={{.error_code}} trace={{.trace_id}} {{.msg}} {{.error_message}}\"",
+                                           "expr":  "{job=\"capstone-structured-http\", level=\"ERROR\", event_type=\"HTTP_ERROR\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json level=\"level\", method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", error_code=\"error.code\", error_message=\"error.message\", msg=\"message\", args=\"args\", result=\"result\" | line_format \"{{.level}} {{.status}} {{.method}} {{.path}} {{.duration}}ms error={{.error_code}} trace={{.trace_id}} {{.msg}} args={{.args}} result={{.result}} {{.error_message}}\"",
                                            "queryType":  "range",
                                            "refId":  "A"
                                        }
@@ -1376,7 +1376,7 @@
                                                               "uid":  "loki"
                                                           },
                                            "editorMode":  "code",
-                                           "expr":  "{job=\"git-worker-structured-http\", level=\"ERROR\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} error={{.error_code}} {{.error_message}}\"",
+                                           "expr":  "{job=\"git-worker-structured-http\", level=\"ERROR\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}} error={{.error_code}} {{.error_message}}\"",
                                            "queryType":  "range",
                                            "refId":  "A"
                                        }
@@ -1414,7 +1414,7 @@
                                                               "uid":  "loki"
                                                           },
                                            "editorMode":  "code",
-                                           "expr":  "{job=\"capstone-structured-http\", level=~\"INFO|ERROR\", event_type=~\"HTTP_RESPONSE|HTTP_ERROR\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json level=\"level\", method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | duration \u003e= ${minDurationMs} | line_format \"{{.level}} {{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+                                           "expr":  "{job=\"capstone-structured-http\", level=~\"INFO|ERROR\", event_type=~\"HTTP_RESPONSE|HTTP_ERROR\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json level=\"level\", method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\" | duration \u003e= ${minDurationMs} | line_format \"{{.level}} {{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
                                            "queryType":  "range",
                                            "refId":  "A"
                                        }
@@ -1452,7 +1452,7 @@
                                                               "uid":  "loki"
                                                           },
                                            "editorMode":  "code",
-                                           "expr":  "{job=\"git-worker-structured-http\", level=~\"INFO|ERROR\", category=~\"SQS|ANALYSIS|JOB_STEP\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | duration \u003e= ${minDurationMs} | line_format \"{{.level}} {{.duration}}ms {{.category}} {{.event_type}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+                                           "expr":  "{job=\"git-worker-structured-http\", level=~\"INFO|ERROR\", category=~\"SQS|ANALYSIS|JOB_STEP\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\" | duration \u003e= ${minDurationMs} | line_format \"{{.level}} {{.duration}}ms {{.category}} {{.event_type}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
                                            "queryType":  "range",
                                            "refId":  "A"
                                        }

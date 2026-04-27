@@ -1,4 +1,4 @@
-{
+﻿{
   "annotations": {
     "list": [
       {
@@ -503,7 +503,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 12,
         "x": 0,
         "y": 23
@@ -567,7 +567,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"capstone-structured-http\", level=~\"INFO|ERROR\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json level=\"level\", method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | duration >= ${minDurationMs} | line_format \"{{.level}} {{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "expr": "{job=\"capstone-structured-http\", level=~\"INFO|ERROR\"} |= \"${mainPathFilter}\" |= \"${traceId}\" | json level=\"level\", method=\"http.method\", path=\"http.path\", status=\"http.status\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\" | duration >= ${minDurationMs} | line_format \"{{.level}} {{.duration}}ms {{.status}} {{.method}} {{.path}} trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -605,7 +605,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=~\"INFO|DEBUG|TRACE|ERROR\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} {{.error_code}} {{.error_message}}\"",
+          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=~\"INFO|DEBUG|TRACE|ERROR\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\", args=\"args\", result=\"result\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}} {{.error_code}} {{.error_message}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -643,7 +643,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=\"INFO\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=\"INFO\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\", args=\"args\", result=\"result\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -681,7 +681,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=\"DEBUG\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=\"DEBUG\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\", args=\"args\", result=\"result\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -719,7 +719,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=\"TRACE\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=\"TRACE\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\", args=\"args\", result=\"result\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -757,7 +757,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=\"ERROR\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} {{.error_code}} {{.error_message}}\"",
+          "expr": "{job=~\"capstone-structured-http|capstone-structured-app\", level=\"ERROR\"} |= \"${mainLogContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", path=\"http.path\", status=\"http.status\", msg=\"message\", args=\"args\", result=\"result\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.status}} {{.path}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}} {{.error_code}} {{.error_message}}\"",
           "queryType": "range",
           "refId": "A"
         }

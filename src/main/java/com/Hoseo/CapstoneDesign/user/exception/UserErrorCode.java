@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum UserErrorCode implements GlobalErrorCode {
 
-    USER_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, 1004, "존재하지 않는 유저입니다.");
+    USER_NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, 1101, "존재하지 않는 유저입니다.");
 
     private final HttpStatus httpStatus;
     private final int errorCode;

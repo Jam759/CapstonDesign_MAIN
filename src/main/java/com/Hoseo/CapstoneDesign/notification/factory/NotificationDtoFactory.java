@@ -8,6 +8,8 @@ import com.Hoseo.CapstoneDesign.notification.dto.application.SseBaseResponse;
 import com.Hoseo.CapstoneDesign.notification.dto.application.SuccessMessage;
 import com.Hoseo.CapstoneDesign.notification.dto.response.NotificationResponse;
 import com.Hoseo.CapstoneDesign.notification.entity.SseNotification;
+import com.Hoseo.CapstoneDesign.notification.exception.NotificationException;
+import com.Hoseo.CapstoneDesign.notification.exception.NotificationErrorCode;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -73,7 +75,7 @@ public class NotificationDtoFactory {
 
     private static AnalysisEventType resolveEventType(NotificationQueueBaseMessage envelope) {
         if (envelope.getEventType() == null) {
-            throw new IllegalArgumentException("Notification eventType must not be null");
+            throw new NotificationException(NotificationErrorCode.NOTIFICATION_EVENT_TYPE_NULL);
         }
 
         return envelope.getEventType();

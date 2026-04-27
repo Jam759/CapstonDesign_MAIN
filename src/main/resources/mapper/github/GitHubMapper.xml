@@ -54,6 +54,8 @@
         WHERE base_gi.github_app_installations_id = #{installationId}
           AND ir.installation_repository_id = #{installationRepositoryId}
           AND gi.account_id = #{senderAccountId}
+          AND p.deleted_at IS NULL
+          AND u.deleted_at IS NULL
             LIMIT 1
 
     </select>

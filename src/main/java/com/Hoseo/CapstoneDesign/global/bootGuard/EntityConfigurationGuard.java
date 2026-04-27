@@ -1,11 +1,12 @@
 package com.Hoseo.CapstoneDesign.global.bootGuard;
 
-import com.Hoseo.CapstoneDesign.global.entity.interfaces.CustomSoftDeletable;
 import com.Hoseo.CapstoneDesign.global.bootGuard.exception.EntityConfigurationException;
+import com.Hoseo.CapstoneDesign.global.entity.interfaces.CustomSoftDeletable;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,12 @@ public class EntityConfigurationGuard implements ApplicationListener<ContextRefr
             if (CustomSoftDeletable.class.isAssignableFrom(clazz)) {
                 SQLDelete sqlDelete = clazz.getAnnotation(SQLDelete.class);
                 if (sqlDelete == null) {
-                    throw new EntityConfigurationException(clazz, "@SQLDelete 설정 누락");
+                    throw new EntityConfigurationException(clazz, "@SQLDelete configuration missing");
+                }
+
+                SQLRestriction sqlRestriction = clazz.getAnnotation(SQLRestriction.class);
+                if (sqlRestriction == null) {
+                    throw new EntityConfigurationException(clazz, "@SQLRestriction configuration missing");
                 }
             }
         });

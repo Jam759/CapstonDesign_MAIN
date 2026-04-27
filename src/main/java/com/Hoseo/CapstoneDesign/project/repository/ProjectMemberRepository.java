@@ -12,19 +12,22 @@ import java.util.Optional;
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Long> {
     List<ProjectMember> findByProject(Projects project);
 
-    List<ProjectMember> findByUserUserIdAndResponse(
+    List<ProjectMember> findByUserUserIdAndResponseAndProjectDeletedAtIsNull(
             Long userId,
             ProjectInviteStatus response
     );
 
-    List<ProjectMember> findByUserUserIdAndProjectRoleOrderByCreatedAtDesc(
+    List<ProjectMember> findByUserUserIdAndProjectRoleAndProjectDeletedAtIsNullOrderByCreatedAtDesc(
             Long userId,
             ProjectMemberRole projectRole
     );
 
-    Optional<ProjectMember> findByProjectMemberIdAndUserUserId(Long projectMemberId, Long userId);
+    Optional<ProjectMember> findByProjectMemberIdAndUserUserIdAndProjectDeletedAtIsNull(
+            Long projectMemberId,
+            Long userId
+    );
 
-    Optional<ProjectMember> findByProjectProjectIdAndUserUserIdAndResponse(
+    Optional<ProjectMember> findByProjectProjectIdAndProjectDeletedAtIsNullAndUserUserIdAndResponse(
             Long projectId,
             Long userId,
             ProjectInviteStatus response
