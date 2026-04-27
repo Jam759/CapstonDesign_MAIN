@@ -51,6 +51,13 @@ public class Users extends LifecycleTimestampEntity {
     @JoinColumn(name = "user_goal_cmd_id", nullable = true)
     private CommonGroupDetail userGoal;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_main_position_cmd_id", nullable = true)
+    private CommonGroupDetail userMainPosition;
+
+    @Column(name = "profile_complete", nullable = false)
+    private boolean profileComplete;
+
     public Users updateOauthNickname(String oauthNickname) {
         this.oauthNickname = oauthNickname;
         return this;
@@ -58,6 +65,21 @@ public class Users extends LifecycleTimestampEntity {
 
     public Users updateServiceNickname(String serviceNickname) {
         this.serviceNickname = serviceNickname;
+        return this;
+    }
+
+    public Users updateUserGoal(CommonGroupDetail userGoal) {
+        this.userGoal = userGoal;
+        return this;
+    }
+
+    public Users updateUserMainPosition(CommonGroupDetail userMainPosition) {
+        this.userMainPosition = userMainPosition;
+        return this;
+    }
+
+    public Users updateProfileComplete(boolean profileComplete) {
+        this.profileComplete = profileComplete;
         return this;
     }
 

@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.project.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,11 +26,11 @@ public record ProjectCreateRequest(
         @Schema(description = "Project end date from frontend date input", example = "2026-06-30")
         LocalDate endDate,
 
-        @Schema(description = "Owner role selected in frontend", example = "backend")
+        @Schema(description = "Owner role common code", example = "Backend")
         String role,
 
         @JsonAlias("useTechStackCmdList")
-        @Schema(description = "Tech stack common detail ids", example = "[\"react\", \"spring\"]")
+        @Schema(description = "Tech stack common detail ids", example = "[\"Java\", \"Spring\", \"React\"]")
         List<String> stacks,
 
         @JsonAlias("inviteMemberIdList")

@@ -15,35 +15,34 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
-@Tag(name = "User", description = "사용자 정보 API")
+@Tag(name = "User", description = "User profile API")
 public class UserController {
 
     private final UserFacade facade;
 
     @GetMapping("/me")
-    @Operation(summary = "내 정보 조회", description = "프론트 user store 초기화를 위한 현재 사용자 요약 정보를 반환합니다.")
+    @Operation(summary = "Get my info", description = "Returns the current user's summary information.")
     @SecurityRequirement(name = "bearerAuth")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "조회 성공",
+                    description = "Success",
                     content = @Content(schema = @Schema(implementation = MyInfoResponse.class))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
@@ -55,31 +54,30 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    @Operation(summary = "내 정보 수정", description = "서비스 닉네임과 대표 배지를 수정합니다.")
+    @Operation(summary = "Update my profile", description = "Updates the current user's profile fields.")
     @SecurityRequirement(name = "bearerAuth")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "수정 성공",
+                    description = "Success",
                     content = @Content(schema = @Schema(implementation = UpdateUserInfoResponse.class))
             ),
             @ApiResponse(
                     responseCode = "401",
-                    description = "인증 실패",
+                    description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "사용자를 찾을 수 없음",
+                    description = "User not found",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
     public ResponseEntity<UpdateUserInfoResponse> updateUser(
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail,
-            @Parameter(description = "사용자 프로필 수정 요청")
-            @ParameterObject
-            @ModelAttribute UserProfileUpdateRequest request
+            @Parameter(description = "User profile update request")
+            @RequestBody UserProfileUpdateRequest request
     ) {
         UpdateUserInfoResponse res =
                 facade.updateUserProfile(userDetail.getUser(), request);

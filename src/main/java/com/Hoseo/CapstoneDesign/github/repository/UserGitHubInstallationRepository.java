@@ -12,6 +12,8 @@ public interface UserGitHubInstallationRepository extends JpaRepository<UserGitH
 
     Optional<UserGitHubInstallations> findByUser(Users user);
 
+    boolean existsByUser(Users user);
+
     boolean existsByUserAndGithubAppInstallation(Users user, GithubAppInstallations installation);
 
     void deleteByGithubAppInstallation(GithubAppInstallations installation);

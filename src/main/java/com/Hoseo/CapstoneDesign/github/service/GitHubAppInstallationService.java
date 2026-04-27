@@ -28,12 +28,15 @@ public class GitHubAppInstallationService {
         return userGitHubInstallationRepository.findByUser(user);
     }
 
+    public boolean isInstalledByUser(Users user) {
+        return userGitHubInstallationRepository.existsByUser(user);
+    }
+
     public GithubAppInstallations getByUser(Users user) {
         return userGitHubInstallationRepository.findByUser(user)
                 .orElseThrow(() -> new GitHubException(GitHubErrorCode.GIT_HUB_NOT_FOUND_USER))
                 .getGithubAppInstallation();
     }
-
 
     public Optional<GithubAppInstallations> findByid(Long installationId) {
         return repository.findById(installationId);
@@ -73,7 +76,6 @@ public class GitHubAppInstallationService {
     public List<GithubAppInstallations> getAllByUserIds(List<Long> userIds) {
         List<UserGitHubInstallations> users = userGitHubInstallationRepository.findByUser_UserIdIn(userIds);
         return users.stream().map(UserGitHubInstallations::getGithubAppInstallation).toList();
-
     }
 
     public boolean userIsExistByUserAndInstallation(Users user, GithubAppInstallations installation) {

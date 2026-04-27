@@ -20,7 +20,13 @@ public class SecurityDtoFactory {
                 .build();
     }
 
-    public static TokenPair toTokenPair(String rawAccessToken, String rawRefreshToken, JwtUtil jwtUtil, Users user) {
+    public static TokenPair toTokenPair(
+            String rawAccessToken,
+            String rawRefreshToken,
+            JwtUtil jwtUtil,
+            boolean needsProfileSetup,
+            boolean githubInstalled
+    ) {
         Date accessTokenExpiration = jwtUtil.getExpirationFromAccessToken(rawAccessToken);
         Date refreshTokenExpiration = jwtUtil.getExpirationFromRefreshToken(rawRefreshToken);
         LocalDateTime accessTokenExpiryDate = TimeUtil.toLocalDateTime(accessTokenExpiration);
@@ -31,7 +37,8 @@ public class SecurityDtoFactory {
                 rawRefreshToken,
                 accessTokenExpiryDate,
                 refreshTokenExpiryDate,
-                user.getServiceNickname() == null
+                needsProfileSetup,
+                githubInstalled
         );
     }
 }

@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.user.service;
 
+import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.support.builder.UsersTestBuilder;
 import com.Hoseo.CapstoneDesign.support.mother.UsersMother;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
@@ -114,6 +115,24 @@ class UserServiceTest {
         assertThat(result.getServiceNickname()).isEqualTo(nickname);
         verify(usersRepository).save(user);
         log.info("[TEST] nickname boundary validated: length={}", nickname.length());
+    }
+
+    @Test
+    @DisplayName("프로필 공통 코드와 완료 여부를 함께 갱신한다")
+    void updateUserProfileUpdatesCommonCodes() {
+        Users user = UsersTestBuilder.defaultUser().serviceNickname("before").build();
+        CommonGroupDetail goal = CommonGroupDetail.builder().commonGroupDetailId("Job").build();
+        CommonGroupDetail position = CommonGroupDetail.builder().commonGroupDetailId("Backend").build();
+        when(usersRepository.save(user)).thenReturn(user);
+
+        Users result = userService.updateUserProfile(user, "after", goal, position, true);
+
+        assertThat(result.getServiceNickname()).isEqualTo("after");
+        assertThat(result.getUserGoal()).isEqualTo(goal);
+        assertThat(result.getUserMainPosition()).isEqualTo(position);
+        assertThat(result.isProfileComplete()).isTrue();
+        verify(usersRepository).save(user);
+        log.info("[TEST] profile common code update validated");
     }
 
     private static Stream<Arguments> newOauthUserSamples() {

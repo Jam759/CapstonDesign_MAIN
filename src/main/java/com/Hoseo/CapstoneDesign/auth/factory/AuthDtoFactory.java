@@ -10,7 +10,8 @@ public class AuthDtoFactory {
                 tokenPair.accessToken(),
                 tokenPair.accessTokenExpiredAt(),
                 tokenPair.refreshTokenExpiredAt(),
-                tokenPair.isNewUser()
+                tokenPair.needsProfileSetup(),
+                tokenPair.githubInstalled()
         );
     }
 }

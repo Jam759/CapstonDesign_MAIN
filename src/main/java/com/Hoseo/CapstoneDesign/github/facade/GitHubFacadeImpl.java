@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Facade
@@ -51,9 +50,8 @@ public class GitHubFacadeImpl implements GitHubFacade {
     @Override
     @Transactional(readOnly = true)
     public InstallationsAvailableResponse getAvailable(Users user, String returnTo) {
-        Optional<UserGitHubInstallations> appUsers =
-                gitHubAppInstallationService.findByUser(user);
-        return GitHubDtoFactory.toInstallationsAvailableResponse(user, appUsers, stateUtil, returnTo);
+        boolean githubInstalled = gitHubAppInstallationService.isInstalledByUser(user);
+        return GitHubDtoFactory.toInstallationsAvailableResponse(user, githubInstalled, stateUtil, returnTo);
     }
 
     @Override
@@ -122,6 +120,4 @@ public class GitHubFacadeImpl implements GitHubFacade {
         }
         return repositories.stream().map(GitHubDtoFactory::toRepositoryResponse).toList();
     }
-
-
 }

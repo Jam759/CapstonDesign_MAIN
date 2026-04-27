@@ -70,13 +70,19 @@ public class ProjectFacadeImpl implements ProjectFacade {
         Projects savedPj = projectService.create(pjEntity);
         List<CommonGroupDetail> techStacks = request.stacks() == null
                 ? List.of()
-                : commonGroupDetailService.getReferencesByIds(request.stacks());
+                : commonGroupDetailService.getRequiredReferencesByGroupAndIds(
+                        CommonGroupDetailService.PROJECT_TECH_STACK_GROUP_ID,
+                        request.stacks()
+                );
         List<ProjectTechStack> pjTechStacks
                 = ProjectEntityFactory.toProjectTechStackList(savedPj, techStacks);
         projectTechStackService.createAll(pjTechStacks);
         CommonGroupDetail ownerPosition = request.role() == null || request.role().isBlank()
                 ? null
-                : commonGroupDetailService.getReferenceById(request.role());
+                : commonGroupDetailService.getRequiredReferenceByGroupAndId(
+                        CommonGroupDetailService.PROJECT_POSITION_GROUP_ID,
+                        request.role()
+                );
 
         ProjectMember projectOwner =
                 ProjectEntityFactory.toProjectsMember(

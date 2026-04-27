@@ -7,6 +7,7 @@ public record TokenPair(
         String refreshToken,
         LocalDateTime accessTokenExpiredAt,
         LocalDateTime refreshTokenExpiredAt,
-        boolean isNewUser
+        boolean needsProfileSetup,
+        boolean githubInstalled
 ) {
 }

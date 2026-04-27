@@ -29,6 +29,9 @@ public class CommonGroupDetail extends LifecycleTimestampEntity {
     @Column(name = "common_group_detail_id", nullable = false, length = 50) // ERD original column: common_groupdetail_id
     private String commonGroupDetailId;
 
+    @Column(name = "description", length = 255)
+    private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "common_group_id", nullable = false)
     private CommonGroup commonGroup;

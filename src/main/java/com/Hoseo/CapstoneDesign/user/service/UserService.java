@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.user.service;
 
+import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.entity.enums.OauthType;
 import com.Hoseo.CapstoneDesign.user.exception.CustomUserException;
@@ -43,6 +44,20 @@ public class UserService {
 
     public Users updateServiceUserName(Users user,String updateNickname ){
         user.updateServiceNickname(updateNickname);
+        return repository.save(user);
+    }
+
+    public Users updateUserProfile(
+            Users user,
+            String serviceNickname,
+            CommonGroupDetail userGoal,
+            CommonGroupDetail userMainPosition,
+            boolean profileComplete
+    ) {
+        user.updateServiceNickname(serviceNickname)
+                .updateUserGoal(userGoal)
+                .updateUserMainPosition(userMainPosition)
+                .updateProfileComplete(profileComplete);
         return repository.save(user);
     }
 
