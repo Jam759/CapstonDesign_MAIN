@@ -41,11 +41,11 @@ public class UserMetaInformationService {
     }
 
     public List<UserMetaInformation> getAllMetaInfoByExpDesc() {
-        return repository.findAllByOrderByTotalExpDesc();
+        return repository.findByUserDeletedAtIsNullOrderByTotalExpDesc();
     }
 
     public long countUsersAbove(Long totalExp) {
-        return repository.countByTotalExpGreaterThan(totalExp);
+        return repository.countByUserDeletedAtIsNullAndTotalExpGreaterThan(totalExp);
     }
 
     public long countAll() {

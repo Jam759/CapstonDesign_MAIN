@@ -16,6 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -24,6 +25,7 @@ import org.hibernate.annotations.SQLDelete;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "static_exp_event_rule")
 @SQLDelete(sql = "UPDATE static_exp_event_rule SET deleted_at = now() WHERE exp_event_rule_id = ?")
+@SQLRestriction("deleted_at is null")
 public class StaticExpEventRule extends LifecycleTimestampEntity {
 
     @Id

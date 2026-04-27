@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface UserMetaInformationRepository extends JpaRepository<UserMetaInformation, Long> {
-    List<UserMetaInformation> findAllByOrderByTotalExpDesc();
-    long countByTotalExpGreaterThan(Long totalExp);
+    List<UserMetaInformation> findByUserDeletedAtIsNullOrderByTotalExpDesc();
+    long countByUserDeletedAtIsNullAndTotalExpGreaterThan(Long totalExp);
 }

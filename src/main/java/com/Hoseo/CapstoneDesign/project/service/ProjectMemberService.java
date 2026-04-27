@@ -31,11 +31,14 @@ public class ProjectMemberService {
     }
 
     public List<ProjectMember> getAcceptedMembersByUserId(Long userId) {
-        return repository.findByUserUserIdAndResponse(userId, ProjectInviteStatus.ACCEPTED);
+        return repository.findByUserUserIdAndResponseAndProjectDeletedAtIsNull(
+                userId,
+                ProjectInviteStatus.ACCEPTED
+        );
     }
 
     public List<ProjectMember> getMemberInvitesByUserId(Long userId) {
-        return repository.findByUserUserIdAndProjectRoleOrderByCreatedAtDesc(
+        return repository.findByUserUserIdAndProjectRoleAndProjectDeletedAtIsNullOrderByCreatedAtDesc(
                 userId,
                 ProjectMemberRole.MEMBER
         );

@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,6 +21,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE users SET deleted_at = now() WHERE user_id = ?")
+@SQLRestriction("deleted_at is null")
 public class Users extends LifecycleTimestampEntity {
 
     @Id
