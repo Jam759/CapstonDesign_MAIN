@@ -85,7 +85,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
-    public void revokeAndSoftDeleteByFamily(Users user, String rawRefreshToken) {
+    public void revokeAndSoftDeleteByFamily(Long userId, String rawRefreshToken) {
         if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
             throw new RefreshTokenException(RefreshTokenErrorCode.REFRESH_TOKEN_NOT_FOUND);
         }
@@ -95,10 +95,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken token = repository.findByTokenHash(tokenHash)
                 .orElseThrow(() -> new RefreshTokenException(RefreshTokenErrorCode.REFRESH_TOKEN_NOT_FOUND));
 
-        if (!token.getUser().getUserId().equals(user.getUserId())) {
+        if (!token.getUser().getUserId().equals(userId)) {
             throw new RefreshTokenException(RefreshTokenErrorCode.REFRESH_TOKEN_USER_MISMATCH);
         }
 
-        repository.revokeAndSoftDeleteByFamilyId(user, token.getFamilyId(), now);
+        repository.revokeAndSoftDeleteByFamilyId(userId, token.getFamilyId(), now);
     }
 }

@@ -2,6 +2,8 @@ package com.Hoseo.CapstoneDesign.security.factory;
 
 import com.Hoseo.CapstoneDesign.global.util.TimeUtil;
 import com.Hoseo.CapstoneDesign.global.util.UuidUtil;
+import com.Hoseo.CapstoneDesign.security.dto.cache.AccessTokenBlackListCache;
+import com.Hoseo.CapstoneDesign.security.entity.AccessTokenBlackList;
 import com.Hoseo.CapstoneDesign.security.entity.RefreshToken;
 import com.Hoseo.CapstoneDesign.security.util.JwtUtil;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
@@ -29,6 +31,19 @@ public class SecurityEntityFactory {
                 .expiresAt(expiresAt)
                 .build();
 
+    }
+
+    public static AccessTokenBlackList toAccessTokenBlackList(
+            String rawAccessToken,
+            AccessTokenBlackListCache cache,
+            Users user
+    ) {
+        return AccessTokenBlackList.builder()
+                .jti(cache.getJti())
+                .user(user)
+                .tokenHash(DigestUtils.sha256Hex(rawAccessToken))
+                .expiresAt(cache.getExpiryDate())
+                .build();
     }
 
 }

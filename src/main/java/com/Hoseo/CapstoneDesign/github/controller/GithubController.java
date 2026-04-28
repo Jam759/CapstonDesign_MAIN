@@ -68,7 +68,7 @@ public class GithubController {
             @RequestParam(required = false, defaultValue = "/projects") String returnTo
     ) {
         InstallationsAvailableResponse response =
-                facade.getAvailable(userDetail.getUser(), returnTo);
+                facade.getAvailable(userDetail.getAuthenticatedUser(), returnTo);
         return ResponseEntity.ok(response);
     }
 
@@ -169,7 +169,7 @@ public class GithubController {
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
         RepositoryBranchesResponse response =
-                facade.getBranches(userDetail.getUser(), repositoryId);
+                facade.getBranches(userDetail.getAuthenticatedUser(), repositoryId);
 
         return ResponseEntity.ok(response);
     }
@@ -202,7 +202,7 @@ public class GithubController {
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
         List<RepositoryResponse> res =
-                facade.getRepositories(userDetail.getUser());
+                facade.getRepositories(userDetail.getAuthenticatedUser());
         return ResponseEntity.ok(res);
     }
 }

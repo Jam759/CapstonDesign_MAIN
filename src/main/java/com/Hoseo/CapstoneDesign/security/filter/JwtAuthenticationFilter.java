@@ -51,16 +51,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 토큰 검증
             jwtUtil.validateAccessToken(token);
+
+            //블랙리스트 확인
+            if (blackListService.isExistByToken(token)) {
+                throw new AccessTokenBlackListException(AccessTokenBlackListErrorCode.TOKEN_IS_BLACK_LIST);
+            }
+
             // Subject에서 UserId(UUID) 가져오기
             UUID userIdentificationId = jwtUtil.getSubjectFromAccessToken(token);
             UserDetails userDetails =
                     userService.loadUserByUsername(userIdentificationId.toString());
-
-            //블랙리스트 확인
-            if (blackListService.isExistByToken(token)) {
-                AccessTokenBlackListErrorCode e = AccessTokenBlackListErrorCode.TOKEN_IS_BLACK_LIST;
-                throw new AccessTokenBlackListException(e);
-            }
 
             // Spring Security 인증 객체 생성
             UsernamePasswordAuthenticationToken authentication =

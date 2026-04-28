@@ -1,5 +1,7 @@
 package com.Hoseo.CapstoneDesign.security.service.impl;
 
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
+import com.Hoseo.CapstoneDesign.security.cache.service.AuthenticatedUserCacheService;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import com.Hoseo.CapstoneDesign.security.exception.JwtUtilErrorCode;
 import com.Hoseo.CapstoneDesign.security.exception.JwtUtilException;
@@ -18,15 +20,30 @@ import java.util.UUID;
 public class UserDetailServiceImpl implements UserDetailsService {
 
     private final UserService service;
+    private final AuthenticatedUserCacheService authenticatedUserCacheService;
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        UUID identityId = UUID.fromString(username);
+        UUID identityId = parseIdentityId(username);
+        return authenticatedUserCacheService.findByIdentityId(identityId)
+                .map(UserDetailImpl::new)
+                .orElseGet(() -> loadFromDb(identityId));
+    }
+
+    private UUID parseIdentityId(String username) {
+        try {
+            return UUID.fromString(username);
+        } catch (IllegalArgumentException e) {
+            throw new JwtUtilException(JwtUtilErrorCode.TOKEN_ILLEGAL_ARGUMENT);
+        }
+    }
+
+    private UserDetailImpl loadFromDb(UUID identityId) {
         try {
             Users member = service.getByIdentityId(identityId);
-            return new UserDetailImpl(member);
+            AuthenticatedUserCacheEntry entry = authenticatedUserCacheService.save(member);
+            return new UserDetailImpl(entry);
         } catch (CustomUserException e) {
-            //jwt 서명부분은 맞는데 member를 못찾을 경우 이 예외를 던지게 함
             throw new JwtUtilException(JwtUtilErrorCode.TOKEN_ILLEGAL_ARGUMENT);
         }
     }

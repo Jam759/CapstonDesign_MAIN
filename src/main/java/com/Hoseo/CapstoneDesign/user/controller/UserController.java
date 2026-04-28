@@ -50,7 +50,7 @@ public class UserController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        return ResponseEntity.ok(facade.getMyInfo(userDetail.getUser()));
+        return ResponseEntity.ok(facade.getMyInfo(userDetail.getAuthenticatedUser()));
     }
 
     @PatchMapping("/me")
@@ -80,7 +80,7 @@ public class UserController {
             @RequestBody UserProfileUpdateRequest request
     ) {
         UpdateUserInfoResponse res =
-                facade.updateUserProfile(userDetail.getUser(), request);
+                facade.updateUserProfile(userDetail.getAuthenticatedUser(), request);
         return ResponseEntity.ok(res);
     }
 }

@@ -45,7 +45,7 @@ public class FriendController {
     public ResponseEntity<List<FriendResponse>> getFriends(
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        return ResponseEntity.ok(friendFacade.getFriends(userDetail.getUser()));
+        return ResponseEntity.ok(friendFacade.getFriends(userDetail.getAuthenticatedUser()));
     }
 
     @GetMapping("/invites")
@@ -59,7 +59,7 @@ public class FriendController {
     public ResponseEntity<List<FriendInviteResponse>> getInvites(
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        return ResponseEntity.ok(friendFacade.getInvites(userDetail.getUser()));
+        return ResponseEntity.ok(friendFacade.getInvites(userDetail.getAuthenticatedUser()));
     }
 
     @PostMapping("/{friendId}/request")
@@ -77,7 +77,7 @@ public class FriendController {
             @PathVariable Long friendId,
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        return ResponseEntity.ok(friendFacade.sendRequest(userDetail.getUser(), friendId));
+        return ResponseEntity.ok(friendFacade.sendRequest(userDetail.getAuthenticatedUser(), friendId));
     }
 
     @PostMapping("/invites/{inviteId}/accept")
@@ -95,7 +95,7 @@ public class FriendController {
             @PathVariable Long inviteId,
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        return ResponseEntity.ok(friendFacade.acceptInvite(userDetail.getUser(), inviteId));
+        return ResponseEntity.ok(friendFacade.acceptInvite(userDetail.getAuthenticatedUser(), inviteId));
     }
 
     @PostMapping("/invites/{inviteId}/decline")
@@ -113,6 +113,6 @@ public class FriendController {
             @PathVariable Long inviteId,
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        return ResponseEntity.ok(friendFacade.declineInvite(userDetail.getUser(), inviteId));
+        return ResponseEntity.ok(friendFacade.declineInvite(userDetail.getAuthenticatedUser(), inviteId));
     }
 }

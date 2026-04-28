@@ -1,8 +1,11 @@
 package com.Hoseo.CapstoneDesign.notification.facade;
 
 import com.Hoseo.CapstoneDesign.analysis.entity.AnalysisJob;
+import com.Hoseo.CapstoneDesign.analysis.entity.ProjectAnalysisReport;
 import com.Hoseo.CapstoneDesign.analysis.entity.enums.AnalysisJobStatus;
 import com.Hoseo.CapstoneDesign.analysis.enums.AnalysisEventType;
+import com.Hoseo.CapstoneDesign.analysis.event.ProjectAnalysisReportPublishedEvent;
+import com.Hoseo.CapstoneDesign.analysis.service.ProjectAnalysisReportService;
 import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.common.service.CommonGroupDetailService;
 import com.Hoseo.CapstoneDesign.github.entity.GithubAppInstallations;
@@ -21,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Map;
@@ -43,13 +47,17 @@ class NotificationFacadeImplTest {
         AnalysisJobServiceStub analysisJobService = new AnalysisJobServiceStub(analysisJob);
         CommonGroupDetailService commonGroupDetailService = mock(CommonGroupDetailService.class);
         UserService userService = mock(UserService.class);
+        ProjectAnalysisReportService projectAnalysisReportService = mock(ProjectAnalysisReportService.class);
+        ApplicationEventPublisher applicationEventPublisher = mock(ApplicationEventPublisher.class);
 
         NotificationFacadeImpl facade = new NotificationFacadeImpl(
                 notificationService,
                 analysisJobService,
                 commonGroupDetailService,
                 userService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                projectAnalysisReportService,
+                applicationEventPublisher
         );
 
         facade.failedHandle(NotificationQueueBaseMessage.builder()
@@ -79,6 +87,8 @@ class NotificationFacadeImplTest {
         AnalysisJobServiceStub analysisJobService = new AnalysisJobServiceStub(analysisJob);
         CommonGroupDetailService commonGroupDetailService = mock(CommonGroupDetailService.class);
         UserService userService = mock(UserService.class);
+        ProjectAnalysisReportService projectAnalysisReportService = mock(ProjectAnalysisReportService.class);
+        ApplicationEventPublisher applicationEventPublisher = mock(ApplicationEventPublisher.class);
         CommonGroupDetail projectLinkType = CommonGroupDetail.builder()
                 .commonGroupDetailId("PROJECT")
                 .build();
@@ -89,7 +99,9 @@ class NotificationFacadeImplTest {
                 analysisJobService,
                 commonGroupDetailService,
                 userService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                projectAnalysisReportService,
+                applicationEventPublisher
         );
 
         facade.failedHandle(NotificationQueueBaseMessage.builder()
@@ -124,17 +136,26 @@ class NotificationFacadeImplTest {
         AnalysisJobServiceStub analysisJobService = new AnalysisJobServiceStub(analysisJob);
         CommonGroupDetailService commonGroupDetailService = mock(CommonGroupDetailService.class);
         UserService userService = mock(UserService.class);
+        ProjectAnalysisReportService projectAnalysisReportService = mock(ProjectAnalysisReportService.class);
+        ApplicationEventPublisher applicationEventPublisher = mock(ApplicationEventPublisher.class);
         CommonGroupDetail projectLinkType = CommonGroupDetail.builder()
                 .commonGroupDetailId("PROJECT")
                 .build();
         when(commonGroupDetailService.getReferenceById("PROJECT")).thenReturn(projectLinkType);
+        when(projectAnalysisReportService.getById(20L)).thenReturn(ProjectAnalysisReport.builder()
+                .projectAnalysisReportId(20L)
+                .project(Projects.builder().projectId(44L).build())
+                .version(3)
+                .build());
 
         NotificationFacadeImpl facade = new NotificationFacadeImpl(
                 notificationService,
                 analysisJobService,
                 commonGroupDetailService,
                 userService,
-                new ObjectMapper()
+                new ObjectMapper(),
+                projectAnalysisReportService,
+                applicationEventPublisher
         );
 
         facade.successHandle(NotificationQueueBaseMessage.builder()
@@ -152,6 +173,9 @@ class NotificationFacadeImplTest {
         ArgumentCaptor<SseNotification> notificationCaptor = ArgumentCaptor.forClass(SseNotification.class);
         ArgumentCaptor<SseBaseResponse> responseCaptor = ArgumentCaptor.forClass(SseBaseResponse.class);
         verify(notificationService).createAndDispatch(notificationCaptor.capture(), responseCaptor.capture());
+        ArgumentCaptor<ProjectAnalysisReportPublishedEvent> eventCaptor =
+                ArgumentCaptor.forClass(ProjectAnalysisReportPublishedEvent.class);
+        verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
 
         assertThat(analysisJob.getJobStatus()).isEqualTo(AnalysisJobStatus.NOTIFICATION_COMPLETED);
         assertThat(responseCaptor.getValue().getEventType()).isEqualTo("analysis-success");
@@ -159,6 +183,9 @@ class NotificationFacadeImplTest {
         assertThat(((Map<?, ?>) responseCaptor.getValue().getData()).get("userViewReportId")).isEqualTo(20L);
         assertThat(notificationCaptor.getValue().getLinkType().getCommonGroupDetailId()).isEqualTo("PROJECT");
         assertThat(notificationCaptor.getValue().getTitle()).isEqualTo("캡스톤 디자인 프로젝트 성공!");
+        assertThat(eventCaptor.getValue().projectId()).isEqualTo(44L);
+        assertThat(eventCaptor.getValue().version()).isEqualTo(3);
+        assertThat(eventCaptor.getValue().reportId()).isEqualTo(20L);
     }
 
     private AnalysisJob createJob(short retryCount, boolean mergeAnalysis) {

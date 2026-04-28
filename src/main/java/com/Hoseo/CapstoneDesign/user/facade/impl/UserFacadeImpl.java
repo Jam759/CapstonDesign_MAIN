@@ -5,6 +5,8 @@ import com.Hoseo.CapstoneDesign.common.service.CommonGroupDetailService;
 import com.Hoseo.CapstoneDesign.gamification.entity.LevelRule;
 import com.Hoseo.CapstoneDesign.gamification.repository.LevelRuleRepository;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
+import com.Hoseo.CapstoneDesign.user.cache.service.UserResponseCacheService;
 import com.Hoseo.CapstoneDesign.user.dto.request.UserProfileUpdateRequest;
 import com.Hoseo.CapstoneDesign.user.dto.response.MyInfoResponse;
 import com.Hoseo.CapstoneDesign.user.dto.response.UpdateUserInfoResponse;
@@ -12,6 +14,7 @@ import com.Hoseo.CapstoneDesign.user.entity.UserInfoUpdateHistory;
 import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.UserTechStack;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
+import com.Hoseo.CapstoneDesign.user.event.UserProfileChangedEvent;
 import com.Hoseo.CapstoneDesign.user.facade.UserFacade;
 import com.Hoseo.CapstoneDesign.user.factory.UserDtoFactory;
 import com.Hoseo.CapstoneDesign.user.factory.UserEntityFactory;
@@ -20,6 +23,7 @@ import com.Hoseo.CapstoneDesign.user.service.UserMetaInformationService;
 import com.Hoseo.CapstoneDesign.user.service.UserService;
 import com.Hoseo.CapstoneDesign.user.service.UserTechStackService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -35,10 +39,13 @@ public class UserFacadeImpl implements UserFacade {
     private final LevelRuleRepository levelRuleRepository;
     private final CommonGroupDetailService commonGroupDetailService;
     private final UserTechStackService userTechStackService;
+    private final UserResponseCacheService userResponseCacheService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional(readOnly = false)
-    public UpdateUserInfoResponse updateUserProfile(Users user, UserProfileUpdateRequest request) {
+    public UpdateUserInfoResponse updateUserProfile(AuthenticatedUserCacheEntry authenticatedUser, UserProfileUpdateRequest request) {
+        Users user = userService.getById(authenticatedUser.userId());
         String previousNickname = user.getServiceNickname();
         String previousOauthNickname = user.getOauthNickname();
         String resolvedNickname = resolveNickname(user, request);
@@ -65,6 +72,10 @@ public class UserFacadeImpl implements UserFacade {
         UserInfoUpdateHistory savedUpdateHistory =
                 userInfoUpdateHistoryService.save(updateHistory);
 
+        applicationEventPublisher.publishEvent(new UserProfileChangedEvent(
+                updatedUser.getUserId(),
+                updatedUser.getIdentityId()
+        ));
         return UserDtoFactory.toUpdateUserInfoResponse(
                 updatedUser,
                 savedUpdateHistory,
@@ -75,9 +86,14 @@ public class UserFacadeImpl implements UserFacade {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public MyInfoResponse getMyInfo(Users user) {
-        UserMetaInformation meta = metaService.getMetaInfo(user);
+    @Transactional(readOnly = false)
+    public MyInfoResponse getMyInfo(AuthenticatedUserCacheEntry user) {
+        return userResponseCacheService.findMyInfo(user.userId())
+                .orElseGet(() -> loadMyInfo(user));
+    }
+
+    private MyInfoResponse loadMyInfo(AuthenticatedUserCacheEntry user) {
+        UserMetaInformation meta = metaService.getMetaInfo(user.userId());
         int currentLevel = meta.getLevelRule().getLevel();
         long totalExp = meta.getTotalExp();
 
@@ -96,11 +112,13 @@ public class UserFacadeImpl implements UserFacade {
         long total      = metaService.countAll();
         int topPercentage = total == 0 ? 100 : (int) Math.ceil((double) (usersAbove + 1) / total * 100);
 
-        String nickname = (user.getServiceNickname() != null && !user.getServiceNickname().isBlank())
-                ? user.getServiceNickname()
-                : user.getOauthNickname();
+        String nickname = (user.serviceNickname() != null && !user.serviceNickname().isBlank())
+                ? user.serviceNickname()
+                : user.oauthNickname();
 
-        return new MyInfoResponse(nickname, currentLevel, xp, maxXp, topPercentage, totalExp);
+        MyInfoResponse response = new MyInfoResponse(nickname, currentLevel, xp, maxXp, topPercentage, totalExp);
+        userResponseCacheService.saveMyInfo(user.userId(), response);
+        return response;
     }
 
     private String resolveNickname(Users user, UserProfileUpdateRequest request) {
