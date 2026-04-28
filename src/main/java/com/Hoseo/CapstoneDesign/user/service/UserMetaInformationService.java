@@ -26,12 +26,17 @@ public class UserMetaInformationService {
 
     @Transactional
     public UserMetaInformation getMetaInfo(Users user) {
-        return repository.findById(user.getUserId())
+        return getMetaInfo(user.getUserId());
+    }
+
+    @Transactional
+    public UserMetaInformation getMetaInfo(Long userId) {
+        return repository.findById(userId)
                 .orElseGet(() -> {
                     LevelRule level1 = levelRuleRepository.findById(INITIAL_LEVEL)
                             .orElseThrow(() -> new GamificationException(GamificationErrorCode.USER_META_NOT_FOUND));
                     // detached Users를 현재 세션에 붙은 프록시 참조로 교체
-                    Users managedUser = usersRepository.getReferenceById(user.getUserId());
+                    Users managedUser = usersRepository.getReferenceById(userId);
                     return repository.save(UserMetaInformation.builder()
                             .user(managedUser)
                             .totalExp(0L)

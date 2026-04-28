@@ -75,6 +75,10 @@ public class ProjectMemberService {
         );
     }
 
+    public List<Long> getUserIdsByProjectId(Long projectId) {
+        return repository.findUserIdsByProjectId(projectId);
+    }
+
     public boolean existsProjectMember(Long projectId, Long userId) {
         return repository.existsByProjectProjectIdAndUserUserId(projectId, userId);
     }

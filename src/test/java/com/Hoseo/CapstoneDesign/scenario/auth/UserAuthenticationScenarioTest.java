@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.scenario.auth;
 
+import com.Hoseo.CapstoneDesign.auth.exception.AuthErrorCode;
 import com.Hoseo.CapstoneDesign.notification.listener.NotificationQueueListener;
 import com.Hoseo.CapstoneDesign.support.factory.UserProfileUpdateRequestFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,7 +52,7 @@ class UserAuthenticationScenarioTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.errorCode").value(401))
+                .andExpect(jsonPath("$.errorCode").value(AuthErrorCode.UNAUTHORIZED.getErrorCode()))
                 .andExpect(jsonPath("$.errorMessage").exists())
                 .andExpect(jsonPath("$.httpStatus").value("UNAUTHORIZED"));
 

@@ -2,7 +2,6 @@ package com.Hoseo.CapstoneDesign.analysis.controller;
 
 import com.Hoseo.CapstoneDesign.analysis.dto.response.*;
 import com.Hoseo.CapstoneDesign.analysis.facade.AnalysisFacade;
-import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionResponse;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AnalysisController {
 
     private final AnalysisFacade facade;
-    private final AnalysisJobService analysisJobService;
 
     @GetMapping("/{projectId}/overview")
     @Operation(
@@ -62,7 +60,7 @@ public class AnalysisController {
             @Parameter(description = "조회할 분석 리포트 버전. 생략하면 최신 버전을 반환합니다.", example = "2")
             @RequestParam(required = false) Integer version
     ) {
-        return facade.getOverview(userDetail.getUser(), projectId, version);
+        return facade.getOverview(userDetail.getAuthenticatedUser(), projectId, version);
     }
 
     @GetMapping("/{projectId}/highlights")
@@ -95,7 +93,7 @@ public class AnalysisController {
             @Parameter(description = "조회할 분석 리포트 버전. 생략하면 최신 버전을 반환합니다.", example = "2")
             @RequestParam(required = false) Integer version
     ) {
-        return facade.getHighlights(userDetail.getUser(), projectId, version);
+        return facade.getHighlights(userDetail.getAuthenticatedUser(), projectId, version);
     }
 
     @GetMapping("/{projectId}/advice")
@@ -128,7 +126,7 @@ public class AnalysisController {
             @Parameter(description = "조회할 분석 리포트 버전. 생략하면 최신 버전을 반환합니다.", example = "2")
             @RequestParam(required = false) Integer version
     ) {
-        return facade.getAdvice(userDetail.getUser(), projectId, version);
+        return facade.getAdvice(userDetail.getAuthenticatedUser(), projectId, version);
     }
 
     @GetMapping("/{projectId}/scorecard")
@@ -161,7 +159,7 @@ public class AnalysisController {
             @Parameter(description = "조회할 분석 리포트 버전. 생략하면 최신 버전을 반환합니다.", example = "2")
             @RequestParam(required = false) Integer version
     ) {
-        ProjectAnalysisScorecardResponse response = facade.getScorecard(userDetail.getUser(), projectId, version);
+        ProjectAnalysisScorecardResponse response = facade.getScorecard(userDetail.getAuthenticatedUser(), projectId, version);
         return ResponseEntity.ok(response);
     }
 
@@ -193,7 +191,7 @@ public class AnalysisController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        ProjectRoadMapResponse response = facade.getRoadMap(userDetail.getUser(), projectId);
+        ProjectRoadMapResponse response = facade.getRoadMap(userDetail.getAuthenticatedUser(), projectId);
         return ResponseEntity.ok(response);
     }
 
@@ -215,7 +213,7 @@ public class AnalysisController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        boolean ready = analysisJobService.hasCompletedAnalysis(projectId);
+        boolean ready = facade.isAnalysisReady(userDetail.getAuthenticatedUser(), projectId);
         return ResponseEntity.ok(new AnalysisReadyResponse(ready));
     }
 }

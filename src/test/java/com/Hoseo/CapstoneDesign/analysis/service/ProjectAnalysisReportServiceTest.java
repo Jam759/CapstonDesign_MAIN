@@ -1,12 +1,12 @@
 package com.Hoseo.CapstoneDesign.analysis.service;
 
+import com.Hoseo.CapstoneDesign.analysis.cache.service.ProjectAnalysisUserViewCacheService;
 import com.Hoseo.CapstoneDesign.analysis.dto.application.ProjectAnalysisUserViewResponse;
 import com.Hoseo.CapstoneDesign.analysis.entity.ProjectAnalysisReport;
 import com.Hoseo.CapstoneDesign.analysis.entity.enums.ReportType;
 import com.Hoseo.CapstoneDesign.analysis.exception.ProjectAnalysisReportErrorCode;
 import com.Hoseo.CapstoneDesign.analysis.exception.ProjectAnalysisReportException;
 import com.Hoseo.CapstoneDesign.analysis.repository.ProjectAnalysisReportRepository;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.Hoseo.CapstoneDesign.global.aws.properties.S3Properties;
 import com.Hoseo.CapstoneDesign.global.aws.s3.S3ObjectService;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
@@ -22,6 +22,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,15 +38,21 @@ class ProjectAnalysisReportServiceTest {
     @Mock
     private S3ObjectService s3ObjectService;
 
+    @Mock
+    private ProjectAnalysisUserViewCacheService cacheService;
+
     private ProjectAnalysisReportService service;
 
     @BeforeEach
     void setUp() {
+        lenient().when(cacheService.findUserView(anyLong(), nullable(Integer.class)))
+                .thenReturn(Optional.empty());
+
         service = new ProjectAnalysisReportService(
                 repository,
                 s3ObjectService,
                 new S3Properties("default-bucket"),
-                Caffeine.newBuilder().build()
+                cacheService
         );
     }
 
@@ -87,6 +96,8 @@ class ProjectAnalysisReportServiceTest {
         ProjectAnalysisReport report = report("analysis-bucket", "reports/user-view-v2.json");
         ProjectAnalysisUserViewResponse response = sampleResponse();
 
+        when(cacheService.findUserView(1L, 2))
+                .thenReturn(Optional.empty(), Optional.of(response));
         when(repository.findByProjectProjectIdAndReportTypeAndVersion(1L, ReportType.USER_VIEW, 2))
                 .thenReturn(Optional.of(report));
         when(s3ObjectService.getObjectAsJson("analysis-bucket", "reports/user-view-v2.json", ProjectAnalysisUserViewResponse.class))
@@ -100,6 +111,7 @@ class ProjectAnalysisReportServiceTest {
         verify(repository, times(1)).findByProjectProjectIdAndReportTypeAndVersion(1L, ReportType.USER_VIEW, 2);
         verify(s3ObjectService, times(1))
                 .getObjectAsJson("analysis-bucket", "reports/user-view-v2.json", ProjectAnalysisUserViewResponse.class);
+        verify(cacheService).saveUserView(1L, 2, 3, response);
     }
 
     @Test

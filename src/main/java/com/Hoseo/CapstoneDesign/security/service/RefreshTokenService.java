@@ -9,5 +9,5 @@ public interface RefreshTokenService {
 
     String rotate(Users user, String rawOldRefreshToken);
 
-    void revokeAndSoftDeleteByFamily(Users user, String rawRefreshToken);
+    void revokeAndSoftDeleteByFamily(Long userId, String rawRefreshToken);
 }

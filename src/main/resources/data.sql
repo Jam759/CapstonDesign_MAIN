@@ -112,3 +112,18 @@ VALUES
   ('CODE_QUALITY',          'QUEST_CATEGORY', '코드 품질 관련 퀘스트 카테고리', NULL, NULL, NOW(), NULL),
   ('TESTABILITY',           'QUEST_CATEGORY', '테스트 용이성 관련 퀘스트 카테고리', NULL, NULL, NOW(), NULL),
   ('RELIABILITY',           'QUEST_CATEGORY', '신뢰성 관련 퀘스트 카테고리', NULL, NULL, NOW(), NULL);
+
+-- ----------------------------------------------------------------
+-- 7) 학습 자료 검색 플랫폼 공통 코드
+-- ----------------------------------------------------------------
+INSERT IGNORE INTO common_group
+  (common_group_id, description, created_by, deleted_by, created_at, deleted_at)
+VALUES
+  ('SEARCH_KEYWORD_PLATFORM', '프로젝트 학습 자료 검색 키워드 플랫폼 공통 코드 그룹', NULL, NULL, NOW(), NULL);
+
+INSERT IGNORE INTO common_group_detail
+  (common_group_detail_id, common_group_id, description, created_by, deleted_by, created_at, deleted_at)
+VALUES
+  ('KOCW',    'SEARCH_KEYWORD_PLATFORM', '대학 공개강의 플랫폼 (이론/과목명 중심)', NULL, NULL, NOW(), NULL),
+  ('KMOOC',   'SEARCH_KEYWORD_PLATFORM', '온라인 공개강좌 플랫폼 (커리큘럼/강좌명 중심)', NULL, NULL, NOW(), NULL),
+  ('YOUTUBE', 'SEARCH_KEYWORD_PLATFORM', '영상 플랫폼 (실습/튜토리얼/최신 기술 중심)', NULL, NULL, NOW(), NULL);

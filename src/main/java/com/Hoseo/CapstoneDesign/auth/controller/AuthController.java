@@ -91,7 +91,7 @@ public class AuthController {
         String rawAccessToken = authentication == null
                 ? null
                 : String.valueOf(authentication.getCredentials());
-        authFacade.logout(userDetail.getUser(), rawAccessToken, refreshTokenRaw);
+        authFacade.logout(userDetail.getAuthenticatedUser(), rawAccessToken, refreshTokenRaw);
         securityCookieService.deleteRefreshTokenCookie(response);
         return ResponseEntity.noContent().build();
     }

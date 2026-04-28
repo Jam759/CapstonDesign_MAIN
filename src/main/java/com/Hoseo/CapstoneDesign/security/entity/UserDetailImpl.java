@@ -1,28 +1,42 @@
 package com.Hoseo.CapstoneDesign.security.entity;
 
-import com.Hoseo.CapstoneDesign.user.entity.Users;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
+import com.Hoseo.CapstoneDesign.user.entity.enums.SystemRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class UserDetailImpl implements UserDetails {
 
-    private final Users user;
+    private final AuthenticatedUserCacheEntry user;
 
-    public UserDetailImpl(Users user) {
+    public UserDetailImpl(AuthenticatedUserCacheEntry user) {
         this.user = user;
     }
 
-    public Users getUser() {
+    public Long getUserId() {
+        return user.userId();
+    }
+
+    public UUID getIdentityId() {
+        return user.identityId();
+    }
+
+    public SystemRole getSystemRole() {
+        return user.systemRole();
+    }
+
+    public AuthenticatedUserCacheEntry getAuthenticatedUser() {
         return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(user.getSystemRole().toString()));
+        return List.of(new SimpleGrantedAuthority(user.systemRole().toString()));
     }
 
     @Override
@@ -32,7 +46,7 @@ public class UserDetailImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getIdentityId().toString();
+        return user.identityId().toString();
     }
 
     @Override

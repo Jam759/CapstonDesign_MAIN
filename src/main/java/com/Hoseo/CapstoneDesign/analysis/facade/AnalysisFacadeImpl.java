@@ -7,6 +7,7 @@ import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisScorecardRe
 import com.Hoseo.CapstoneDesign.analysis.dto.application.ProjectAnalysisUserViewResponse;
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectRoadMapResponse;
 import com.Hoseo.CapstoneDesign.analysis.factory.AnalysisSectionDtoFactory;
+import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.analysis.service.ProjectAnalysisReportService;
 import com.Hoseo.CapstoneDesign.analysis.service.ProjectRoadMapService;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
@@ -14,7 +15,7 @@ import com.Hoseo.CapstoneDesign.project.exception.ProjectsErrorCode;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsException;
 import com.Hoseo.CapstoneDesign.project.service.ProjectMemberService;
 import com.Hoseo.CapstoneDesign.project.service.ProjectService;
-import com.Hoseo.CapstoneDesign.user.entity.Users;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,50 +27,58 @@ public class AnalysisFacadeImpl implements AnalysisFacade {
     private final ProjectMemberService projectMemberService;
     private final ProjectAnalysisReportService projectAnalysisReportService;
     private final ProjectRoadMapService projectRoadMapService;
+    private final AnalysisJobService analysisJobService;
 
     @Override
     @Transactional(readOnly = true)
-    public ProjectAnalysisOverviewResponse getOverview(Users user, Long projectId, Integer version) {
+    public ProjectAnalysisOverviewResponse getOverview(AuthenticatedUserCacheEntry user, Long projectId, Integer version) {
         ProjectAnalysisUserViewResponse userView = getValidatedUserView(user, projectId, version);
         return AnalysisSectionDtoFactory.toOverview(userView);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ProjectAnalysisHighlightsResponse getHighlights(Users user, Long projectId, Integer version) {
+    public ProjectAnalysisHighlightsResponse getHighlights(AuthenticatedUserCacheEntry user, Long projectId, Integer version) {
         ProjectAnalysisUserViewResponse userView = getValidatedUserView(user, projectId, version);
         return AnalysisSectionDtoFactory.toHighlights(userView);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ProjectAnalysisAdviceResponse getAdvice(Users user, Long projectId, Integer version) {
+    public ProjectAnalysisAdviceResponse getAdvice(AuthenticatedUserCacheEntry user, Long projectId, Integer version) {
         ProjectAnalysisUserViewResponse userView = getValidatedUserView(user, projectId, version);
         return AnalysisSectionDtoFactory.toAdvice(userView);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ProjectAnalysisScorecardResponse getScorecard(Users user, Long projectId, Integer version) {
+    public ProjectAnalysisScorecardResponse getScorecard(AuthenticatedUserCacheEntry user, Long projectId, Integer version) {
         ProjectAnalysisUserViewResponse userView = getValidatedUserView(user, projectId, version);
         return AnalysisSectionDtoFactory.toScorecard(userView);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ProjectRoadMapResponse getRoadMap(Users user, Long projectId) {
-        return projectRoadMapService.getRoadMap(projectId, user.getUserId());
+    public ProjectRoadMapResponse getRoadMap(AuthenticatedUserCacheEntry user, Long projectId) {
+        return projectRoadMapService.getRoadMap(projectId, user.userId());
     }
 
-    private ProjectAnalysisUserViewResponse getValidatedUserView(Users user, Long projectId, Integer version) {
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isAnalysisReady(AuthenticatedUserCacheEntry user, Long projectId) {
+        validateProjectAccess(user, projectId);
+        return analysisJobService.hasCompletedAnalysis(projectId);
+    }
+
+    private ProjectAnalysisUserViewResponse getValidatedUserView(AuthenticatedUserCacheEntry user, Long projectId, Integer version) {
         validateProjectAccess(user, projectId);
         return projectAnalysisReportService.getUserView(projectId, version);
     }
 
-    private void validateProjectAccess(Users user, Long projectId) {
+    private void validateProjectAccess(AuthenticatedUserCacheEntry user, Long projectId) {
         projectService.getById(projectId);
 
-        if (!projectMemberService.isAcceptedMember(projectId, user.getUserId())) {
+        if (!projectMemberService.isAcceptedMember(projectId, user.userId())) {
             throw new ProjectsException(ProjectsErrorCode.PROJECT_FORBIDDEN);
         }
     }

@@ -17,6 +17,13 @@ spring:
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
 
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:root}
+      timeout: ${REDIS_TIMEOUT:2s}
+
   jpa:
     hibernate:
       ddl-auto: create  #prod -> update

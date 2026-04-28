@@ -1,6 +1,5 @@
 package com.Hoseo.CapstoneDesign.github.facade;
 
-import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubBranchDto;
 import com.Hoseo.CapstoneDesign.github.dto.application.GithubInstallationDetailResponse;
 import com.Hoseo.CapstoneDesign.github.dto.query.UserGitHubInstallationLinkQueryResult;
@@ -21,6 +20,7 @@ import com.Hoseo.CapstoneDesign.github.service.InstallationRepositoryService;
 import com.Hoseo.CapstoneDesign.github.service.strategy.GithubWebhookStrategy;
 import com.Hoseo.CapstoneDesign.github.util.StateUtil;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,7 +40,6 @@ public class GitHubFacadeImpl implements GitHubFacade {
     private final GitHubAppInstallationService gitHubAppInstallationService;
     private final InstallationRepositoryService installationRepositoryService;
     private final GithubAppClientService githubAppClientService;
-    private final AnalysisJobService analysisJobService;
     private final UserService userService;
 
     private final GitHubQueryService gitHubQueryService;
@@ -49,9 +48,10 @@ public class GitHubFacadeImpl implements GitHubFacade {
 
     @Override
     @Transactional(readOnly = true)
-    public InstallationsAvailableResponse getAvailable(Users user, String returnTo) {
-        boolean githubInstalled = gitHubAppInstallationService.isInstalledByUser(user);
-        return GitHubDtoFactory.toInstallationsAvailableResponse(user, githubInstalled, stateUtil, returnTo);
+    public InstallationsAvailableResponse getAvailable(AuthenticatedUserCacheEntry user, String returnTo) {
+        Users userReference = userService.getReferenceById(user.userId());
+        boolean githubInstalled = gitHubAppInstallationService.isInstalledByUser(userReference);
+        return GitHubDtoFactory.toInstallationsAvailableResponse(userReference, githubInstalled, stateUtil, returnTo);
     }
 
     @Override
@@ -101,9 +101,9 @@ public class GitHubFacadeImpl implements GitHubFacade {
 
     @Override
     @Transactional(readOnly = true)
-    public RepositoryBranchesResponse getBranches(Users user, Long repositoryId) {
+    public RepositoryBranchesResponse getBranches(AuthenticatedUserCacheEntry user, Long repositoryId) {
         UserGitHubInstallationLinkQueryResult result
-                = gitHubQueryService.getUserLinkedRepoOrThrow(user.getUserId(), repositoryId);
+                = gitHubQueryService.getUserLinkedRepoOrThrow(user.userId(), repositoryId);
         List<GithubBranchDto> branches
                 = githubAppClientService.getBranches(result.gitHubInstallationId(), result.repositoryFullName());
         return GitHubDtoFactory.toRepositoryBranchesResponse(result, branches);
@@ -111,8 +111,8 @@ public class GitHubFacadeImpl implements GitHubFacade {
 
     @Override
     @Transactional(readOnly = false)
-    public List<RepositoryResponse> getRepositories(Users user) {
-        GithubAppInstallations installation = gitHubAppInstallationService.getByUser(user);
+    public List<RepositoryResponse> getRepositories(AuthenticatedUserCacheEntry user) {
+        GithubAppInstallations installation = gitHubAppInstallationService.getByUser(userService.getReferenceById(user.userId()));
         List<InstallationRepository> repositories
                 = installationRepositoryService.getByGithubAppInstallations(installation);
         if (repositories.isEmpty()) {

@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.auth.dto.application.TokenPair;
 import com.Hoseo.CapstoneDesign.auth.facade.AuthFacade;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.github.service.GitHubAppInstallationService;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import com.Hoseo.CapstoneDesign.security.exception.JwtUtilErrorCode;
 import com.Hoseo.CapstoneDesign.security.exception.JwtUtilException;
 import com.Hoseo.CapstoneDesign.security.factory.SecurityDtoFactory;
@@ -45,11 +46,11 @@ public class AuthFacadeImpl implements AuthFacade {
 
     @Override
     @Transactional(readOnly = false)
-    public void logout(Users user, String rawAccessToken, String rawRefreshToken) {
+    public void logout(AuthenticatedUserCacheEntry authenticatedUser, String rawAccessToken, String rawRefreshToken) {
         if (rawAccessToken == null || rawAccessToken.isBlank()) {
             throw new JwtUtilException(JwtUtilErrorCode.TOKEN_IS_NULL);
         }
-        accessTokenBlackListService.saveBlackList(rawAccessToken, user);
-        refreshTokenService.revokeAndSoftDeleteByFamily(user, rawRefreshToken);
+        accessTokenBlackListService.saveBlackList(rawAccessToken, authenticatedUser);
+        refreshTokenService.revokeAndSoftDeleteByFamily(authenticatedUser.userId(), rawRefreshToken);
     }
 }
