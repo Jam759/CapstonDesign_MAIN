@@ -27,11 +27,11 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
            update RefreshToken rt
            set rt.revokedAt = :now,
                rt.deletedAt = :now
-           where rt.user = :user
+           where rt.user.userId = :userId
              and rt.familyId = :familyId
              and rt.deletedAt is null
            """)
-    int revokeAndSoftDeleteByFamilyId(Users user, UUID familyId, LocalDateTime now);
+    int revokeAndSoftDeleteByFamilyId(Long userId, UUID familyId, LocalDateTime now);
 
 }
 

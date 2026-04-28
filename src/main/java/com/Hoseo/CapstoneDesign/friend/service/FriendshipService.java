@@ -31,18 +31,18 @@ public class FriendshipService {
     }
 
     @Transactional
-    public Friendship sendRequest(Users requester, Long receiverId) {
+    public Friendship sendRequest(Long requesterId, Long receiverId) {
         usersRepository.findById(receiverId)
                 .orElseThrow(() -> new FriendException(FriendErrorCode.USER_NOT_FOUND));
 
         boolean alreadyExists =
-                friendshipRepository.existsByRequesterUserIdAndReceiverUserId(requester.getUserId(), receiverId)
-                || friendshipRepository.existsByRequesterUserIdAndReceiverUserId(receiverId, requester.getUserId());
+                friendshipRepository.existsByRequesterUserIdAndReceiverUserId(requesterId, receiverId)
+                || friendshipRepository.existsByRequesterUserIdAndReceiverUserId(receiverId, requesterId);
         if (alreadyExists) {
             throw new FriendException(FriendErrorCode.FRIENDSHIP_ALREADY_EXISTS);
         }
 
-        Users managedRequester = usersRepository.getReferenceById(requester.getUserId());
+        Users managedRequester = usersRepository.getReferenceById(requesterId);
         Users managedReceiver = usersRepository.getReferenceById(receiverId);
         return friendshipRepository.save(Friendship.builder()
                 .requester(managedRequester)

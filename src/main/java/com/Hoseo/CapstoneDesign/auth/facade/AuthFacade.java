@@ -1,10 +1,10 @@
 package com.Hoseo.CapstoneDesign.auth.facade;
 
 import com.Hoseo.CapstoneDesign.auth.dto.application.TokenPair;
-import com.Hoseo.CapstoneDesign.user.entity.Users;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 
 public interface AuthFacade {
     TokenPair accessTokenReissue(String rawRefreshToken);
 
-    void logout(Users user, String rawAccessToken, String rawRefreshToken);
+    void logout(AuthenticatedUserCacheEntry user, String rawAccessToken, String rawRefreshToken);
 }

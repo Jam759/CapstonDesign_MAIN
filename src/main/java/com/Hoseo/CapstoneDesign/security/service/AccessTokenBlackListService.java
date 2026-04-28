@@ -1,7 +1,7 @@
 package com.Hoseo.CapstoneDesign.security.service;
 
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import com.Hoseo.CapstoneDesign.security.dto.cache.AccessTokenBlackListCache;
-import com.Hoseo.CapstoneDesign.user.entity.Users;
 
 import java.util.Optional;
 
@@ -10,7 +10,7 @@ public interface AccessTokenBlackListService {
 
     Optional<AccessTokenBlackListCache> findBlackList(String accessToken);
 
-    void saveBlackList(String accessToken, Users user);
+    void saveBlackList(String accessToken, AuthenticatedUserCacheEntry user);
 
     boolean isExistByToken(String accessToken);
 }

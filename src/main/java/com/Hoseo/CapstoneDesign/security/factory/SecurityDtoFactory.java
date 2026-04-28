@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.security.factory;
 
 import com.Hoseo.CapstoneDesign.auth.dto.application.TokenPair;
 import com.Hoseo.CapstoneDesign.global.util.TimeUtil;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import com.Hoseo.CapstoneDesign.security.dto.cache.AccessTokenBlackListCache;
 import com.Hoseo.CapstoneDesign.security.util.JwtUtil;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
@@ -11,12 +12,24 @@ import java.util.Date;
 
 public class SecurityDtoFactory {
     public static AccessTokenBlackListCache toAccessTokenBlackListCache(String accessToken, Users user, JwtUtil jwtUtil) {
+        return toAccessTokenBlackListCache(accessToken, user.getUserId(), jwtUtil);
+    }
+
+    public static AccessTokenBlackListCache toAccessTokenBlackListCache(
+            String accessToken,
+            AuthenticatedUserCacheEntry user,
+            JwtUtil jwtUtil
+    ) {
+        return toAccessTokenBlackListCache(accessToken, user.userId(), jwtUtil);
+    }
+
+    private static AccessTokenBlackListCache toAccessTokenBlackListCache(String accessToken, Long userId, JwtUtil jwtUtil) {
         return AccessTokenBlackListCache.builder()
                 .jti(jwtUtil.getJtiFromAccessToken(accessToken))
                 .encryptedToken(accessToken)
                 .expiryDate(TimeUtil.toLocalDateTime(jwtUtil.getExpirationFromAccessToken(accessToken)))
                 .logoutTime(TimeUtil.getNowSeoulLocalDateTime())
-                .userId(user.getUserId())
+                .userId(userId)
                 .build();
     }
 

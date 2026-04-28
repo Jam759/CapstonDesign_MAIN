@@ -3,17 +3,17 @@ package com.Hoseo.CapstoneDesign.gamification.facade;
 import com.Hoseo.CapstoneDesign.gamification.dto.response.QuestResponse;
 import com.Hoseo.CapstoneDesign.gamification.dto.response.RankingResponse;
 import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestProgressStatus;
-import com.Hoseo.CapstoneDesign.user.entity.Users;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 
 import java.util.List;
 
 public interface GamificationFacade {
     List<RankingResponse> getRanking(Integer page, Integer size);
 
-    RankingResponse getMyRank(Users user);
+    RankingResponse getMyRank(AuthenticatedUserCacheEntry user);
 
     List<QuestResponse> getMyQuest(
-            Users user,
+            AuthenticatedUserCacheEntry user,
             Long projectId,
             AiQuestProgressStatus progressStatus,
             String status,
@@ -21,7 +21,7 @@ public interface GamificationFacade {
             Integer size
     );
 
-    QuestResponse acceptQuest(Users user, Long questId);
+    QuestResponse acceptQuest(AuthenticatedUserCacheEntry user, Long questId);
 
-    QuestResponse declineQuest(Users user, Long questId);
+    QuestResponse declineQuest(AuthenticatedUserCacheEntry user, Long questId);
 }

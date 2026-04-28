@@ -10,6 +10,8 @@ import com.Hoseo.CapstoneDesign.project.exception.ProjectsErrorCode;
 import com.Hoseo.CapstoneDesign.project.exception.ProjectsException;
 import com.Hoseo.CapstoneDesign.project.service.ProjectMemberService;
 import com.Hoseo.CapstoneDesign.project.service.ProjectService;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
+import com.Hoseo.CapstoneDesign.security.cache.factory.AuthenticatedUserCacheFactory;
 import com.Hoseo.CapstoneDesign.support.builder.UsersTestBuilder;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +58,7 @@ class AnalysisFacadeImplTest {
     @Test
     @DisplayName("returns the overview section when the user is an accepted project member")
     void getOverviewSuccess() {
-        Users user = UsersTestBuilder.defaultUser().userId(1L).build();
+        AuthenticatedUserCacheEntry user = authenticatedUser();
         when(projectService.getById(1L)).thenReturn(Projects.builder().projectId(1L).build());
         when(projectMemberService.isAcceptedMember(1L, 1L)).thenReturn(true);
         when(projectAnalysisReportService.getUserView(1L, 2)).thenReturn(sampleUserView());
@@ -70,7 +72,7 @@ class AnalysisFacadeImplTest {
     @Test
     @DisplayName("returns merged highlights when the user is an accepted project member")
     void getHighlightsSuccess() {
-        Users user = UsersTestBuilder.defaultUser().userId(1L).build();
+        AuthenticatedUserCacheEntry user = authenticatedUser();
         when(projectService.getById(1L)).thenReturn(Projects.builder().projectId(1L).build());
         when(projectMemberService.isAcceptedMember(1L, 1L)).thenReturn(true);
         when(projectAnalysisReportService.getUserView(1L, 2)).thenReturn(sampleUserView());
@@ -84,7 +86,7 @@ class AnalysisFacadeImplTest {
     @Test
     @DisplayName("throws PROJECT_FORBIDDEN when the user does not belong to the project")
     void getOverviewForbidden() {
-        Users user = UsersTestBuilder.defaultUser().userId(1L).build();
+        AuthenticatedUserCacheEntry user = authenticatedUser();
         when(projectService.getById(1L)).thenReturn(Projects.builder().projectId(1L).build());
         when(projectMemberService.isAcceptedMember(1L, 1L)).thenReturn(false);
 
@@ -136,5 +138,9 @@ class AnalysisFacadeImplTest {
                         )
                 )
         );
+    }
+
+    private AuthenticatedUserCacheEntry authenticatedUser() {
+        return AuthenticatedUserCacheFactory.fromUser(UsersTestBuilder.defaultUser().userId(1L).build());
     }
 }

@@ -1,8 +1,11 @@
 package com.Hoseo.CapstoneDesign.notification.facade;
 
 import com.Hoseo.CapstoneDesign.analysis.entity.AnalysisJob;
+import com.Hoseo.CapstoneDesign.analysis.entity.ProjectAnalysisReport;
 import com.Hoseo.CapstoneDesign.analysis.entity.enums.AnalysisJobStatus;
+import com.Hoseo.CapstoneDesign.analysis.event.ProjectAnalysisReportPublishedEvent;
 import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
+import com.Hoseo.CapstoneDesign.analysis.service.ProjectAnalysisReportService;
 import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.common.service.CommonGroupDetailService;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
@@ -22,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -39,6 +43,8 @@ public class NotificationFacadeImpl implements NotificationFacade {
     private final CommonGroupDetailService commonGroupDetailService;
     private final UserService userService;
     private final ObjectMapper objectMapper;
+    private final ProjectAnalysisReportService projectAnalysisReportService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -74,6 +80,7 @@ public class NotificationFacadeImpl implements NotificationFacade {
         SuccessMessage data = objectMapper.convertValue(envelope.getData(), SuccessMessage.class);
         AnalysisJob job = analysisJobService.getById(envelope.getJobId());
         job.updateJobStatus(AnalysisJobStatus.NOTIFICATION_COMPLETED);
+        publishReportCacheInvalidation(data);
 
         SseBaseResponse response = NotificationDtoFactory.toAnalysisSuccessSseResponse(envelope, data);
         notificationService.createAndDispatch(
@@ -142,5 +149,20 @@ public class NotificationFacadeImpl implements NotificationFacade {
             log.error("SSE payload serialization failed", e);
             throw new NotificationException(NotificationErrorCode.NOTIFICATION_SERIALIZE_FAILED);
         }
+    }
+
+    private void publishReportCacheInvalidation(SuccessMessage data) {
+        if (data.getUserViewReportId() == null) {
+            return;
+        }
+
+        ProjectAnalysisReport report = projectAnalysisReportService.getById(data.getUserViewReportId());
+        applicationEventPublisher.publishEvent(
+                new ProjectAnalysisReportPublishedEvent(
+                        report.getProject().getProjectId(),
+                        report.getVersion(),
+                        report.getProjectAnalysisReportId()
+                )
+        );
     }
 }

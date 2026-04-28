@@ -7,7 +7,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum AccessTokenBlackListErrorCode implements GlobalErrorCode {
 
-    TOKEN_IS_BLACK_LIST(HttpStatus.UNAUTHORIZED, 1201, "로그아웃된 유저입니다.");
+    TOKEN_IS_BLACK_LIST(HttpStatus.UNAUTHORIZED, 1201, "Logged out access token."),
+    TOKEN_BLACKLIST_CHECK_FAILED(HttpStatus.UNAUTHORIZED, 1202, "Access token blacklist verification failed.");
 
     private final HttpStatus httpStatus;
     private final int errorCode;
@@ -27,5 +28,4 @@ public enum AccessTokenBlackListErrorCode implements GlobalErrorCode {
     public String getMessage() {
         return message;
     }
-
 }

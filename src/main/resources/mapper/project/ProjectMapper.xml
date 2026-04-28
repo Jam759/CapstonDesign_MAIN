@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.Hoseo.CapstoneDesign.project.mapper.ProjectMapper">
+
+    <select id="findMyProjectThumbnails"
+            resultType="com.Hoseo.CapstoneDesign.project.dto.query.ProjectThumbnailQueryRow">
+        SELECT
+            p.project_id                                                        AS projectId,
+            p.title                                                             AS title,
+            p.description                                                       AS description,
+            p.start_date                                                        AS startDate,
+            p.end_date                                                          AS endDate,
+            p.tracked_branch                                                    AS trackedBranch,
+            ir.full_name                                                        AS repositoryFullName,
+            COALESCE(my_pm.project_position_cmd_id, LOWER(my_pm.project_role)) AS role,
+            (
+                SELECT GROUP_CONCAT(pts.project_tech_stack_cmd_id
+                                    ORDER BY pts.project_tech_stack_cmd_id
+                                    SEPARATOR ',')
+                FROM project_tech_stack pts
+                WHERE pts.project_id = p.project_id
+            )                                                                   AS techStacksCsv,
+            (
+                SELECT GROUP_CONCAT(
+                               COALESCE(NULLIF(u.service_nickname, ''), u.oauth_nickname)
+                               ORDER BY member_pm.project_member_id
+                               SEPARATOR ','
+                       )
+                FROM project_member member_pm
+                         JOIN users u ON u.user_id = member_pm.user_id
+                WHERE member_pm.project_id = p.project_id
+                  AND member_pm.response = 'ACCEPTED'
+                  AND u.deleted_at IS NULL
+            )                                                                   AS teamMembersCsv
+        FROM project_member my_pm
+                 JOIN projects p ON p.project_id = my_pm.project_id
+                 LEFT JOIN installation_repository ir
+                           ON ir.installation_repository_id = p.installation_repository_id
+        WHERE my_pm.user_id = #{userId}
+          AND my_pm.response = 'ACCEPTED'
+          AND p.deleted_at IS NULL
+    </select>
+
+    <select id="findMyInvites"
+            resultType="com.Hoseo.CapstoneDesign.project.dto.query.InviteStatusQueryRow">
+        SELECT
+            pm.project_member_id                                                   AS id,
+            COALESCE(NULLIF(inviter.service_nickname, ''), inviter.oauth_nickname) AS `from`,
+            p.title                                                                AS projectName,
+            pm.response                                                            AS status
+        FROM project_member pm
+                 JOIN projects p ON p.project_id = pm.project_id
+                 LEFT JOIN users inviter ON inviter.user_id = pm.invited_by
+        WHERE pm.user_id = #{userId}
+          AND pm.project_role = 'MEMBER'
+          AND p.deleted_at IS NULL
+        ORDER BY pm.created_at DESC
+    </select>
+
+</mapper>

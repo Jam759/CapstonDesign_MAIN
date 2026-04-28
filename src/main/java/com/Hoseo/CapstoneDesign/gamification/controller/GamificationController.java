@@ -84,7 +84,7 @@ public class GamificationController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        RankingResponse myRank = facade.getMyRank(userDetail != null ? userDetail.getUser() : null);
+        RankingResponse myRank = facade.getMyRank(userDetail.getAuthenticatedUser());
         return ResponseEntity.ok(myRank);
     }
 
@@ -120,7 +120,7 @@ public class GamificationController {
             @RequestParam(defaultValue = "8") Integer size
     ) {
         List<QuestResponse> res = facade.getMyQuest(
-                userDetail != null ? userDetail.getUser() : null,
+                userDetail.getAuthenticatedUser(),
                 projectId,
                 progressStatus,
                 status,
@@ -153,7 +153,7 @@ public class GamificationController {
             @Parameter(description = "Quest id", example = "1")
             @PathVariable Long questId
     ) {
-        QuestResponse res = facade.acceptQuest(userDetail != null ? userDetail.getUser() : null, questId);
+        QuestResponse res = facade.acceptQuest(userDetail.getAuthenticatedUser(), questId);
         return ResponseEntity.ok(res);
     }
 
@@ -180,7 +180,7 @@ public class GamificationController {
             @Parameter(description = "Quest id", example = "1")
             @PathVariable Long questId
     ) {
-        QuestResponse res = facade.declineQuest(userDetail != null ? userDetail.getUser() : null, questId);
+        QuestResponse res = facade.declineQuest(userDetail.getAuthenticatedUser(), questId);
         return ResponseEntity.ok(res);
     }
 }
