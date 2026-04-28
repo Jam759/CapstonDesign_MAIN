@@ -31,23 +31,26 @@ public class ProjectMemberService {
     }
 
     public List<ProjectMember> getAcceptedMembersByUserId(Long userId) {
-        return repository.findByUserUserIdAndResponse(userId, ProjectInviteStatus.ACCEPTED);
+        return repository.findByUserUserIdAndResponseAndProjectDeletedAtIsNull(
+                userId,
+                ProjectInviteStatus.ACCEPTED
+        );
     }
 
     public List<ProjectMember> getMemberInvitesByUserId(Long userId) {
-        return repository.findByUserUserIdAndProjectRoleOrderByCreatedAtDesc(
+        return repository.findByUserUserIdAndProjectRoleAndProjectDeletedAtIsNullOrderByCreatedAtDesc(
                 userId,
                 ProjectMemberRole.MEMBER
         );
     }
 
     public ProjectMember getByIdAndUserId(Long projectMemberId, Long userId) {
-        return repository.findByProjectMemberIdAndUserUserId(projectMemberId, userId)
+        return repository.findByProjectMemberIdAndUserUserIdAndProjectDeletedAtIsNull(projectMemberId, userId)
                 .orElseThrow(() -> new ProjectsException(ProjectsErrorCode.PROJECT_INVITE_NOT_FOUND));
     }
 
     public ProjectMember getPendingInvite(Long projectId, Long userId) {
-        return repository.findByProjectProjectIdAndUserUserIdAndResponse(
+        return repository.findByProjectProjectIdAndProjectDeletedAtIsNullAndUserUserIdAndResponse(
                         projectId,
                         userId,
                         ProjectInviteStatus.INVITED
@@ -70,6 +73,10 @@ public class ProjectMemberService {
                 ProjectMemberRole.OWNER,
                 ProjectInviteStatus.ACCEPTED
         );
+    }
+
+    public List<Long> getUserIdsByProjectId(Long projectId) {
+        return repository.findUserIdsByProjectId(projectId);
     }
 
     public boolean existsProjectMember(Long projectId, Long userId) {

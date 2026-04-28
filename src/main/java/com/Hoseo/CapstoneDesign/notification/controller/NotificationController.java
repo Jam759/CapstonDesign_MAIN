@@ -66,7 +66,7 @@ public class NotificationController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        return notificationSseService.subscribe(userDetail.getUser());
+        return notificationSseService.subscribe(userDetail.getUserId());
     }
 
     @GetMapping
@@ -94,7 +94,7 @@ public class NotificationController {
             @Parameter(description = "Page size", example = "20")
             @RequestParam(defaultValue = "20") Integer size
     ) {
-        List<NotificationResponse> res = facade.getNotification(userDetail.getUser().getUserId(), page, size);
+        List<NotificationResponse> res = facade.getNotification(userDetail.getUserId(), page, size);
         return ResponseEntity.ok(res);
     }
 
@@ -121,7 +121,7 @@ public class NotificationController {
             @AuthenticationPrincipal UserDetailImpl userDetail,
             @RequestBody MarkNotificationsReadRequest body
     ) {
-        facade.readNotifications(userDetail.getUser().getUserId(), body.getIds());
+        facade.readNotifications(userDetail.getUserId(), body.getIds());
         return ResponseEntity.ok().build();
     }
 
@@ -146,7 +146,7 @@ public class NotificationController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        List<NotificationResponse> res = facade.getUnReadNotification(userDetail.getUser().getUserId());
+        List<NotificationResponse> res = facade.getUnReadNotification(userDetail.getUserId());
         return ResponseEntity.ok(res);
     }
 }

@@ -17,9 +17,16 @@ spring:
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:root}
 
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:root}
+      timeout: ${REDIS_TIMEOUT:2s}
+
   jpa:
     hibernate:
-      ddl-auto: update  #prod -> update
+      ddl-auto: create  #prod -> update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -109,10 +116,10 @@ auth:
     access-ttl: 15 #min
     refresh-ttl: 7 # days
     cookie-name: "REFRESH_TOKEN"  #prod -> os var
-    cookie-http-only: true
+    cookie-http-only: ${COOKIE_HTTP_ONLY:false}
     cookie-secure: ${COOKIE_SECURE:true}
     cookie-samesite: "None"
-    front-redirect-url: "${FRONTEND_REDIRECT_URL:http://localhost:5173/install-app}"
+    front-redirect-url: "${FRONTEND_REDIRECT_URL:http://localhost:5173/install-app/auth-test.html}"
 
 logging:
   level:

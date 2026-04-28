@@ -8,9 +8,11 @@ import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestProgressStatus;
 import com.Hoseo.CapstoneDesign.gamification.factory.GamificationDtoFactory;
 import com.Hoseo.CapstoneDesign.gamification.service.UserAiQuestService;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.service.UserMetaInformationService;
+import com.Hoseo.CapstoneDesign.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ public class GamificationFacadeImpl implements GamificationFacade {
 
     private final UserAiQuestService questService;
     private final UserMetaInformationService metaService;
+    private final UserService userService;
 
     @Override
     @Transactional(readOnly = true)
@@ -31,9 +34,9 @@ public class GamificationFacadeImpl implements GamificationFacade {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public RankingResponse getMyRank(Users user) {
-        UserMetaInformation meta = metaService.getMetaInfo(user);
+    @Transactional(readOnly = false)
+    public RankingResponse getMyRank(AuthenticatedUserCacheEntry user) {
+        UserMetaInformation meta = metaService.getMetaInfo(user.userId());
         int rank = (int) metaService.countUsersAbove(meta.getTotalExp()) + 1;
         return GamificationDtoFactory.toRankingResponse(rank, meta);
     }
@@ -41,14 +44,15 @@ public class GamificationFacadeImpl implements GamificationFacade {
     @Override
     @Transactional(readOnly = true)
     public List<QuestResponse> getMyQuest(
-            Users user,
+            AuthenticatedUserCacheEntry user,
             Long projectId,
             AiQuestProgressStatus progressStatus,
             String status,
             Integer page,
             Integer size
     ) {
-        List<QuestResponse> quests = questService.getQuestsByUserAndProject(user, projectId).stream()
+        Users userReference = userService.getReferenceById(user.userId());
+        List<QuestResponse> quests = questService.getQuestsByUserAndProject(userReference, projectId).stream()
                 .filter(q -> progressStatus == null || q.getProgressStatus() == progressStatus)
                 .filter(q -> status == null || status.isBlank()
                         || GamificationDtoFactory.toFrontendStatus(q.getApprovalStatus()).equalsIgnoreCase(status))
@@ -59,18 +63,20 @@ public class GamificationFacadeImpl implements GamificationFacade {
 
     @Override
     @Transactional(readOnly = false)
-    public QuestResponse acceptQuest(Users user, Long questId) {
+    public QuestResponse acceptQuest(AuthenticatedUserCacheEntry user, Long questId) {
+        Users userReference = userService.getReferenceById(user.userId());
         UserAiQuest quest = questService.updateQuestStatus(
-                questId, AiQuestApprovalStatus.REQUEST_ACCEPT, AiQuestProgressStatus.ACTIVE
+                userReference, questId, AiQuestApprovalStatus.REQUEST_ACCEPT, AiQuestProgressStatus.ACTIVE
         );
         return GamificationDtoFactory.toQuestResponse(quest);
     }
 
     @Override
     @Transactional(readOnly = false)
-    public QuestResponse declineQuest(Users user, Long questId) {
+    public QuestResponse declineQuest(AuthenticatedUserCacheEntry user, Long questId) {
+        Users userReference = userService.getReferenceById(user.userId());
         UserAiQuest quest = questService.updateQuestStatus(
-                questId, AiQuestApprovalStatus.REQUEST_REJECT, AiQuestProgressStatus.ARCHIVED
+                userReference, questId, AiQuestApprovalStatus.REQUEST_REJECT, AiQuestProgressStatus.ARCHIVED
         );
         return GamificationDtoFactory.toQuestResponse(quest);
     }

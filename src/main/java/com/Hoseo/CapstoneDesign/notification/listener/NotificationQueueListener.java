@@ -3,6 +3,8 @@ package com.Hoseo.CapstoneDesign.notification.listener;
 import com.Hoseo.CapstoneDesign.analysis.enums.AnalysisStatus;
 import com.Hoseo.CapstoneDesign.global.logging.support.TraceIdContext;
 import com.Hoseo.CapstoneDesign.notification.dto.application.NotificationQueueBaseMessage;
+import com.Hoseo.CapstoneDesign.notification.exception.NotificationErrorCode;
+import com.Hoseo.CapstoneDesign.notification.exception.NotificationException;
 import com.Hoseo.CapstoneDesign.notification.facade.NotificationFacade;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.awspring.cloud.sqs.annotation.SqsListener;
@@ -28,14 +30,6 @@ public class NotificationQueueListener {
             try (TraceIdContext traceIdContext = TraceIdContext.open(envelope.getTraceId())) {
                 String traceId = traceIdContext.traceId();
 
-                log.info(
-                        "SQS analysis result received. traceId={}, jobId={}, eventType={}, status={}",
-                        traceId,
-                        envelope.getJobId(),
-                        envelope.getEventType(),
-                        envelope.getStatus()
-                );
-
                 if (envelope.getStatus() == AnalysisStatus.SUCCESS) {
                     notificationFacade.successHandle(envelope);
                     return;
@@ -45,16 +39,10 @@ public class NotificationQueueListener {
                     notificationFacade.failedHandle(envelope);
                     return;
                 }
-                log.warn(
-                        "Unknown analysis status. traceId={}, jobId={}, status={}",
-                        traceId,
-                        envelope.getJobId(),
-                        envelope.getStatus()
-                );
             }
         } catch (Exception e) {
-            log.error("Failed to process SQS message. body={}", messageBody, e);
-            throw new RuntimeException("SQS message processing failed", e);
+            log.error("SQS message processing failed", e);
+            throw new NotificationException(NotificationErrorCode.NOTIFICATION_SQS_PROCESS_FAILED);
         }
     }
 }

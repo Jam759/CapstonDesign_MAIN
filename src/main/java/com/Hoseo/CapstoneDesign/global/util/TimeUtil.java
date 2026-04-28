@@ -1,5 +1,7 @@
 package com.Hoseo.CapstoneDesign.global.util;
 
+import com.Hoseo.CapstoneDesign.common.exception.CommonException;
+import com.Hoseo.CapstoneDesign.common.exception.CommonErrorCode;
 
 import java.time.*;
 import java.util.Date;
@@ -34,7 +36,7 @@ public class TimeUtil {
 
     public static long toEpochMilli(LocalDateTime ldt) {
         ZoneId zone = ZoneId.of("Asia/Seoul");
-        if (ldt == null) throw new IllegalArgumentException("ldt and zone must not be null");
+        if (ldt == null) throw new CommonException(CommonErrorCode.INVALID_INPUT);
         return ldt.atZone(zone).toInstant().toEpochMilli();
     }
 

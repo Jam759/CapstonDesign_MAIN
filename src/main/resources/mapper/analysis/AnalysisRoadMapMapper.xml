@@ -52,6 +52,7 @@
                  LEFT JOIN project_milestone_observable_evidence pmoe
                            ON pmoe.project_milestone_id = pm.project_milestone_id
         WHERE p.project_id = #{projectId}
+          AND p.deleted_at IS NULL
         ORDER BY pp.phase_order ASC,
                  pp.project_phase_id ASC,
                  pps.scope_order ASC,

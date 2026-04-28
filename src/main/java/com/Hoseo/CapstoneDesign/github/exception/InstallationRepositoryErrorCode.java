@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum InstallationRepositoryErrorCode implements GlobalErrorCode {
 
-    INSTALLATION_REPOSITORY_NOT_FOUND(HttpStatus.NOT_FOUND, 6004, "깃허브 리포지토리를 찾을 수 없습니다.");
+    INSTALLATION_REPOSITORY_NOT_FOUND(HttpStatus.NOT_FOUND, 5101, "깃허브 리포지토리를 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final int errorCode;

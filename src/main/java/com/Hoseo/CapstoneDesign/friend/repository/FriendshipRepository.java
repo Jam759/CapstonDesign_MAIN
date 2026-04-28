@@ -12,16 +12,22 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
 
     @Query("SELECT f FROM Friendship f JOIN FETCH f.requester JOIN FETCH f.receiver " +
            "WHERE (f.requester.userId = :userId OR f.receiver.userId = :userId) " +
+           "AND f.requester.deletedAt IS NULL " +
+           "AND f.receiver.deletedAt IS NULL " +
            "AND f.status = com.Hoseo.CapstoneDesign.friend.entity.enums.FriendshipStatus.ACCEPTED")
     List<Friendship> findAllAcceptedByUserId(@Param("userId") Long userId);
 
     @Query("SELECT f FROM Friendship f JOIN FETCH f.requester JOIN FETCH f.receiver " +
            "WHERE f.receiver.userId = :userId " +
+           "AND f.requester.deletedAt IS NULL " +
+           "AND f.receiver.deletedAt IS NULL " +
            "AND f.status = com.Hoseo.CapstoneDesign.friend.entity.enums.FriendshipStatus.PENDING")
     List<Friendship> findPendingInvitesByReceiverId(@Param("userId") Long userId);
 
     @Query("SELECT f FROM Friendship f JOIN FETCH f.requester JOIN FETCH f.receiver " +
-           "WHERE f.id = :id AND f.receiver.userId = :userId")
+           "WHERE f.id = :id AND f.receiver.userId = :userId " +
+           "AND f.requester.deletedAt IS NULL " +
+           "AND f.receiver.deletedAt IS NULL")
     Optional<Friendship> findByIdAndReceiverUserId(@Param("id") Long id, @Param("userId") Long userId);
 
     boolean existsByRequesterUserIdAndReceiverUserId(Long requesterId, Long receiverId);

@@ -20,6 +20,7 @@ public final class SecurityUrlPaths {
             ACTUATOR_PROMETHEUS,
             NOTIFICATION_SSE_SUBSCRIBE,
             "/",
+            "/favicon.ico",
             "/public/**",
             "/tmp/oauth2/test",
             "/tmp/oauth2/config",

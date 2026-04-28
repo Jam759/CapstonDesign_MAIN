@@ -35,6 +35,9 @@ services:
     environment:
       # .env(DB_URL 설정 시) / 기본값: Docker 내부 네트워크로 mysql:3306 직접 접근
       DB_URL: ${DB_URL:-jdbc:mysql://mysql:3306/capstone_design?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     volumes:
       - app-logs:/app/.logs
     env_file:
@@ -42,6 +45,20 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - app-net
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: capstone-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-root}
+    volumes:
+      - redis-data:/data
     networks:
       - app-net
 
@@ -121,6 +138,7 @@ volumes:
   prometheus-data:
   alloy-data:
   grafana-data:
+  redis-data:
 
 networks:
   app-net:

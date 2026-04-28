@@ -5,6 +5,7 @@ import com.Hoseo.CapstoneDesign.user.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE refresh_token SET deleted_at = now() WHERE id = ?")
+@SQLRestriction("deleted_at is null")
 public class RefreshToken extends LifecycleTimestampEntity {
 
     @Id

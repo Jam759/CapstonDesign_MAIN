@@ -65,7 +65,7 @@ public class ProjectController {
             @AuthenticationPrincipal UserDetailImpl userDetail,
             @RequestBody ProjectCreateRequest request
     ) {
-        ProjectCreateResponse res = facade.createProject(request, userDetail.getUser());
+        ProjectCreateResponse res = facade.createProject(request, userDetail.getAuthenticatedUser());
         return ResponseEntity.ok(res);
     }
 
@@ -90,7 +90,7 @@ public class ProjectController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        List<ProjectThumbnailResponse> res = facade.getMyProject(userDetail.getUser());
+        List<ProjectThumbnailResponse> res = facade.getMyProject(userDetail.getAuthenticatedUser());
         return ResponseEntity.ok(res);
     }
 
@@ -122,7 +122,7 @@ public class ProjectController {
             @Parameter(description = "Project id", example = "101")
             @PathVariable Long projectId
     ) {
-        ProjectSettingResponse response = facade.getProjectSetting(projectId, userDetail.getUser());
+        ProjectSettingResponse response = facade.getProjectSetting(projectId, userDetail.getAuthenticatedUser());
         return ResponseEntity.ok(response);
     }
 
@@ -145,7 +145,7 @@ public class ProjectController {
             @Parameter(description = "Project id", example = "101")
             @PathVariable Long projectId
     ) {
-        facade.deleteProject(projectId, userDetail.getUser());
+        facade.deleteProject(projectId, userDetail.getAuthenticatedUser());
         return ResponseEntity.ok().build();
     }
 
@@ -171,7 +171,7 @@ public class ProjectController {
             @AuthenticationPrincipal UserDetailImpl userDetail,
             @RequestBody ProjectInviteRequest request
     ) {
-        List<ProjectInviteResponse> res = facade.inviteProject(request, userDetail.getUser());
+        List<ProjectInviteResponse> res = facade.inviteProject(request, userDetail.getAuthenticatedUser());
         return ResponseEntity.ok(res);
     }
 
@@ -197,7 +197,7 @@ public class ProjectController {
             @AuthenticationPrincipal UserDetailImpl userDetail,
             @RequestBody ProjectInviteResponseRequest request
     ) {
-        ProjectInviteResponse res = facade.responseInvite(request, userDetail.getUser());
+        ProjectInviteResponse res = facade.responseInvite(request, userDetail.getAuthenticatedUser());
         return ResponseEntity.ok(res);
     }
 
@@ -222,7 +222,7 @@ public class ProjectController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        List<InviteStatusResponse> res = facade.getMyInvitedList(userDetail.getUser());
+        List<InviteStatusResponse> res = facade.getMyInvitedList(userDetail.getAuthenticatedUser());
         return ResponseEntity.ok(res);
     }
 }

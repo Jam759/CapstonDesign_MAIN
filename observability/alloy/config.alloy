@@ -24,6 +24,7 @@ loki.process "structured_http" {
       class_name     = "className",
       handler_method = "method",
       message        = "message",
+      args           = "args",
       duration_ms    = "durationMs",
       http_method    = "http.method",
       http_path      = "http.path",
@@ -72,6 +73,8 @@ loki.process "structured_app" {
       class_name     = "className",
       handler_method = "method",
       message        = "message",
+      args           = "args",
+      result         = "result",
       duration_ms    = "durationMs",
       error_type     = "error.type",
       error_message  = "error.message",
@@ -130,16 +133,16 @@ loki.source.file "structured_app" {
   }
 }
 
-loki.source.file "git_worker_structured_http" {
+loki.source.file "git_worker_structured_app" {
   targets = [
     {
-      __path__ = "/var/log/git-worker/structured-http.log",
-      job      = "git-worker-structured-http",
+      __path__ = "/var/log/git-worker/structured-app.log",
+      job      = "git-worker-structured-app",
       app      = "git-worker",
       env      = env("APP_ENV"),
     },
   ]
-  forward_to = [loki.process.structured_http.receiver]
+  forward_to = [loki.process.structured_app.receiver]
   tail_from_end = true
   file_match {
     enabled = true

@@ -5,8 +5,12 @@ import com.Hoseo.CapstoneDesign.user.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserPersonalQuestRepository extends JpaRepository<UserAiQuest, Long> {
-    List<UserAiQuest> findByUser(Users user);
-    List<UserAiQuest> findByUserAndProject_ProjectId(Users user, Long projectId);
+    List<UserAiQuest> findByUserAndProjectDeletedAtIsNull(Users user);
+
+    List<UserAiQuest> findByUserAndProjectProjectIdAndProjectDeletedAtIsNull(Users user, Long projectId);
+
+    Optional<UserAiQuest> findByUserAiQuestIdAndUserAndProjectDeletedAtIsNull(Long questId, Users user);
 }

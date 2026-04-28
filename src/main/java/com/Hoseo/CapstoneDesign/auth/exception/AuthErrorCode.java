@@ -10,8 +10,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum AuthErrorCode implements GlobalErrorCode {
 
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 401, "인증이 필요합니다."),
-    FORBIDDEN(HttpStatus.FORBIDDEN, 403, "접근 권한이 없습니다.");
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 1001, "인증이 필요합니다."),
+    FORBIDDEN(HttpStatus.FORBIDDEN, 1002, "접근 권한이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final int errorCode;

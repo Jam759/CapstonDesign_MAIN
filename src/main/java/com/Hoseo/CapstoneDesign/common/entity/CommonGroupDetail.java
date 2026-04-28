@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -23,6 +24,7 @@ import org.hibernate.annotations.SQLDelete;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "common_group_detail")
 @SQLDelete(sql = "UPDATE common_group_detail SET deleted_at = now() WHERE common_group_detail_id = ?")
+@SQLRestriction("deleted_at is null")
 public class CommonGroupDetail extends LifecycleTimestampEntity {
 
     @Id

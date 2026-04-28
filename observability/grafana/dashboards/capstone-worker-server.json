@@ -1,4 +1,4 @@
-{
+﻿{
   "annotations": {
     "list": [
       {
@@ -628,7 +628,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=~\"INFO|DEBUG|TRACE|ERROR\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", error_code=\"error.code\", error_message=\"error.message\" | duration >= ${minDurationMs} | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} {{.error_code}} {{.error_message}}\"",
+          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=~\"INFO|DEBUG|TRACE|ERROR\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\", error_code=\"error.code\", error_message=\"error.message\" | duration >= ${minDurationMs} | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}} {{.error_code}} {{.error_message}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -666,7 +666,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=~\"INFO|DEBUG|TRACE|ERROR\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} {{.error_code}} {{.error_message}}\"",
+          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=~\"INFO|DEBUG|TRACE|ERROR\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}} {{.error_code}} {{.error_message}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -704,7 +704,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=\"INFO\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=\"INFO\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -742,7 +742,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=\"DEBUG\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=\"DEBUG\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -780,7 +780,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=\"TRACE\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}}\"",
+          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=\"TRACE\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}}\"",
           "queryType": "range",
           "refId": "A"
         }
@@ -818,7 +818,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=\"ERROR\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} {{.error_code}} {{.error_message}}\"",
+          "expr": "{job=~\"git-worker-structured-http|git-worker-structured-app\", level=\"ERROR\", event_type=~\"${workerEventTypeRegex}\"} |= \"${workerContainsText}\" |= \"${traceId}\" | json level=\"level\", category=\"category\", event_type=\"eventType\", duration=\"durationMs\", trace_id=\"traceId\", class_name=\"className\", handler_method=\"method\", msg=\"message\", args=\"args\", result=\"result\", error_code=\"error.code\", error_message=\"error.message\" | line_format \"{{.level}} {{.category}} {{.event_type}} {{.duration}}ms trace={{.trace_id}} {{.class_name}}.{{.handler_method}} {{.msg}} args={{.args}} result={{.result}} {{.error_code}} {{.error_message}}\"",
           "queryType": "range",
           "refId": "A"
         }

@@ -5,7 +5,7 @@ import com.Hoseo.CapstoneDesign.friend.dto.response.FriendResponse;
 import com.Hoseo.CapstoneDesign.friend.factory.FriendDtoFactory;
 import com.Hoseo.CapstoneDesign.friend.service.FriendshipService;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
-import com.Hoseo.CapstoneDesign.user.entity.Users;
+import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,43 +19,43 @@ public class FriendFacadeImpl implements FriendFacade {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FriendResponse> getFriends(Users user) {
-        return friendshipService.getAcceptedFriends(user.getUserId())
+    public List<FriendResponse> getFriends(AuthenticatedUserCacheEntry user) {
+        return friendshipService.getAcceptedFriends(user.userId())
                 .stream()
-                .map(f -> FriendDtoFactory.toFriendResponse(f, user.getUserId()))
+                .map(f -> FriendDtoFactory.toFriendResponse(f, user.userId()))
                 .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<FriendInviteResponse> getInvites(Users user) {
-        return friendshipService.getPendingInvites(user.getUserId())
+    public List<FriendInviteResponse> getInvites(AuthenticatedUserCacheEntry user) {
+        return friendshipService.getPendingInvites(user.userId())
                 .stream()
                 .map(FriendDtoFactory::toInviteResponse)
                 .toList();
     }
 
     @Override
-    @Transactional
-    public FriendInviteResponse sendRequest(Users user, Long targetUserId) {
+    @Transactional(readOnly = false)
+    public FriendInviteResponse sendRequest(AuthenticatedUserCacheEntry user, Long targetUserId) {
         return FriendDtoFactory.toInviteResponse(
-                friendshipService.sendRequest(user, targetUserId)
+                friendshipService.sendRequest(user.userId(), targetUserId)
         );
     }
 
     @Override
-    @Transactional
-    public FriendInviteResponse acceptInvite(Users user, Long inviteId) {
+    @Transactional(readOnly = false)
+    public FriendInviteResponse acceptInvite(AuthenticatedUserCacheEntry user, Long inviteId) {
         return FriendDtoFactory.toInviteResponse(
-                friendshipService.acceptInvite(user.getUserId(), inviteId)
+                friendshipService.acceptInvite(user.userId(), inviteId)
         );
     }
 
     @Override
-    @Transactional
-    public FriendInviteResponse declineInvite(Users user, Long inviteId) {
+    @Transactional(readOnly = false)
+    public FriendInviteResponse declineInvite(AuthenticatedUserCacheEntry user, Long inviteId) {
         return FriendDtoFactory.toInviteResponse(
-                friendshipService.declineInvite(user.getUserId(), inviteId)
+                friendshipService.declineInvite(user.userId(), inviteId)
         );
     }
 }

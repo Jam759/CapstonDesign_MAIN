@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @SQLDelete(sql = "UPDATE projects SET deleted_at = now() WHERE project_id = ?")
+@SQLRestriction("deleted_at is null")
 public class Projects extends LifecycleTimestampEntity {
 
     @Id

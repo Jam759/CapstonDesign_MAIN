@@ -24,6 +24,11 @@ public class UserService {
                 .orElseThrow( () -> new CustomUserException(UserErrorCode.USER_NOT_FOUND_ERROR));
     }
 
+    public Users getById(Long userId) {
+        return repository.findById(userId)
+                .orElseThrow(() -> new CustomUserException(UserErrorCode.USER_NOT_FOUND_ERROR));
+    }
+
     public Users getReferenceById(Long userId) {
         return repository.getReferenceById(userId);
     }
