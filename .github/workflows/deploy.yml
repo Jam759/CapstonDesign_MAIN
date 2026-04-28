@@ -101,6 +101,10 @@ jobs:
             # [alloy] 로그 env 라벨
             APP_ENV=prod
 
+            # [redis] 호스트 포트 매핑 / 패스워드 (내부 host·port는 docker-compose 기본값 redis:6379)
+            REDIS_HOST_PORT=${{ secrets.REDIS_HOST_PORT }}
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+
             # [app] auth.jwt.cookie-secure / OAuth2 redirect
             COOKIE_SECURE=true
             OAUTH_REDIRECT_URI=https://capstone-project-lxp.duckdns.org/login/oauth2/code/github
