@@ -37,7 +37,7 @@ services:
       DB_URL: ${DB_URL:-jdbc:mysql://mysql:3306/capstone_design?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-root}
     volumes:
       - app-logs:/app/.logs
     env_file:
