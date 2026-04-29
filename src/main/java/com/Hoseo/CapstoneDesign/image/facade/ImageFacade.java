@@ -5,6 +5,6 @@ import com.Hoseo.CapstoneDesign.image.entity.enums.TargetType;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ImageFacade {
-    // 💡 [수정] 파라미터에 TargetType 추가
+    // 파라미터에 TargetType 추가
     ImageUploadResponse uploadTempImage(Long uploaderId, TargetType targetType, MultipartFile file);
 }

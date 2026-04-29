@@ -48,19 +48,12 @@ public class Question extends LifecycleTimestampEntity {
     @Builder.Default
     private List<String> tags = new ArrayList<>();
 
-    // 2. 작성자 정보: 기존에 친구가 만들어둔 Users 테이블의 데이터를 참조합니다. (다대일 관계)
+    // 2. 작성자 정보: 기존에 만들어둔 Users 테이블의 데이터를 참조합니다. (단방향 다대일 관계)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "writer_id", nullable = false)
     private Users writer;
 
-    // 3. 답변 목록 (새로 추가됨): 질문 상세 조회를 위해 이 질문에 달린 답변들을 리스트로 묶어줍니다. (일대다 관계)
-    // mappedBy = "question"은 Answer 엔티티의 question 필드가 관계의 주인임을 의미합니다.
-    // cascade = CascadeType.ALL은 질문이 지워지면 답변도 함께 지워지도록 설정합니다.
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Answer> answers = new ArrayList<>();
-
-    // --- 객체 수정을 위한 비즈니스 메서드 (친구의 규칙에 따라 Setter 대신 사용) ---
+    // --- 객체 수정을 위한 비즈니스 메서드 ---
 
     // 질문 제목, 내용, 태그를 한 번에 수정하는 메서드
     public void updateQuestion(String title, String content, List<String> tags) {

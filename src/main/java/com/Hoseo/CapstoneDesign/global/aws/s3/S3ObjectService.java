@@ -7,15 +7,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile; // 💡 [추가] MultipartFile 임포트
+import org.springframework.web.multipart.MultipartFile; // MultipartFile 임포트
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.exception.SdkException;
-import software.amazon.awssdk.core.sync.RequestBody; // 💡 [추가] RequestBody 임포트
+import software.amazon.awssdk.core.sync.RequestBody; // RequestBody 임포트
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest; // 💡 [추가] PutObjectRequest 임포트
+import software.amazon.awssdk.services.s3.model.PutObjectRequest; // PutObjectRequest 임포트
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -28,16 +28,14 @@ public class S3ObjectService {
     private final S3Properties s3Properties;
     private final ObjectMapper objectMapper;
 
-    // ==========================================
-    // 💡 [새로 추가된 업로드(Upload) 로직 시작]
-    // ==========================================
-
-    public void uploadFile(String objectKey, MultipartFile file) {
-        // 기존 메서드들처럼 기본 버킷 이름을 가져와서 오버로딩된 메서드를 호출합니다.
-        uploadFile(s3Properties.bucketName(), objectKey, file);
+    // 반환 타입을 void -> String으로 변경하여 생성된 URL을 리턴합니다.
+    public String uploadFile(String objectKey, MultipartFile file) {
+        // 기존 메서드들처럼 기본 버킷 이름을 가져와서 오버로딩된 메서드를 호출하고 그 결과를 반환합니다.
+        return uploadFile(s3Properties.bucketName(), objectKey, file);
     }
 
-    public void uploadFile(String bucketName, String objectKey, MultipartFile file) {
+    // 반환 타입을 void -> String으로 변경
+    public String uploadFile(String bucketName, String objectKey, MultipartFile file) {
         try {
             // S3에 업로드할 메타데이터(버킷명, 경로명, 파일타입) 세팅
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -50,6 +48,9 @@ public class S3ObjectService {
             s3Client.putObject(putObjectRequest,
                     RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
+            // AWS SDK 기능을 활용하여 S3 퍼블릭 URL을 자동 생성하여 반환합니다. (하드코딩 제거)
+            return s3Client.utilities().getUrl(builder -> builder.bucket(bucketName).key(objectKey)).toExternalForm();
+
         } catch (IOException e) {
             // 파일 읽기 실패 시 기존에 만들어둔 커스텀 예외 던지기
             throw new S3Exception(S3ErrorCode.S3_IO_ERROR);
@@ -61,12 +62,6 @@ public class S3ObjectService {
         }
     }
 
-    // ==========================================
-    // 💡 [새로 추가된 업로드(Upload) 로직 끝]
-    // ==========================================
-
-
-    // 👇 아래부터는 기존 코드와 100% 동일합니다. 건드리지 않았습니다.
     public byte[] getObjectBytes(String objectKey) {
         return getObjectBytes(s3Properties.bucketName(), objectKey);
     }
@@ -82,6 +77,11 @@ public class S3ObjectService {
         } catch (SdkException e) {
             throw new S3Exception(S3ErrorCode.S3_IO_ERROR);
         }
+    }
+
+    // 외부(Facade 등)에서 URL만 따로 필요할 때 사용할 수 있는 조회용 메서드
+    public String getPublicUrl(String objectKey) {
+        return s3Client.utilities().getUrl(builder -> builder.bucket(s3Properties.bucketName()).key(objectKey)).toExternalForm();
     }
 
     public String getObjectAsString(String objectKey) {

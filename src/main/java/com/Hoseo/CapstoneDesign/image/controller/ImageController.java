@@ -23,13 +23,13 @@ public class ImageController {
     @Operation(summary = "이미지 임시 업로드")
     @PostMapping(value = "/temp", consumes = "multipart/form-data")
     public ResponseEntity<ImageUploadResponse> uploadTempImage(
-            // 💡 [수정] 인증 토큰에서 유저 정보를 직접 가져옵니다. (제민 님 요구사항)
+            // 인증 토큰에서 유저 정보를 직접 가져옵니다. (제민 님 요구사항)
             @AuthenticationPrincipal UserDetailImpl userDetail,
-            // 💡 [추가] 이미지 용도(PROFILE, POST)를 파라미터로 받습니다.
+            // 이미지 용도(PROFILE, POST)를 파라미터로 받습니다.
             @RequestParam("targetType") TargetType targetType,
             @RequestPart("file") MultipartFile file) {
 
-        // 💡 [수정] private 필드 대신 public 메서드인 getUserId()를 사용합니다.
+        // private 필드 대신 public 메서드인 getUserId()를 사용합니다.
         Long userId = userDetail.getUserId();
 
         // Facade로 용도(targetType)를 함께 전달합니다.

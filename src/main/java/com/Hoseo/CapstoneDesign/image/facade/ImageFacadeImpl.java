@@ -1,6 +1,7 @@
 package com.Hoseo.CapstoneDesign.image.facade;
 
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
+import com.Hoseo.CapstoneDesign.global.aws.s3.S3ObjectService;
 import com.Hoseo.CapstoneDesign.image.dto.response.ImageUploadResponse;
 import com.Hoseo.CapstoneDesign.image.entity.Image;
 import com.Hoseo.CapstoneDesign.image.entity.enums.TargetType;
@@ -18,6 +19,8 @@ public class ImageFacadeImpl implements ImageFacade {
 
     private final ImageService imageService;
     private final UserService userService;
+    // URL 조회를 위해 S3ObjectService를 주입받습니다.
+    private final S3ObjectService s3ObjectService;
 
     @Override
     @Transactional(readOnly = false)
@@ -25,18 +28,16 @@ public class ImageFacadeImpl implements ImageFacade {
 
         Users uploader = userService.getReferenceById(uploaderId);
 
-        // 💡 ImageService에서 파일을 S3에 올리고 DB에 저장한 엔티티를 받아옵니다.
+        // 1. 이미지 저장 완료 (DB 저장 & S3 전송)
         Image savedImage = imageService.createAndSaveTempImage(uploader, targetType, file);
 
-        /* * 💡 [해결 포인트]
-         * 기존: .../public/ + 파일명 (X)
-         * 수정: 버킷주소 + 실제저장경로(imgPath) + 파일명 (O)
-         * savedImage.getImgPath() 안에는 "/temp/profile/" 혹은 "/temp/post/"가 들어있습니다.
-         */
-        String bucketBaseUrl = "https://hoseo-capstonedesign-project-erp-405894844993-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com";
+        // 2. 객체 키(objectKey) 조립 (맨 앞의 슬래시 제거)
+        String objectKey = savedImage.getImgPath().startsWith("/")
+                ? savedImage.getImgPath().substring(1) + savedImage.getUploadImgName()
+                : savedImage.getImgPath() + savedImage.getUploadImgName();
 
-        // 경로가 슬래시(/)로 시작하므로 중복되지 않게 합쳐줍니다.
-        String s3PublicUrl = bucketBaseUrl + savedImage.getImgPath() + savedImage.getUploadImgName();
+        // S3ObjectService에게 URL 생성을 위임합니다.
+        String s3PublicUrl = s3ObjectService.getPublicUrl(objectKey);
 
         return ImageDtoFactory.toUploadResponse(savedImage, s3PublicUrl);
     }

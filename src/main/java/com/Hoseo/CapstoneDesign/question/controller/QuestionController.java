@@ -6,6 +6,8 @@ import com.Hoseo.CapstoneDesign.question.dto.request.QuestionCreateRequest;
 import com.Hoseo.CapstoneDesign.question.dto.response.AnswerResponse;
 import com.Hoseo.CapstoneDesign.question.dto.response.QuestionDetailResponse;
 import com.Hoseo.CapstoneDesign.question.dto.response.QuestionSummaryResponse;
+// 서버가 유저 정보를 알기 위해 필요한 시큐리티 엔티티를 임포트합니다.
+import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -17,6 +19,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+// 토큰에서 유저 정보를 바로 꺼내올 수 있게 해주는 어노테이션을 임포트합니다.
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +54,15 @@ public class QuestionController {
             @ApiResponse(responseCode = "200", description = "Question created", content = @Content(schema = @Schema(implementation = QuestionDetailResponse.class))),
             @ApiResponse(responseCode = "401", description = "Authentication failed", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     })
-    public ResponseEntity<QuestionDetailResponse> createQuestion(@RequestBody QuestionCreateRequest request) {
+    public ResponseEntity<QuestionDetailResponse> createQuestion(
+            // 스프링 시큐리티가 JWT 토큰을 분석해서 현재 로그인한 유저의 정보를 userDetail 객체에 담아줍니다.
+            @AuthenticationPrincipal UserDetailImpl userDetail,
+            @RequestBody QuestionCreateRequest request) {
+
+        // userDetail 객체에서 현재 요청을 보낸 유저의 고유 ID 값을 안전하게 꺼내옵니다.
+        // 나중에 이 userId를 Service 계층으로 넘겨서 DB에 작성자로 기록하게 됩니다.
+        Long userId = userDetail.getUserId();
+
         QuestionDetailResponse response = new QuestionDetailResponse(
                 1L,
                 request.title(),
@@ -94,10 +106,15 @@ public class QuestionController {
             @ApiResponse(responseCode = "401", description = "Authentication failed", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     })
     public ResponseEntity<AnswerResponse> createAnswer(
+            // 답변을 달 때도 작성자가 누구인지 파악하기 위해 동일하게 유저 정보를 주입받습니다.
+            @AuthenticationPrincipal UserDetailImpl userDetail,
             @Parameter(description = "Question id", example = "1")
             @PathVariable Long questionId,
             @RequestBody AnswerCreateRequest request
     ) {
+        // 토큰에서 추출한 답변 작성자의 고유 ID 값입니다.
+        Long userId = userDetail.getUserId();
+
         AnswerResponse response = new AnswerResponse(
                 1L,
                 "service-user",
