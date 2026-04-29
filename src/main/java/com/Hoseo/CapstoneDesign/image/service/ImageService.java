@@ -31,7 +31,7 @@ public class ImageService {
         String originName = file.getOriginalFilename();
         String extension = extractExtension(originName);
         String uploadName = UUID.randomUUID() + "." + extension;
-        String imgPath = "/temp/" + targetType.name().toLowerCase() + "/";
+        String imgPath = "/public/" + targetType.name().toLowerCase() + "/";
 
         // ==========================================
         // 💡 [새로 추가된 S3 실제 파일 업로드 로직]
