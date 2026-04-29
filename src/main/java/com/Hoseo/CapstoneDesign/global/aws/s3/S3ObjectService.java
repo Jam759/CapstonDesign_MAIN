@@ -7,12 +7,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile; // 💡 [추가] MultipartFile 임포트
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody; // 💡 [추가] RequestBody 임포트
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest; // 💡 [추가] PutObjectRequest 임포트
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +28,45 @@ public class S3ObjectService {
     private final S3Properties s3Properties;
     private final ObjectMapper objectMapper;
 
+    // ==========================================
+    // 💡 [새로 추가된 업로드(Upload) 로직 시작]
+    // ==========================================
+
+    public void uploadFile(String objectKey, MultipartFile file) {
+        // 기존 메서드들처럼 기본 버킷 이름을 가져와서 오버로딩된 메서드를 호출합니다.
+        uploadFile(s3Properties.bucketName(), objectKey, file);
+    }
+
+    public void uploadFile(String bucketName, String objectKey, MultipartFile file) {
+        try {
+            // S3에 업로드할 메타데이터(버킷명, 경로명, 파일타입) 세팅
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .contentType(file.getContentType())
+                    .build();
+
+            // 실제 파일 스트림을 S3로 전송
+            s3Client.putObject(putObjectRequest,
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+        } catch (IOException e) {
+            // 파일 읽기 실패 시 기존에 만들어둔 커스텀 예외 던지기
+            throw new S3Exception(S3ErrorCode.S3_IO_ERROR);
+        } catch (software.amazon.awssdk.services.s3.model.S3Exception e) {
+            // S3 서버 에러 발생 시 기존에 만들어둔 맵핑 로직 타기
+            throw mapS3Exception(e);
+        } catch (SdkException e) {
+            throw new S3Exception(S3ErrorCode.S3_IO_ERROR);
+        }
+    }
+
+    // ==========================================
+    // 💡 [새로 추가된 업로드(Upload) 로직 끝]
+    // ==========================================
+
+
+    // 👇 아래부터는 기존 코드와 100% 동일합니다. 건드리지 않았습니다.
     public byte[] getObjectBytes(String objectKey) {
         return getObjectBytes(s3Properties.bucketName(), objectKey);
     }

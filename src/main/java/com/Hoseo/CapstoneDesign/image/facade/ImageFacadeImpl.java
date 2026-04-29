@@ -1,8 +1,9 @@
 package com.Hoseo.CapstoneDesign.image.facade;
 
-import com.Hoseo.CapstoneDesign.global.annotation.Facade; // [규칙 Must] @Facade 사용
+import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.image.dto.response.ImageUploadResponse;
 import com.Hoseo.CapstoneDesign.image.entity.Image;
+import com.Hoseo.CapstoneDesign.image.entity.enums.TargetType;
 import com.Hoseo.CapstoneDesign.image.factory.ImageDtoFactory;
 import com.Hoseo.CapstoneDesign.image.service.ImageService;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
@@ -19,17 +20,24 @@ public class ImageFacadeImpl implements ImageFacade {
     private final UserService userService;
 
     @Override
-    @Transactional(readOnly = false) // [규칙 Must] 트랜잭션 명시
-    public ImageUploadResponse uploadTempImage(Long uploaderId, MultipartFile file) {
+    @Transactional(readOnly = false)
+    public ImageUploadResponse uploadTempImage(Long uploaderId, TargetType targetType, MultipartFile file) {
 
-        // 1. 서비스 호출 (도메인 로직 및 영속성 처리)
         Users uploader = userService.getReferenceById(uploaderId);
-        Image savedImage = imageService.createAndSaveTempImage(uploader, file);
 
-        // 2. 가공 로직
-        String s3PublicUrl = "https://s3.../public/" + savedImage.getUploadImgName();
+        // 💡 ImageService에서 파일을 S3에 올리고 DB에 저장한 엔티티를 받아옵니다.
+        Image savedImage = imageService.createAndSaveTempImage(uploader, targetType, file);
 
-        // 3. [규칙 Must] 팩토리를 통해 DTO 변환 후 반환
+        /* * 💡 [해결 포인트]
+         * 기존: .../public/ + 파일명 (X)
+         * 수정: 버킷주소 + 실제저장경로(imgPath) + 파일명 (O)
+         * savedImage.getImgPath() 안에는 "/temp/profile/" 혹은 "/temp/post/"가 들어있습니다.
+         */
+        String bucketBaseUrl = "https://hoseo-capstonedesign-project-erp-405894844993-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com";
+
+        // 경로가 슬래시(/)로 시작하므로 중복되지 않게 합쳐줍니다.
+        String s3PublicUrl = bucketBaseUrl + savedImage.getImgPath() + savedImage.getUploadImgName();
+
         return ImageDtoFactory.toUploadResponse(savedImage, s3PublicUrl);
     }
 }
