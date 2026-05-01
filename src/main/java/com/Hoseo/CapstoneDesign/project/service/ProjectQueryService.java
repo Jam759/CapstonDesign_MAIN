@@ -2,7 +2,7 @@ package com.Hoseo.CapstoneDesign.project.service;
 
 import com.Hoseo.CapstoneDesign.project.dto.query.InviteStatusQueryRow;
 import com.Hoseo.CapstoneDesign.project.dto.query.ProjectThumbnailQueryRow;
-import com.Hoseo.CapstoneDesign.project.dto.response.InviteStatusResponse;
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteStatusResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectThumbnailResponse;
 import com.Hoseo.CapstoneDesign.project.mapper.ProjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class ProjectQueryService {
                 .toList();
     }
 
-    public List<InviteStatusResponse> findMyInvites(Long userId) {
+    public List<ProjectInviteStatusResponse> findMyInvites(Long userId) {
         return mapper.findMyInvites(userId).stream()
                 .map(this::toInviteStatusResponse)
                 .toList();
@@ -50,8 +50,8 @@ public class ProjectQueryService {
                 .build();
     }
 
-    private InviteStatusResponse toInviteStatusResponse(InviteStatusQueryRow row) {
-        return InviteStatusResponse.builder()
+    private ProjectInviteStatusResponse toInviteStatusResponse(InviteStatusQueryRow row) {
+        return ProjectInviteStatusResponse.builder()
                 .id(row.id())
                 .from(row.from() != null ? row.from() : "")
                 .projectName(row.projectName())

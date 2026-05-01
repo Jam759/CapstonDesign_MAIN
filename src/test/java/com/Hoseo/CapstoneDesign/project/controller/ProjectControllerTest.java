@@ -1,6 +1,6 @@
 package com.Hoseo.CapstoneDesign.project.controller;
 
-import com.Hoseo.CapstoneDesign.project.dto.response.InviteStatusResponse;
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteStatusResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectThumbnailResponse;
 import com.Hoseo.CapstoneDesign.project.entity.enums.ProjectInviteStatus;
@@ -128,19 +128,19 @@ class ProjectControllerTest {
     @DisplayName("GET /api/v1/projects/member returns invite list from facade")
     void getMyInvitedListReturnsFacadeList() throws Exception {
         when(facade.getMyInvitedList(any())).thenReturn(List.of(
-                InviteStatusResponse.builder()
+                ProjectInviteStatusResponse.builder()
                         .id(201L)
                         .from("Alice")
                         .projectName("Algorithm Study")
                         .status("INVITED")
                         .build(),
-                InviteStatusResponse.builder()
+                ProjectInviteStatusResponse.builder()
                         .id(202L)
                         .from("Bob")
                         .projectName("Capstone Design")
                         .status("ACCEPTED")
                         .build(),
-                InviteStatusResponse.builder()
+                ProjectInviteStatusResponse.builder()
                         .id(203L)
                         .from("Charlie")
                         .projectName("TypeScript Practice")

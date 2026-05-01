@@ -4,7 +4,7 @@ import com.Hoseo.CapstoneDesign.project.dto.request.ProjectCreateRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteResponseRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectSettingRequest;
-import com.Hoseo.CapstoneDesign.project.dto.response.InviteStatusResponse;
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteStatusResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectCreateResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
@@ -28,5 +28,5 @@ public interface ProjectFacade {
 
     ProjectInviteResponse responseInvite(ProjectInviteResponseRequest request, AuthenticatedUserCacheEntry user);
 
-    List<InviteStatusResponse> getMyInvitedList(AuthenticatedUserCacheEntry user);
+    List<ProjectInviteStatusResponse> getMyInvitedList(AuthenticatedUserCacheEntry user);
 }
