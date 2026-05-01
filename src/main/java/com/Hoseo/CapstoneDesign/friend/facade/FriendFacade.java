@@ -14,7 +14,6 @@ public interface FriendFacade {
     //자신이 보낸 초대 요청 혹은 받은 요청 목록은 가져온다
     FriendInviteStatusResponse getInvites(AuthenticatedUserCacheEntry user);
 
-    //
     FriendInviteResponse sendRequest(AuthenticatedUserCacheEntry user, Long targetUserId);
     FriendInviteResponse acceptInvite(AuthenticatedUserCacheEntry user, Long inviteId);
     FriendInviteResponse declineInvite(AuthenticatedUserCacheEntry user, Long inviteId);

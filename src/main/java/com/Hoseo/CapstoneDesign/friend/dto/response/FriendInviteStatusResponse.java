@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(description = "Friend or project invite response")
+@Schema(description = "받은 요청 및 자신의 요청 목록 dto")
 public record FriendInviteStatusResponse(
 
         //요청
