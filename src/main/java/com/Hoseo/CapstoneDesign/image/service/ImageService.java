@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -57,5 +58,20 @@ public class ImageService {
 
     private String extractExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+    // 새롭게 추가된 이미지 타겟 연결 메서드 (클래스 내부로 올바르게 이동됨)
+    @Transactional
+    public void attachImagesToTarget(List<Long> imageIds, Long targetId, String targetTypeCmdId) {
+        if (imageIds == null || imageIds.isEmpty()) {
+            return;
+        }
+        // 전달받은 ID들로 이미지 엔티티들을 조회합니다.
+        List<Image> images = imageRepository.findAllById(imageIds);
+
+        // 조회된 이미지들에 타겟 정보(예: 질문글 ID, "QUESTION")를 업데이트합니다.
+        for (Image image : images) {
+            image.attachToTarget(targetId, targetTypeCmdId);
+        }
     }
 }

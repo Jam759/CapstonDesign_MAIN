@@ -6,6 +6,7 @@ import com.Hoseo.CapstoneDesign.question.dto.request.QuestionCreateRequest;
 import com.Hoseo.CapstoneDesign.question.dto.response.AnswerResponse;
 import com.Hoseo.CapstoneDesign.question.dto.response.QuestionDetailResponse;
 import com.Hoseo.CapstoneDesign.question.dto.response.QuestionSummaryResponse;
+import com.Hoseo.CapstoneDesign.question.facade.QuestionFacade; // QuestionFacade 임포트 추가
 // 서버가 유저 정보를 알기 위해 필요한 시큐리티 엔티티를 임포트합니다.
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +39,9 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class QuestionController {
 
+    // 새로 생성한 QuestionFacade를 의존성 주입받습니다.
+    private final QuestionFacade questionFacade;
+
     @GetMapping
     @Operation(summary = "Get questions", description = "Entry point for the frontend question board list.")
     @ApiResponses({
@@ -60,19 +64,11 @@ public class QuestionController {
             @RequestBody QuestionCreateRequest request) {
 
         // userDetail 객체에서 현재 요청을 보낸 유저의 고유 ID 값을 안전하게 꺼내옵니다.
-        // 나중에 이 userId를 Service 계층으로 넘겨서 DB에 작성자로 기록하게 됩니다.
         Long userId = userDetail.getUserId();
 
-        QuestionDetailResponse response = new QuestionDetailResponse(
-                1L,
-                request.title(),
-                "service-user",
-                LocalDateTime.now(),
-                request.content(),
-                request.tags() == null ? List.of() : request.tags(),
-                0,
-                List.of()
-        );
+        // 기존 더미 데이터를 삭제하고 Facade를 호출하여 실제 비즈니스 로직(DB 저장 및 이미지 연결)을 실행합니다.
+        QuestionDetailResponse response = questionFacade.createQuestion(userId, request);
+
         return ResponseEntity.ok(response);
     }
 
