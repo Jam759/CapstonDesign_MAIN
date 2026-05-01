@@ -127,20 +127,3 @@ VALUES
   ('KOCW',    'SEARCH_KEYWORD_PLATFORM', '대학 공개강의 플랫폼 (이론/과목명 중심)', NULL, NULL, NOW(), NULL),
   ('KMOOC',   'SEARCH_KEYWORD_PLATFORM', '온라인 공개강좌 플랫폼 (커리큘럼/강좌명 중심)', NULL, NULL, NOW(), NULL),
   ('YOUTUBE', 'SEARCH_KEYWORD_PLATFORM', '영상 플랫폼 (실습/튜토리얼/최신 기술 중심)', NULL, NULL, NOW(), NULL);
--- ----------------------------------------------------------------
--- 8) 테스트용 유저 (users)
---    UserEntityFactoryTest 사양에 맞춘 1번 유저 시드 데이터
--- ----------------------------------------------------------------
-INSERT IGNORE INTO users
-(user_id, service_nickname, oauth_nickname, oauth_provider_id, oauth_type, system_role, user_goal_cmd_id, user_main_position_cmd_id, identity_id, created_at)
-VALUES
-    (1,
-     '이종엽',               -- service_nickname
-     'cartman33',            -- oauth_nickname
-     'mock-provider-id-1',   -- oauth_provider_id (테스트 코드의 'provider-x' 역할)
-     'GITHUB',               -- oauth_type (Enum: OauthType.GITHUB)
-     'USER',                 -- system_role (Enum: SystemRole.USER)
-     'Job',                  -- user_goal_cmd_id
-     'Backend',              -- user_main_position_cmd_id
-     UUID_TO_BIN(UUID()),    -- identity_id (바이너리 16바이트 형태)
-     NOW());                 -- created_at
