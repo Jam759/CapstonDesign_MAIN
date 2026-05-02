@@ -15,6 +15,7 @@ public class UsersTestBuilder {
     private OauthType oauthType = OauthType.GITHUB;
     private String oauthProviderId = "github-provider-id";
     private String oauthNickname = "github-user";
+    private String bio = null;
 
     public static UsersTestBuilder defaultUser() {
         return new UsersTestBuilder();
@@ -55,6 +56,11 @@ public class UsersTestBuilder {
         return this;
     }
 
+    public UsersTestBuilder bio(String bio) {
+        this.bio = bio;
+        return this;
+    }
+
     public Users build() {
         return Users.builder()
                 .userId(userId)
@@ -64,6 +70,7 @@ public class UsersTestBuilder {
                 .oauthType(oauthType)
                 .oauthProviderId(oauthProviderId)
                 .oauthNickname(oauthNickname)
+                .bio(bio)
                 .build();
     }
 }

@@ -14,6 +14,8 @@ import com.Hoseo.CapstoneDesign.user.entity.UserInfoUpdateHistory;
 import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.event.UserProfileChangedEvent;
+import com.Hoseo.CapstoneDesign.user.exception.CustomUserException;
+import com.Hoseo.CapstoneDesign.user.exception.UserErrorCode;
 import com.Hoseo.CapstoneDesign.user.facade.impl.UserFacadeImpl;
 import com.Hoseo.CapstoneDesign.user.service.UserInfoUpdateHistoryService;
 import com.Hoseo.CapstoneDesign.user.service.UserMetaInformationService;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -78,9 +81,10 @@ class UserFacadeImplTest {
                 .userId(1L)
                 .serviceNickname("before-service-nick")
                 .build()
-                .updateOauthNickname("before-oauth");
+                .syncOauthProfile("before-oauth");
         UserProfileUpdateRequest request = UserProfileUpdateRequestFactory.create(
                 "after-service-nick",
+                "updated bio",
                 "Job",
                 "Backend",
                 List.of("Java", "React")
@@ -108,12 +112,15 @@ class UserFacadeImplTest {
                 request.techStacks()
         )).thenReturn(List.of(javaStack, reactStack));
         when(userService.getById(user.getUserId())).thenReturn(user);
-        when(userService.updateUserProfile(user, "after-service-nick", goal, position, true))
+        when(userService.updateUserProfile(user, "after-service-nick", "updated bio", goal, position, true))
                 .thenAnswer(invocation -> {
-                    user.updateServiceNickname(request.userServiceNickname());
-                    user.updateUserGoal(goal);
-                    user.updateUserMainPosition(position);
-                    user.updateProfileComplete(true);
+                    user.applyProfileUpdate(
+                            request.userServiceNickname(),
+                            request.bio(),
+                            goal,
+                            position,
+                            true
+                    );
                     return user;
                 });
         when(historyService.save(any())).thenReturn(savedHistory);
@@ -121,6 +128,7 @@ class UserFacadeImplTest {
         UpdateUserInfoResponse response = facade.updateUserProfile(authenticated(user), request);
 
         assertThat(response.serviceNickname()).isEqualTo("after-service-nick");
+        assertThat(response.bio()).isEqualTo("updated bio");
         assertThat(response.goal()).isEqualTo("Job");
         assertThat(response.position()).isEqualTo("Backend");
         assertThat(response.techStacks()).containsExactly("Java", "React");
@@ -184,6 +192,19 @@ class UserFacadeImplTest {
         assertThat(response.maxXp()).isEqualTo(300L);
         assertThat(response.topPercentage()).isEqualTo(20);
         verify(userResponseCacheService).saveMyInfo(user.getUserId(), response);
+    }
+
+    @Test
+    @DisplayName("null request fails with invalid profile update request")
+    void updateUserProfileNullRequestFails() {
+        Users user = UsersTestBuilder.defaultUser()
+                .userId(1L)
+                .build();
+
+        assertThatThrownBy(() -> facade.updateUserProfile(authenticated(user), null))
+                .isInstanceOf(CustomUserException.class)
+                .extracting("errorCode")
+                .isEqualTo(UserErrorCode.USER_PROFILE_UPDATE_REQUEST_INVALID);
     }
 
     @Test

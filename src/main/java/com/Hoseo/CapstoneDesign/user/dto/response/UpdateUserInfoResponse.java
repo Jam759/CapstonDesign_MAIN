@@ -9,6 +9,8 @@ import java.util.List;
 public record UpdateUserInfoResponse(
         @Schema(description = "Updated service nickname", example = "new-service-nick")
         String serviceNickname,
+        @Schema(description = "Updated user bio", example = "Backend developer interested in distributed systems.")
+        String bio,
         @Schema(description = "Updated goal common code", example = "Job")
         String goal,
         @Schema(description = "Updated position common code", example = "Backend")
