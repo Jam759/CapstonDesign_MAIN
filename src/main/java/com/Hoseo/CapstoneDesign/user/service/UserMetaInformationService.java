@@ -11,19 +11,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor
 public class UserMetaInformationService {
 
-
     private final UserMetaInformationRepository repository;
+    private final AtomicBoolean rankRebuildRequested = new AtomicBoolean(false);
 
+    @Transactional
     public UserMetaInformation getOrCreate(Users user) {
         return repository.findByUser(user.getUserId())
                 .orElseGet( () -> {
-                    UserMetaInformation newEntity = UserEntityFactory.toUserMetaInformation(user);
+                    long initialRank = repository.findDenseRankByTotalExp(0L);
+                    UserMetaInformation newEntity = UserEntityFactory.toUserMetaInformation(user, initialRank);
                     return repository.save(newEntity);
                 });
     }
@@ -33,8 +35,8 @@ public class UserMetaInformationService {
                 .orElseThrow(() -> new GamificationException(GamificationErrorCode.USER_META_NOT_FOUND));
     }
 
-    public List<UserMetaInformation> getAllMetaInfoByExpDesc() {
-        return repository.findAllOrderByTotalExpDesc();
+    public List<UserMetaInformation> getAllMetaInfoByRank() {
+        return repository.findAllOrderByRankAscUserIdAsc();
     }
 
     public int calculateTopPercentage(long totalExp) {
@@ -42,5 +44,32 @@ public class UserMetaInformationService {
         long usersAbove = ((Number) stats[0]).longValue();
         long total      = ((Number) stats[1]).longValue();
         return total == 0 ? 100 : (int) Math.ceil((double) (usersAbove + 1) / total * 100);
+    }
+
+    public void requestRankRebuild() {
+        rankRebuildRequested.set(true);
+    }
+
+    @Transactional
+    public void deleteByUserId(Long userId) {
+        if (!repository.existsById(userId)) {
+            return;
+        }
+        repository.deleteById(userId);
+        requestRankRebuild();
+    }
+
+    @Transactional
+    public boolean rebuildRanksIfRequested() {
+        if (!rankRebuildRequested.compareAndSet(true, false)) {
+            return false;
+        }
+        try {
+            repository.rebuildDenseRanks();
+            return true;
+        } catch (RuntimeException e) {
+            rankRebuildRequested.set(true);
+            throw e;
+        }
     }
 }

@@ -37,4 +37,11 @@ public class UserMetaInformation {
     @Column(name = "current_level", nullable = false)
     private Integer currentLevel;
 
+    @Column(name = "current_rank", nullable = false)
+    private Long currentRank;
+
+    public UserMetaInformation updateCurrentRank(Long currentRank) {
+        this.currentRank = currentRank;
+        return this;
+    }
 }

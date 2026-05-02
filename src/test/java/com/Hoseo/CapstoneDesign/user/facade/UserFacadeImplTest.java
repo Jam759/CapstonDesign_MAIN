@@ -57,9 +57,6 @@ class UserFacadeImplTest {
     private UserMetaInformationService metaService;
 
     @Mock
-    private LevelRuleRepository levelRuleRepository;
-
-    @Mock
     private CommonGroupDetailService commonGroupDetailService;
 
     @Mock
@@ -156,7 +153,7 @@ class UserFacadeImplTest {
         MyInfoResponse response = facade.getMyInfo(authenticated(user));
 
         assertThat(response).isEqualTo(cached);
-        verify(metaService, never()).getMetaInfo(user);
+        verify(metaService, never()).getMetaInfo(user.getUserId());
     }
 
     @Test
@@ -166,28 +163,18 @@ class UserFacadeImplTest {
                 .userId(1L)
                 .serviceNickname("me")
                 .build();
-        LevelRule currentLevel = LevelRule.builder()
-                .level(2)
-                .requiredTotalExp(100L)
-                .build();
         UserMetaInformation meta = UserMetaInformation.builder()
                 .user(user)
                 .totalExp(150L)
-                .levelRule(currentLevel)
+                .currentLevel(2)
+                .currentRank(2L)
                 .build();
 
         when(userResponseCacheService.findMyInfo(user.getUserId())).thenReturn(Optional.empty());
         when(metaService.getMetaInfo(user.getUserId())).thenReturn(meta);
-        when(levelRuleRepository.findById(1)).thenReturn(Optional.of(LevelRule.builder()
-                .level(1)
-                .requiredTotalExp(0L)
-                .build()));
-        when(levelRuleRepository.findById(3)).thenReturn(Optional.of(LevelRule.builder()
-                .level(3)
-                .requiredTotalExp(300L)
-                .build()));
-        when(metaService.countUsersAbove(150L)).thenReturn(1L);
-        when(metaService.countAll()).thenReturn(10L);
+        when(commonGroupDetailService.findLevelRequiredExp(1)).thenReturn(Optional.of(0L));
+        when(commonGroupDetailService.findLevelRequiredExp(3)).thenReturn(Optional.of(300L));
+        when(metaService.calculateTopPercentage(150L)).thenReturn(20);
 
         MyInfoResponse response = facade.getMyInfo(authenticated(user));
 

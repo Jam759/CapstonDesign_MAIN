@@ -7,7 +7,6 @@ import com.Hoseo.CapstoneDesign.gamification.entity.enums.AiQuestApprovalStatus;
 import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GamificationDtoFactory {
@@ -33,24 +32,15 @@ public class GamificationDtoFactory {
     }
 
     public static List<RankingResponse> toRankingList(List<UserMetaInformation> sorted) {
-        List<RankingResponse> result = new ArrayList<>(sorted.size());
-        int rank = 0;
-        long prevExp = Long.MIN_VALUE;
-        for (int i = 0; i < sorted.size(); i++) {
-            UserMetaInformation meta = sorted.get(i);
-            if (meta.getTotalExp() != prevExp) {
-                rank = i + 1;
-                prevExp = meta.getTotalExp();
-            }
-            result.add(toRankingResponse(rank, meta));
-        }
-        return result;
+        return sorted.stream()
+                .map(GamificationDtoFactory::toRankingResponse)
+                .toList();
     }
 
-    public static RankingResponse toRankingResponse(int rank, UserMetaInformation meta) {
+    public static RankingResponse toRankingResponse(UserMetaInformation meta) {
         Users user = meta.getUser();
         return RankingResponse.builder()
-                .rank(rank)
+                .rank(meta.getCurrentRank())
                 .userId(user.getUserId())
                 .serviceNickname(resolveDisplayName(user))
                 .level(meta.getCurrentLevel())

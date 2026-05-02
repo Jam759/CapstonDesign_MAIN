@@ -65,6 +65,7 @@ class UserDetailServiceImplTest {
 
         when(authenticatedUserCacheService.findByIdentityId(identityId)).thenReturn(Optional.empty());
         when(userService.getByIdentityId(identityId)).thenReturn(user);
+        when(authenticatedUserCacheService.save(user)).thenReturn(AuthenticatedUserCacheFactory.fromUser(user));
 
         UserDetails result = service.loadUserByUsername(identityId.toString());
 
