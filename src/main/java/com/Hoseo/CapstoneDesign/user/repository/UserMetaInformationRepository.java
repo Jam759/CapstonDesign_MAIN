@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.user.repository;
 
+import com.Hoseo.CapstoneDesign.user.dto.query.RankStatsQueryResult;
 import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,14 +32,16 @@ public interface UserMetaInformationRepository extends JpaRepository<UserMetaInf
             """)
     List<UserMetaInformation> findAllOrderByRankAscUserIdAsc();
 
-    @Query(value = """
-            SELECT
-                SUM(CASE WHEN umi.total_exp > :totalExp THEN 1 ELSE 0 END),
-                COUNT(*)
-            FROM user_meta_information umi
-            INNER JOIN users u ON u.user_id = umi.user_id AND u.deleted_at IS NULL
-            """, nativeQuery = true)
-    Object[] findRankStats(Long totalExp);
+    @Query("""
+            SELECT new com.Hoseo.CapstoneDesign.user.dto.query.RankStatsQueryResult(
+                COALESCE(SUM(CASE WHEN umi.totalExp > :totalExp THEN 1L ELSE 0L END), 0L),
+                COUNT(umi)
+            )
+            FROM UserMetaInformation umi
+            JOIN umi.user u
+            WHERE u.deletedAt IS NULL
+            """)
+    RankStatsQueryResult findRankStats(Long totalExp);
 
     @Query(value = """
             SELECT COUNT(DISTINCT umi.total_exp) + 1
