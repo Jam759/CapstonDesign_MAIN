@@ -2,8 +2,6 @@ package com.Hoseo.CapstoneDesign.user.facade;
 
 import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.common.service.CommonGroupDetailService;
-import com.Hoseo.CapstoneDesign.gamification.entity.LevelRule;
-import com.Hoseo.CapstoneDesign.gamification.repository.LevelRuleRepository;
 import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import com.Hoseo.CapstoneDesign.security.cache.factory.AuthenticatedUserCacheFactory;
 import com.Hoseo.CapstoneDesign.support.builder.UsersTestBuilder;

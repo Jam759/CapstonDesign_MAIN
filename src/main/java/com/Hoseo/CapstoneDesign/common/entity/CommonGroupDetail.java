@@ -23,7 +23,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "common_group_detail")
-@SQLDelete(sql = "UPDATE common_group_detail SET deleted_at = now() WHERE common_group_detail_id = ?")
+@SQLDelete(sql = "UPDATE common_group_detail SET use_yn = 'n' WHERE common_group_detail_id = ?")
 @SQLRestriction("deleted_at is null")
 public class CommonGroupDetail extends LifecycleTimestampEntity {
 
@@ -37,6 +37,21 @@ public class CommonGroupDetail extends LifecycleTimestampEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "common_group_id", nullable = false)
     private CommonGroup commonGroup;
+
+    @Column(name = "ref1", length = 255)
+    private String ref1;
+
+    @Column(name = "ref2", length = 255)
+    private String ref2;
+
+    @Column(name = "ref3", length = 255)
+    private String ref3;
+
+    @Column(name = "ref4", length = 255)
+    private String ref4;
+
+    @Column(name = "use_yn", length = 1)
+    private String use_yn;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
