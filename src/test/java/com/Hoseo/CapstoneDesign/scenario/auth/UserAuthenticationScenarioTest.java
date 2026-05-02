@@ -43,6 +43,7 @@ class UserAuthenticationScenarioTest {
     void updateUserWithoutAuthenticationFailsWithGlobalExceptionResponse() throws Exception {
         var request = UserProfileUpdateRequestFactory.create(
                 "unauthorized",
+                null,
                 "Job",
                 "Backend",
                 List.of("Java")

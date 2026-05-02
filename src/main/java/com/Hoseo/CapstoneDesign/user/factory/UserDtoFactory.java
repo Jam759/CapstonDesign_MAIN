@@ -15,6 +15,7 @@ public class UserDtoFactory {
     ) {
         return new UpdateUserInfoResponse(
                 updatedUser.getServiceNickname(),
+                updatedUser.getBio(),
                 updatedUser.getUserGoal() != null ? updatedUser.getUserGoal().getCommonGroupDetailId() : null,
                 updatedUser.getUserMainPosition() != null ? updatedUser.getUserMainPosition().getCommonGroupDetailId() : null,
                 techStackIds,

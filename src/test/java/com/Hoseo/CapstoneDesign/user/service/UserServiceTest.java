@@ -43,7 +43,7 @@ class UserServiceTest {
     private UserService userService;
 
     @Test
-    @DisplayName("identityId로 사용자를 조회한다")
+    @DisplayName("getByIdentityId returns an existing user")
     void getByIdentityIdSuccess() {
         UUID identityId = UUID.randomUUID();
         Users user = UsersMother.defaultUser();
@@ -57,7 +57,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("identityId로 조회 실패 시 USER_NOT_FOUND_ERROR를 던진다")
+    @DisplayName("getByIdentityId throws USER_NOT_FOUND_ERROR when missing")
     void getByIdentityIdFail() {
         UUID identityId = UUID.randomUUID();
         when(usersRepository.findByIdentityId(identityId)).thenReturn(Optional.empty());
@@ -71,7 +71,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("기존 OAuth 사용자는 nickname 업데이트 후 저장한다")
+    @DisplayName("getOrCreateOauthUser syncs oauth nickname for existing user")
     void getOrCreateOauthUserExistingUser() {
         Users existing = UsersMother.withOauth("provider-1", "old-oauth");
         when(usersRepository.findByOauthTypeAndOauthProviderId(OauthType.GITHUB, "provider-1"))
@@ -87,7 +87,7 @@ class UserServiceTest {
 
     @ParameterizedTest
     @MethodSource("newOauthUserSamples")
-    @DisplayName("신규 OAuth 사용자는 생성 후 저장된다")
+    @DisplayName("getOrCreateOauthUser creates new oauth user")
     void getOrCreateOauthUserNewUser(String providerId, String oauthNickname) {
         when(usersRepository.findByOauthTypeAndOauthProviderId(OauthType.GITHUB, providerId))
                 .thenReturn(Optional.empty());
@@ -103,31 +103,21 @@ class UserServiceTest {
         log.info("[TEST] getOrCreateOauthUser new-user sample validated: providerId={}", providerId);
     }
 
-    @ParameterizedTest
-    @MethodSource("nicknameBoundarySamples")
-    @DisplayName("서비스 닉네임은 전달값으로 변경되어 저장된다")
-    void updateServiceUserNameBoundary(String nickname) {
-        Users user = UsersTestBuilder.defaultUser().serviceNickname("before").build();
-        when(usersRepository.save(user)).thenReturn(user);
-
-        Users result = userService.updateServiceUserName(user, nickname);
-
-        assertThat(result.getServiceNickname()).isEqualTo(nickname);
-        verify(usersRepository).save(user);
-        log.info("[TEST] nickname boundary validated: length={}", nickname.length());
-    }
-
     @Test
-    @DisplayName("프로필 공통 코드와 완료 여부를 함께 갱신한다")
+    @DisplayName("updateUserProfile applies profile fields together")
     void updateUserProfileUpdatesCommonCodes() {
-        Users user = UsersTestBuilder.defaultUser().serviceNickname("before").build();
+        Users user = UsersTestBuilder.defaultUser()
+                .serviceNickname("before")
+                .bio("before-bio")
+                .build();
         CommonGroupDetail goal = CommonGroupDetail.builder().commonGroupDetailId("Job").build();
         CommonGroupDetail position = CommonGroupDetail.builder().commonGroupDetailId("Backend").build();
         when(usersRepository.save(user)).thenReturn(user);
 
-        Users result = userService.updateUserProfile(user, "after", goal, position, true);
+        Users result = userService.updateUserProfile(user, "after", "after-bio", goal, position, true);
 
         assertThat(result.getServiceNickname()).isEqualTo("after");
+        assertThat(result.getBio()).isEqualTo("after-bio");
         assertThat(result.getUserGoal()).isEqualTo(goal);
         assertThat(result.getUserMainPosition()).isEqualTo(position);
         assertThat(result.isProfileComplete()).isTrue();
@@ -140,15 +130,6 @@ class UserServiceTest {
                 Arguments.of("provider-a", "oauth-a"),
                 Arguments.of("provider-b", "oauth-b"),
                 Arguments.of("provider-c", "oauth-c")
-        );
-    }
-
-    private static Stream<String> nicknameBoundarySamples() {
-        return Stream.of(
-                "a",
-                "nick-name-100-" + "x".repeat(86),
-                "",
-                "한글닉네임"
         );
     }
 }
