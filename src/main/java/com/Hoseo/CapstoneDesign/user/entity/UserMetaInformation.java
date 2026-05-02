@@ -1,6 +1,5 @@
 package com.Hoseo.CapstoneDesign.user.entity;
 
-import com.Hoseo.CapstoneDesign.gamification.entity.LevelRule;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -20,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "user_meta_information") // ERD original table: user_meta_infomations
+@Table(name = "user_meta_information") // ERD original table: user_meta_informations
 public class UserMetaInformation {
 
     @Id
@@ -35,7 +34,7 @@ public class UserMetaInformation {
     @Column(name = "total_exp", nullable = false)
     private Long totalExp;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "level", nullable = false, referencedColumnName = "level")
-    private LevelRule levelRule;
+    @Column(name = "current_level", nullable = false)
+    private Integer currentLevel;
+
 }

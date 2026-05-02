@@ -53,7 +53,7 @@ public class GamificationDtoFactory {
                 .rank(rank)
                 .userId(user.getUserId())
                 .serviceNickname(resolveDisplayName(user))
-                .level(meta.getLevelRule().getLevel())
+                .level(meta.getCurrentLevel())
                 .totalExp(meta.getTotalExp())
                 .build();
     }

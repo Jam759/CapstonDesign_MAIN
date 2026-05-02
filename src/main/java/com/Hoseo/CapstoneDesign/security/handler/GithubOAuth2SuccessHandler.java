@@ -5,8 +5,10 @@ import com.Hoseo.CapstoneDesign.github.exception.GitHubException;
 import com.Hoseo.CapstoneDesign.security.properties.JwtProperties;
 import com.Hoseo.CapstoneDesign.security.service.RefreshTokenService;
 import com.Hoseo.CapstoneDesign.security.service.SecurityCookieService;
+import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.entity.enums.OauthType;
+import com.Hoseo.CapstoneDesign.user.service.UserMetaInformationService;
 import com.Hoseo.CapstoneDesign.user.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +30,7 @@ public class GithubOAuth2SuccessHandler implements AuthenticationSuccessHandler 
     private final UserService userService;
     private final RefreshTokenService refreshTokenService;
     private final SecurityCookieService securityCookieService;
+    private final UserMetaInformationService userMetaInformationService;
 
     @Override
     @Transactional(readOnly = false)
@@ -49,6 +52,8 @@ public class GithubOAuth2SuccessHandler implements AuthenticationSuccessHandler 
         String githubLogin = String.valueOf(loginObj);   // oauth_nickname
 
         Users user = userService.getOrCreateOauthUser(OauthType.GITHUB, githubProviderId, githubLogin);
+        UserMetaInformation userMeta = userMetaInformationService.getOrCreate(user);
+
         String refreshToken = refreshTokenService.createAndSaveInitial(user);
 
         securityCookieService.createRefreshTokenCookie(response, refreshToken);

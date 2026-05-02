@@ -33,6 +33,7 @@ public class UserService {
         return repository.getReferenceById(userId);
     }
 
+
     public Users getOrCreateOauthUser(OauthType oauthType, String oauthProviderId, String oauthNickname) {
         Optional<Users> user =
                 repository.findByOauthTypeAndOauthProviderId(oauthType, oauthProviderId);

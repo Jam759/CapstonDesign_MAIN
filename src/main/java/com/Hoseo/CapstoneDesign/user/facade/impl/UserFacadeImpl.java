@@ -2,8 +2,6 @@ package com.Hoseo.CapstoneDesign.user.facade.impl;
 
 import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.common.service.CommonGroupDetailService;
-import com.Hoseo.CapstoneDesign.gamification.entity.LevelRule;
-import com.Hoseo.CapstoneDesign.gamification.repository.LevelRuleRepository;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import com.Hoseo.CapstoneDesign.user.cache.service.UserResponseCacheService;
@@ -36,7 +34,6 @@ public class UserFacadeImpl implements UserFacade {
     private final UserService userService;
     private final UserInfoUpdateHistoryService userInfoUpdateHistoryService;
     private final UserMetaInformationService metaService;
-    private final LevelRuleRepository levelRuleRepository;
     private final CommonGroupDetailService commonGroupDetailService;
     private final UserTechStackService userTechStackService;
     private final UserResponseCacheService userResponseCacheService;
@@ -94,24 +91,18 @@ public class UserFacadeImpl implements UserFacade {
 
     private MyInfoResponse loadMyInfo(AuthenticatedUserCacheEntry user) {
         UserMetaInformation meta = metaService.getMetaInfo(user.userId());
-        int currentLevel = meta.getLevelRule().getLevel();
+        int currentLevel = meta.getCurrentLevel();
         long totalExp = meta.getTotalExp();
 
-        long prevLevelExp = levelRuleRepository.findById(currentLevel - 1)
-                .map(LevelRule::getRequiredTotalExp)
+        long prevLevelExp = commonGroupDetailService.findLevelRequiredExp(currentLevel - 1)
                 .orElse(0L);
-
-        long nextLevelExp = levelRuleRepository.findById(currentLevel + 1)
-                .map(LevelRule::getRequiredTotalExp)
+        long nextLevelExp = commonGroupDetailService.findLevelRequiredExp(currentLevel + 1)
                 .orElse(totalExp);
 
         long xp    = totalExp - prevLevelExp;
         long maxXp = nextLevelExp - prevLevelExp;
 
-        long usersAbove = metaService.countUsersAbove(totalExp);
-        long total      = metaService.countAll();
-        int topPercentage = total == 0 ? 100 : (int) Math.ceil((double) (usersAbove + 1) / total * 100);
-
+        int topPercentage = metaService.calculateTopPercentage(totalExp);
         String nickname = (user.serviceNickname() != null && !user.serviceNickname().isBlank())
                 ? user.serviceNickname()
                 : user.oauthNickname();
