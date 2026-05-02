@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class CommonGroupDetailService {
     public static final String PROJECT_TECH_STACK_GROUP_ID = "PROJECT_TECH_STACK";
     public static final String PROJECT_POSITION_GROUP_ID = "PROJECT_POSITION";
     public static final String USER_GOAL_GROUP_ID = "USER_GOAL";
+    public static final String LEVEL_RULE_GROUP_ID = "LEVEL_RULE";
 
     private final CommonGroupDetailRepository repository;
 
@@ -92,6 +94,12 @@ public class CommonGroupDetailService {
         return normalizedIds.stream()
                 .map(commonGroupDetailMap::get)
                 .toList();
+    }
+
+    public Optional<Long> findLevelRequiredExp(int level) {
+        return repository.findByCommonGroupCommonGroupIdAndCommonGroupDetailIdAndDeletedAtIsNull(
+                        LEVEL_RULE_GROUP_ID, "LEVEL_" + level)
+                .map(detail -> Long.parseLong(detail.getRef2()));
     }
 
     private List<String> getCommonGroupDetailIds(String commonGroupId) {

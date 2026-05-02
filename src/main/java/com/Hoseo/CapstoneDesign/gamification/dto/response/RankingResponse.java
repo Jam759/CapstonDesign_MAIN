@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Schema(description = "경험치 랭킹 정보")
 public class RankingResponse {
     @Schema(description = "랭킹 순위", example = "1")
-    private Integer rank;
+    private Long rank;
 
     @Schema(description = "사용자 ID", example = "1001")
     private Long userId;

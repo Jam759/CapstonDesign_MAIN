@@ -17,7 +17,7 @@ import com.Hoseo.CapstoneDesign.project.service.ProjectQueryService;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteResponseRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectSettingRequest;
-import com.Hoseo.CapstoneDesign.project.dto.response.InviteStatusResponse;
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteStatusResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectCreateResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
@@ -252,7 +252,7 @@ public class ProjectFacadeImpl implements ProjectFacade {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InviteStatusResponse> getMyInvitedList(AuthenticatedUserCacheEntry user) {
+    public List<ProjectInviteStatusResponse> getMyInvitedList(AuthenticatedUserCacheEntry user) {
         if (user == null || user.userId() == null) {
             return List.of();
         }

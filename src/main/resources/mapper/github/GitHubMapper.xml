@@ -7,20 +7,19 @@
 
     <select id="findUserLinkedInstallationRepository"
             resultType="com.Hoseo.CapstoneDesign.github.dto.query.UserGitHubInstallationLinkQueryResult">
-
-        SELECT
-            ughi.user_id AS userId,
-            ughi.github_app_installation_id AS gitHubInstallationId,
-            ir.installation_repository_id AS installationRepositoryId,
-            ir.full_name AS repositoryFullName
-        FROM user_git_hub_installations ughi
-                 INNER JOIN github_app_installations gai
-                            ON gai.github_app_installations_id = ughi.github_app_installation_id
-                 INNER JOIN installation_repository ir
-                            ON ir.github_app_installation_id = gai.github_app_installations_id
-        WHERE ughi.user_id = #{userId}
-          AND ir.installation_repository_id = #{installationRepositoryId}
-
+        /* GitHubMapper.xml [findUserLinkedInstallationRepository] */
+        SELECT ughi.user_id                    AS userId  /* */
+             , ughi.github_app_installation_id AS gitHubInstallationId
+             , ir.installation_repository_id   AS installationRepositoryId
+             , ir.full_name                    AS repositoryFullName
+          FROM user_git_hub_installations ughi  /* */
+    INNER JOIN github_app_installations gai
+            ON gai.github_app_installations_id = ughi.github_app_installation_id
+    INNER JOIN installation_repository ir
+            ON ir.github_app_installation_id = gai.github_app_installations_id
+         WHERE 1=1
+           AND ughi.user_id = #{userId}
+           AND ir.installation_repository_id = #{installationRepositoryId}
     </select>
 
     <select id="findWebhookValidation"
@@ -56,8 +55,7 @@
           AND gi.account_id = #{senderAccountId}
           AND p.deleted_at IS NULL
           AND u.deleted_at IS NULL
-            LIMIT 1
-
+        LIMIT 1
     </select>
 
 </mapper>
