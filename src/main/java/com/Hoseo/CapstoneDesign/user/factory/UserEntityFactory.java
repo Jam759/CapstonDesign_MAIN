@@ -54,11 +54,12 @@ public class UserEntityFactory {
                 .toList();
     }
 
-    public static UserMetaInformation toUserMetaInformation(Users user) {
+    public static UserMetaInformation toUserMetaInformation(Users user, long currentRank) {
         return UserMetaInformation.builder()
                 .user(user)
                 .currentLevel(INITIAL_LEVEL)
                 .totalExp(INITIAL_EXP)
+                .currentRank(currentRank)
                 .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.Hoseo.CapstoneDesign.support.fixture.auth;
 
+import com.Hoseo.CapstoneDesign.security.cache.factory.AuthenticatedUserCacheFactory;
 import com.Hoseo.CapstoneDesign.security.entity.UserDetailImpl;
 import com.Hoseo.CapstoneDesign.support.builder.UsersTestBuilder;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
@@ -18,7 +19,7 @@ public class WithMockUserDetailSecurityContextFactory implements WithSecurityCon
                 .oauthNickname(annotation.oauthNickname())
                 .build();
 
-        UserDetailImpl principal = new UserDetailImpl(user);
+        UserDetailImpl principal = new UserDetailImpl(AuthenticatedUserCacheFactory.fromUser(user));
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 principal,
                 null,

@@ -45,17 +45,17 @@ class GamificationControllerTest {
     void getRankingReturnsMockList() throws Exception {
         when(facade.getRanking(eq(1), eq(3))).thenReturn(List.of(
                 RankingResponse.builder()
-                        .rank(1)
+                        .rank(1L)
                         .serviceNickname("commit-master")
                         .totalExp(4820L)
                         .build(),
                 RankingResponse.builder()
-                        .rank(2)
+                        .rank(2L)
                         .serviceNickname("refactor-ace")
                         .totalExp(4210L)
                         .build(),
                 RankingResponse.builder()
-                        .rank(3)
+                        .rank(3L)
                         .serviceNickname("test-runner")
                         .totalExp(4010L)
                         .build()
@@ -76,7 +76,7 @@ class GamificationControllerTest {
     @DisplayName("GET /api/v1/gamification/xp returns my rank")
     void getMyRankReturnsMockResponse() throws Exception {
         when(facade.getMyRank(any())).thenReturn(RankingResponse.builder()
-                .rank(7)
+                .rank(7L)
                 .serviceNickname("service-user")
                 .totalExp(1280L)
                 .build());
