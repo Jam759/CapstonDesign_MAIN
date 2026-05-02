@@ -2,6 +2,7 @@ package com.Hoseo.CapstoneDesign.user.service;
 
 import com.Hoseo.CapstoneDesign.gamification.exception.GamificationErrorCode;
 import com.Hoseo.CapstoneDesign.gamification.exception.GamificationException;
+import com.Hoseo.CapstoneDesign.user.dto.query.RankStatsQueryResult;
 import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.factory.UserEntityFactory;
@@ -40,9 +41,9 @@ public class UserMetaInformationService {
     }
 
     public int calculateTopPercentage(long totalExp) {
-        Object[] stats = repository.findRankStats(totalExp);
-        long usersAbove = ((Number) stats[0]).longValue();
-        long total      = ((Number) stats[1]).longValue();
+        RankStatsQueryResult stats = repository.findRankStats(totalExp);
+        long usersAbove = stats.usersAbove();
+        long total      = stats.total();
         return total == 0 ? 100 : (int) Math.ceil((double) (usersAbove + 1) / total * 100);
     }
 
