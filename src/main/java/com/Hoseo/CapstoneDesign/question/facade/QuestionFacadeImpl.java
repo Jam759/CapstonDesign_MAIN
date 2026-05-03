@@ -4,8 +4,10 @@ import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.image.service.ImageService;
 import com.Hoseo.CapstoneDesign.question.dto.request.AnswerCreateRequest;
 import com.Hoseo.CapstoneDesign.question.dto.request.QuestionCreateRequest;
+import com.Hoseo.CapstoneDesign.question.dto.request.QuestionUpdateRequest;
 import com.Hoseo.CapstoneDesign.question.dto.response.AnswerResponse;
 import com.Hoseo.CapstoneDesign.question.dto.response.QuestionDetailResponse;
+import com.Hoseo.CapstoneDesign.question.dto.response.QuestionSummaryResponse;
 import com.Hoseo.CapstoneDesign.question.entity.Answer;
 import com.Hoseo.CapstoneDesign.question.entity.Question;
 import com.Hoseo.CapstoneDesign.question.exception.QuestionErrorCode;
@@ -28,60 +30,101 @@ public class QuestionFacadeImpl implements QuestionFacade {
 
     private final UserService userService;
     private final QuestionService questionService;
-    private final ImageService imageService; // 이미지 도메인 연결
-
-    // 답변 생성을 위해 필요한 Repository 두 개를 추가로 주입받습니다.
+    private final ImageService imageService;
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
 
+    // 전체 질문 목록 조회 (더미 제거)
     @Override
-    @Transactional(readOnly = false) // 데이터 변경(insert)이 일어나므로 트랜잭션을 엽니다.
+    @Transactional(readOnly = true)
+    public List<QuestionSummaryResponse> getQuestions() {
+        return questionService.getAllQuestions().stream()
+                .map(q -> {
+                    int repliesCount = answerRepository.countByQuestion(q);
+                    return QuestionDtoFactory.toSummaryResponse(q, repliesCount);
+                })
+                .toList();
+    }
+
+    // 질문 상세 단건 조회 (더미 제거 및 조회수 증가 포함)
+    @Override
+    @Transactional(readOnly = false) // 조회수를 증가시키므로 읽기 전용 해제
+    public QuestionDetailResponse getQuestion(Long questionId) {
+        Question question = questionService.getQuestionWithViews(questionId);
+
+        List<AnswerResponse> answers = answerRepository.findAllByQuestion(question).stream()
+                .map(QuestionDtoFactory::toAnswerResponse)
+                .toList();
+
+        return QuestionDtoFactory.toDetailResponse(question, answers);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
     public QuestionDetailResponse createQuestion(Long userId, QuestionCreateRequest request) {
-        // 1. 유저 정보 조회 (data.sql 유저 혹은 실제 가입 유저 모두 호환)
         Users writer = userService.getReferenceById(userId);
 
-        // 2. 질문글 생성 및 DB 저장 (Service 계층에 위임)
         Question savedQuestion = questionService.createQuestion(
                 writer, request.title(), request.content(), request.tags()
         );
 
-        // 3. 업로드된 임시 이미지들이 있다면, 이 질문글의 소속(QUESTION)으로 확정 짓기
         if (request.imageIds() != null && !request.imageIds().isEmpty()) {
             imageService.attachImagesToTarget(request.imageIds(), savedQuestion.getQuestionId(), "QUESTION");
         }
 
-        // 4. 저장된 엔티티를 프론트엔드가 요구하는 DTO 규격으로 변환하여 반환
         return QuestionDtoFactory.toDetailResponse(savedQuestion, List.of());
     }
 
-    // 👇 [추가된 부분] 인터페이스에서 약속한 답변 생성 메서드를 구현합니다.
     @Override
-    @Transactional(readOnly = false) // 답변 데이터 삽입을 위한 트랜잭션 설정
+    @Transactional(readOnly = false)
     public AnswerResponse createAnswer(Long userId, Long questionId, AnswerCreateRequest request) {
-
-        // 1. 토큰을 통해 추출된 유저 ID로 실제 유저 엔티티를 가져옵니다.
-        // (프록시 객체로 가져와 성능을 최적화합니다.)
         Users writer = userService.getReferenceById(userId);
 
-        // 2. 답변을 달 대상 '질문글'이 DB에 실제로 존재하는지 확인합니다.
-        // 만약 존재하지 않으면 우리가 만든 Custom Exception(404 Not Found)을 던집니다.
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new QuestionException(QuestionErrorCode.QUESTION_NOT_FOUND));
 
-        // 3. Factory 클래스를 활용해 새로운 답변(Answer) 엔티티 객체를 조립합니다.
         Answer answer = QuestionEntityFactory.createAnswer(request.content(), question, writer);
-
-        // 4. 조립된 답변 엔티티를 데이터베이스에 실제로 저장(INSERT)합니다.
         Answer savedAnswer = answerRepository.save(answer);
 
-        // 5. 프론트엔드에 돌려줄 응답 DTO를 생성하여 반환합니다.
-        // 더 이상 임시 값(1L, "service-user")이 아닌 실제 DB ID와 유저의 닉네임을 담아줍니다.
         return new AnswerResponse(
-                savedAnswer.getAnswerId(),    // DB가 방금 자동 생성(Auto-Increment)한 답변 번호
-                writer.getServiceNickname(), // 실제 로그인한 유저의 서비스 닉네임 (예: '이종엽')
-                savedAnswer.getCreatedAt(),  // 답변이 작성된 실제 시간
-                false,                       // 초기 채택(Best) 상태는 무조건 false로 고정
-                savedAnswer.getContent()     // 방금 작성한 답변 본문
+                savedAnswer.getAnswerId(),
+                writer.getServiceNickname(),
+                savedAnswer.getCreatedAt(),
+                false,
+                savedAnswer.getContent()
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuestionSummaryResponse> getMyQuestions(Long userId) {
+        Users writer = userService.getReferenceById(userId);
+
+        List<Question> myQuestions = questionRepository.findAllByWriterOrderByCreatedAtDesc(writer);
+
+        return myQuestions.stream()
+                .map(q -> {
+                    int repliesCount = answerRepository.countByQuestion(q);
+                    return QuestionDtoFactory.toSummaryResponse(q, repliesCount);
+                })
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public QuestionDetailResponse updateQuestion(Long userId, Long questionId, QuestionUpdateRequest request) {
+        Question updatedQuestion = questionService.updateQuestion(questionId, userId, request.title(), request.content(), request.tags());
+
+        if (request.imageIds() != null && !request.imageIds().isEmpty()) {
+            imageService.attachImagesToTarget(request.imageIds(), updatedQuestion.getQuestionId(), "QUESTION");
+        }
+
+        return QuestionDtoFactory.toDetailResponse(updatedQuestion, List.of());
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public void deleteQuestion(Long userId, Long questionId) {
+        questionService.deleteQuestion(questionId, userId);
     }
 }
