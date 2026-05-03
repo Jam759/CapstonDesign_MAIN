@@ -117,7 +117,7 @@ public class FriendController {
         return ResponseEntity.ok(friendFacade.declineInvite(userDetail.getAuthenticatedUser(), inviteId));
     }
 
-    // 주석 필요
+    // 보낸 친구 요청 취소 (대기 중인 요청만 가능)
     @PostMapping("/invites/{inviteId}/cancel")
     @Operation(summary = "Cancel friend invite", description = "Cancels a pending friend request.")
     @ApiResponses({
