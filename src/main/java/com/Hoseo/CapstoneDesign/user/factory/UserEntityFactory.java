@@ -4,14 +4,19 @@ import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.global.util.TimeUtil;
 import com.Hoseo.CapstoneDesign.global.util.UuidUtil;
 import com.Hoseo.CapstoneDesign.user.entity.UserInfoUpdateHistory;
+import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.UserTechStack;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.entity.enums.OauthType;
 import com.Hoseo.CapstoneDesign.user.entity.enums.SystemRole;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class UserEntityFactory {
+
+    private static final int INITIAL_LEVEL = 1;
+    private static final long INITIAL_EXP = 0L;
 
     public static Users toUsers(OauthType oauthType, String oauthProviderId, String oauthNickname) {
         return Users.builder()
@@ -47,5 +52,14 @@ public class UserEntityFactory {
                         .userTechStack(techStack)
                         .build())
                 .toList();
+    }
+
+    public static UserMetaInformation toUserMetaInformation(Users user, long currentRank) {
+        return UserMetaInformation.builder()
+                .user(user)
+                .currentLevel(INITIAL_LEVEL)
+                .totalExp(INITIAL_EXP)
+                .currentRank(currentRank)
+                .build();
     }
 }

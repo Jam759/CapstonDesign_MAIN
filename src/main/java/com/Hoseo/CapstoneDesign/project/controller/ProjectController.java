@@ -4,7 +4,7 @@ import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionResponse;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectCreateRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteRequest;
 import com.Hoseo.CapstoneDesign.project.dto.request.ProjectInviteResponseRequest;
-import com.Hoseo.CapstoneDesign.project.dto.response.InviteStatusResponse;
+import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteStatusResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectCreateResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectInviteResponse;
 import com.Hoseo.CapstoneDesign.project.dto.response.ProjectSettingResponse;
@@ -210,7 +210,7 @@ public class ProjectController {
             @ApiResponse(
                     responseCode = "200",
                     description = "Invite list returned",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = InviteStatusResponse.class)))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProjectInviteStatusResponse.class)))
             ),
             @ApiResponse(
                     responseCode = "401",
@@ -218,11 +218,11 @@ public class ProjectController {
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))
             )
     })
-    public ResponseEntity<List<InviteStatusResponse>> getMyInvitedList(
+    public ResponseEntity<List<ProjectInviteStatusResponse>> getMyInvitedList(
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
-        List<InviteStatusResponse> res = facade.getMyInvitedList(userDetail.getAuthenticatedUser());
+        List<ProjectInviteStatusResponse> res = facade.getMyInvitedList(userDetail.getAuthenticatedUser());
         return ResponseEntity.ok(res);
     }
 }

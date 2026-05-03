@@ -60,27 +60,25 @@ public class Users extends LifecycleTimestampEntity {
     @Column(name = "profile_complete", nullable = false)
     private boolean profileComplete;
 
-    public Users updateOauthNickname(String oauthNickname) {
+    @Column(name = "bio", length = 500)
+    private String bio;
+
+    public Users syncOauthProfile(String oauthNickname) {
         this.oauthNickname = oauthNickname;
         return this;
     }
 
-    public Users updateServiceNickname(String serviceNickname) {
+    public Users applyProfileUpdate(
+            String serviceNickname,
+            String bio,
+            CommonGroupDetail userGoal,
+            CommonGroupDetail userMainPosition,
+            boolean profileComplete
+    ) {
         this.serviceNickname = serviceNickname;
-        return this;
-    }
-
-    public Users updateUserGoal(CommonGroupDetail userGoal) {
+        this.bio = bio;
         this.userGoal = userGoal;
-        return this;
-    }
-
-    public Users updateUserMainPosition(CommonGroupDetail userMainPosition) {
         this.userMainPosition = userMainPosition;
-        return this;
-    }
-
-    public Users updateProfileComplete(boolean profileComplete) {
         this.profileComplete = profileComplete;
         return this;
     }

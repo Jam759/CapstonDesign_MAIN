@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "사용자가 받은 프로젝트 초대 정보")
-public class InviteStatusResponse {
+public class ProjectInviteStatusResponse {
     @Schema(description = "초대 ID (ProjectMember PK)", example = "23101")
     private Long id;
 

@@ -33,12 +33,13 @@ public class UserService {
         return repository.getReferenceById(userId);
     }
 
+
     public Users getOrCreateOauthUser(OauthType oauthType, String oauthProviderId, String oauthNickname) {
         Optional<Users> user =
                 repository.findByOauthTypeAndOauthProviderId(oauthType, oauthProviderId);
         return user
                 .map( u -> {
-                    u.updateOauthNickname(oauthNickname);
+                    u.syncOauthProfile(oauthNickname);
                     return repository.save(u);
                 })
                 .orElseGet( () -> {
@@ -47,22 +48,21 @@ public class UserService {
                 });
     }
 
-    public Users updateServiceUserName(Users user,String updateNickname ){
-        user.updateServiceNickname(updateNickname);
-        return repository.save(user);
-    }
-
     public Users updateUserProfile(
             Users user,
             String serviceNickname,
+            String bio,
             CommonGroupDetail userGoal,
             CommonGroupDetail userMainPosition,
             boolean profileComplete
     ) {
-        user.updateServiceNickname(serviceNickname)
-                .updateUserGoal(userGoal)
-                .updateUserMainPosition(userMainPosition)
-                .updateProfileComplete(profileComplete);
+        user.applyProfileUpdate(
+                serviceNickname,
+                bio,
+                userGoal,
+                userMainPosition,
+                profileComplete
+        );
         return repository.save(user);
     }
 

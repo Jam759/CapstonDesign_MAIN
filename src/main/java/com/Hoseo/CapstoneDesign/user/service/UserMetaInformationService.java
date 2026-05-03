@@ -1,59 +1,76 @@
 package com.Hoseo.CapstoneDesign.user.service;
 
-import com.Hoseo.CapstoneDesign.gamification.entity.LevelRule;
 import com.Hoseo.CapstoneDesign.gamification.exception.GamificationErrorCode;
 import com.Hoseo.CapstoneDesign.gamification.exception.GamificationException;
-import com.Hoseo.CapstoneDesign.gamification.repository.LevelRuleRepository;
+import com.Hoseo.CapstoneDesign.user.dto.query.RankStatsQueryResult;
 import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
+import com.Hoseo.CapstoneDesign.user.factory.UserEntityFactory;
 import com.Hoseo.CapstoneDesign.user.repository.UserMetaInformationRepository;
-import com.Hoseo.CapstoneDesign.user.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor
 public class UserMetaInformationService {
 
-    private static final int INITIAL_LEVEL = 1;
-
     private final UserMetaInformationRepository repository;
-    private final LevelRuleRepository levelRuleRepository;
-    private final UsersRepository usersRepository;
+    private final AtomicBoolean rankRebuildRequested = new AtomicBoolean(false);
 
     @Transactional
-    public UserMetaInformation getMetaInfo(Users user) {
-        return getMetaInfo(user.getUserId());
-    }
-
-    @Transactional
-    public UserMetaInformation getMetaInfo(Long userId) {
-        return repository.findById(userId)
-                .orElseGet(() -> {
-                    LevelRule level1 = levelRuleRepository.findById(INITIAL_LEVEL)
-                            .orElseThrow(() -> new GamificationException(GamificationErrorCode.USER_META_NOT_FOUND));
-                    // detached Users를 현재 세션에 붙은 프록시 참조로 교체
-                    Users managedUser = usersRepository.getReferenceById(userId);
-                    return repository.save(UserMetaInformation.builder()
-                            .user(managedUser)
-                            .totalExp(0L)
-                            .levelRule(level1)
-                            .build());
+    public UserMetaInformation getOrCreate(Users user) {
+        return repository.findByUser(user.getUserId())
+                .orElseGet( () -> {
+                    long initialRank = repository.findDenseRankByTotalExp(0L);
+                    UserMetaInformation newEntity = UserEntityFactory.toUserMetaInformation(user, initialRank);
+                    return repository.save(newEntity);
                 });
     }
 
-    public List<UserMetaInformation> getAllMetaInfoByExpDesc() {
-        return repository.findByUserDeletedAtIsNullOrderByTotalExpDesc();
+    public UserMetaInformation getMetaInfo(Long userId) {
+        return repository.findByUser(userId)
+                .orElseThrow(() -> new GamificationException(GamificationErrorCode.USER_META_NOT_FOUND));
     }
 
-    public long countUsersAbove(Long totalExp) {
-        return repository.countByUserDeletedAtIsNullAndTotalExpGreaterThan(totalExp);
+    public List<UserMetaInformation> getAllMetaInfoByRank() {
+        return repository.findAllOrderByRankAscUserIdAsc();
     }
 
-    public long countAll() {
-        return repository.count();
+    public int calculateTopPercentage(long totalExp) {
+        RankStatsQueryResult stats = repository.findRankStats(totalExp);
+        long usersAbove = stats.usersAbove();
+        long total      = stats.total();
+        return total == 0 ? 100 : (int) Math.ceil((double) (usersAbove + 1) / total * 100);
+    }
+
+    public void requestRankRebuild() {
+        rankRebuildRequested.set(true);
+    }
+
+    @Transactional
+    public void deleteByUserId(Long userId) {
+        if (!repository.existsById(userId)) {
+            return;
+        }
+        repository.deleteById(userId);
+        requestRankRebuild();
+    }
+
+    @Transactional
+    public boolean rebuildRanksIfRequested() {
+        if (!rankRebuildRequested.compareAndSet(true, false)) {
+            return false;
+        }
+        try {
+            repository.rebuildDenseRanks();
+            return true;
+        } catch (RuntimeException e) {
+            rankRebuildRequested.set(true);
+            throw e;
+        }
     }
 }

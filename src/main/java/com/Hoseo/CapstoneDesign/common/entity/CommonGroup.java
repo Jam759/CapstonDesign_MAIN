@@ -34,6 +34,9 @@ public class CommonGroup extends LifecycleTimestampEntity {
     @Column(name = "description", length = 255)
     private String description;
 
+    @Column(name = "use_yn", length = 1)
+    private String use_yn;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private Users createdBy;

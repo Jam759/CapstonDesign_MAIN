@@ -2,8 +2,6 @@ package com.Hoseo.CapstoneDesign.user.facade.impl;
 
 import com.Hoseo.CapstoneDesign.common.entity.CommonGroupDetail;
 import com.Hoseo.CapstoneDesign.common.service.CommonGroupDetailService;
-import com.Hoseo.CapstoneDesign.gamification.entity.LevelRule;
-import com.Hoseo.CapstoneDesign.gamification.repository.LevelRuleRepository;
 import com.Hoseo.CapstoneDesign.global.annotation.Facade;
 import com.Hoseo.CapstoneDesign.security.cache.dto.AuthenticatedUserCacheEntry;
 import com.Hoseo.CapstoneDesign.user.cache.service.UserResponseCacheService;
@@ -15,6 +13,8 @@ import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.UserTechStack;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.event.UserProfileChangedEvent;
+import com.Hoseo.CapstoneDesign.user.exception.CustomUserException;
+import com.Hoseo.CapstoneDesign.user.exception.UserErrorCode;
 import com.Hoseo.CapstoneDesign.user.facade.UserFacade;
 import com.Hoseo.CapstoneDesign.user.factory.UserDtoFactory;
 import com.Hoseo.CapstoneDesign.user.factory.UserEntityFactory;
@@ -36,7 +36,6 @@ public class UserFacadeImpl implements UserFacade {
     private final UserService userService;
     private final UserInfoUpdateHistoryService userInfoUpdateHistoryService;
     private final UserMetaInformationService metaService;
-    private final LevelRuleRepository levelRuleRepository;
     private final CommonGroupDetailService commonGroupDetailService;
     private final UserTechStackService userTechStackService;
     private final UserResponseCacheService userResponseCacheService;
@@ -45,13 +44,42 @@ public class UserFacadeImpl implements UserFacade {
     @Override
     @Transactional(readOnly = false)
     public UpdateUserInfoResponse updateUserProfile(AuthenticatedUserCacheEntry authenticatedUser, UserProfileUpdateRequest request) {
+        if (request == null) {
+            throw new CustomUserException(UserErrorCode.USER_PROFILE_UPDATE_REQUEST_INVALID);
+        }
         Users user = userService.getById(authenticatedUser.userId());
         String previousNickname = user.getServiceNickname();
         String previousOauthNickname = user.getOauthNickname();
-        String resolvedNickname = resolveNickname(user, request);
-        CommonGroupDetail resolvedGoal = resolveGoal(user, request);
-        CommonGroupDetail resolvedPosition = resolvePosition(user, request);
-        List<CommonGroupDetail> resolvedTechStacks = resolveTechStacks(user, request);
+        String resolvedNickname = request.resolveUserServiceNickname(user.getServiceNickname());
+        String resolvedBio = request.resolveBio(user.getBio());
+        String resolvedGoalId = request.resolveGoal(
+                user.getUserGoal() != null ? user.getUserGoal().getCommonGroupDetailId() : null
+        );
+        String resolvedPositionId = request.resolvePosition(
+                user.getUserMainPosition() != null ? user.getUserMainPosition().getCommonGroupDetailId() : null
+        );
+        List<String> resolvedTechStackIds = request.resolveTechStacks(
+                userTechStackService.getByUser(user).stream()
+                        .map(UserTechStack::getUserTechStack)
+                        .map(CommonGroupDetail::getCommonGroupDetailId)
+                        .toList()
+        );
+        CommonGroupDetail resolvedGoal = resolvedGoalId == null
+                ? null
+                : commonGroupDetailService.getRequiredReferenceByGroupAndId(
+                CommonGroupDetailService.USER_GOAL_GROUP_ID,
+                resolvedGoalId
+        );
+        CommonGroupDetail resolvedPosition = resolvedPositionId == null
+                ? null
+                : commonGroupDetailService.getRequiredReferenceByGroupAndId(
+                CommonGroupDetailService.PROJECT_POSITION_GROUP_ID,
+                resolvedPositionId
+        );
+        List<CommonGroupDetail> resolvedTechStacks = commonGroupDetailService.getRequiredReferencesByGroupAndIds(
+                CommonGroupDetailService.PROJECT_TECH_STACK_GROUP_ID,
+                resolvedTechStackIds
+        );
         boolean profileComplete =
                 StringUtils.hasText(resolvedNickname)
                         && resolvedGoal != null
@@ -61,6 +89,7 @@ public class UserFacadeImpl implements UserFacade {
         Users updatedUser = userService.updateUserProfile(
                 user,
                 resolvedNickname,
+                resolvedBio,
                 resolvedGoal,
                 resolvedPosition,
                 profileComplete
@@ -94,24 +123,18 @@ public class UserFacadeImpl implements UserFacade {
 
     private MyInfoResponse loadMyInfo(AuthenticatedUserCacheEntry user) {
         UserMetaInformation meta = metaService.getMetaInfo(user.userId());
-        int currentLevel = meta.getLevelRule().getLevel();
+        int currentLevel = meta.getCurrentLevel();
         long totalExp = meta.getTotalExp();
 
-        long prevLevelExp = levelRuleRepository.findById(currentLevel - 1)
-                .map(LevelRule::getRequiredTotalExp)
+        long prevLevelExp = commonGroupDetailService.findLevelRequiredExp(currentLevel - 1)
                 .orElse(0L);
-
-        long nextLevelExp = levelRuleRepository.findById(currentLevel + 1)
-                .map(LevelRule::getRequiredTotalExp)
+        long nextLevelExp = commonGroupDetailService.findLevelRequiredExp(currentLevel + 1)
                 .orElse(totalExp);
 
         long xp    = totalExp - prevLevelExp;
         long maxXp = nextLevelExp - prevLevelExp;
 
-        long usersAbove = metaService.countUsersAbove(totalExp);
-        long total      = metaService.countAll();
-        int topPercentage = total == 0 ? 100 : (int) Math.ceil((double) (usersAbove + 1) / total * 100);
-
+        int topPercentage = metaService.calculateTopPercentage(totalExp);
         String nickname = (user.serviceNickname() != null && !user.serviceNickname().isBlank())
                 ? user.serviceNickname()
                 : user.oauthNickname();
@@ -119,50 +142,5 @@ public class UserFacadeImpl implements UserFacade {
         MyInfoResponse response = new MyInfoResponse(nickname, currentLevel, xp, maxXp, topPercentage, totalExp);
         userResponseCacheService.saveMyInfo(user.userId(), response);
         return response;
-    }
-
-    private String resolveNickname(Users user, UserProfileUpdateRequest request) {
-        if (request.userServiceNickname() == null) {
-            return user.getServiceNickname();
-        }
-        return request.userServiceNickname();
-    }
-
-    private CommonGroupDetail resolveGoal(Users user, UserProfileUpdateRequest request) {
-        if (request.goal() == null) {
-            return user.getUserGoal();
-        }
-        if (request.goal().isBlank()) {
-            return null;
-        }
-        return commonGroupDetailService.getRequiredReferenceByGroupAndId(
-                CommonGroupDetailService.USER_GOAL_GROUP_ID,
-                request.goal()
-        );
-    }
-
-    private CommonGroupDetail resolvePosition(Users user, UserProfileUpdateRequest request) {
-        if (request.position() == null) {
-            return user.getUserMainPosition();
-        }
-        if (request.position().isBlank()) {
-            return null;
-        }
-        return commonGroupDetailService.getRequiredReferenceByGroupAndId(
-                CommonGroupDetailService.PROJECT_POSITION_GROUP_ID,
-                request.position()
-        );
-    }
-
-    private List<CommonGroupDetail> resolveTechStacks(Users user, UserProfileUpdateRequest request) {
-        if (request.techStacks() == null) {
-            return userTechStackService.getByUser(user).stream()
-                    .map(UserTechStack::getUserTechStack)
-                    .toList();
-        }
-        return commonGroupDetailService.getRequiredReferencesByGroupAndIds(
-                CommonGroupDetailService.PROJECT_TECH_STACK_GROUP_ID,
-                request.techStacks()
-        );
     }
 }

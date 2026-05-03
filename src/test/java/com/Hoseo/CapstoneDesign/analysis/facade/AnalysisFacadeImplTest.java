@@ -3,6 +3,7 @@ package com.Hoseo.CapstoneDesign.analysis.facade;
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisHighlightsResponse;
 import com.Hoseo.CapstoneDesign.analysis.dto.response.ProjectAnalysisOverviewResponse;
 import com.Hoseo.CapstoneDesign.analysis.dto.application.ProjectAnalysisUserViewResponse;
+import com.Hoseo.CapstoneDesign.analysis.service.AnalysisJobService;
 import com.Hoseo.CapstoneDesign.analysis.service.ProjectAnalysisReportService;
 import com.Hoseo.CapstoneDesign.analysis.service.ProjectRoadMapService;
 import com.Hoseo.CapstoneDesign.project.entity.Projects;
@@ -43,6 +44,9 @@ class AnalysisFacadeImplTest {
     @Mock
     private ProjectRoadMapService projectRoadMapService;
 
+    @Mock
+    private AnalysisJobService analysisJobService;
+
     private AnalysisFacadeImpl facade;
 
     @BeforeEach
@@ -51,7 +55,8 @@ class AnalysisFacadeImplTest {
                 projectService,
                 projectMemberService,
                 projectAnalysisReportService,
-                projectRoadMapService
+                projectRoadMapService,
+                analysisJobService
         );
     }
 

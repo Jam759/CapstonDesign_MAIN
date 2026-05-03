@@ -1,6 +1,7 @@
 package com.Hoseo.CapstoneDesign.friend.controller;
 
 import com.Hoseo.CapstoneDesign.friend.dto.response.FriendInviteResponse;
+import com.Hoseo.CapstoneDesign.friend.dto.response.FriendInviteStatusResponse;
 import com.Hoseo.CapstoneDesign.friend.dto.response.FriendResponse;
 import com.Hoseo.CapstoneDesign.friend.facade.FriendFacade;
 import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionResponse;
@@ -52,11 +53,11 @@ public class FriendController {
     @Operation(summary = "Get pending friend invites", description = "Returns friend requests received by the current user.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Invite list returned",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = FriendInviteResponse.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = FriendInviteStatusResponse.class)))),
             @ApiResponse(responseCode = "401", description = "Authentication failed",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     })
-    public ResponseEntity<List<FriendInviteResponse>> getInvites(
+    public ResponseEntity<FriendInviteStatusResponse> getInvites(
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
         return ResponseEntity.ok(friendFacade.getInvites(userDetail.getAuthenticatedUser()));
@@ -66,7 +67,7 @@ public class FriendController {
     @Operation(summary = "Send friend request", description = "Sends a friend request to the target user.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Friend request sent",
-                    content = @Content(schema = @Schema(implementation = FriendInviteResponse.class))),
+                    content = @Content(schema = @Schema(implementation = FriendInviteStatusResponse.class))),
             @ApiResponse(responseCode = "400", description = "Already friends or request exists",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))),
             @ApiResponse(responseCode = "401", description = "Authentication failed",
@@ -84,7 +85,7 @@ public class FriendController {
     @Operation(summary = "Accept friend invite", description = "Accepts a pending friend request.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Invite accepted",
-                    content = @Content(schema = @Schema(implementation = FriendInviteResponse.class))),
+                    content = @Content(schema = @Schema(implementation = FriendInviteStatusResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invite not found",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))),
             @ApiResponse(responseCode = "401", description = "Authentication failed",
@@ -102,7 +103,7 @@ public class FriendController {
     @Operation(summary = "Decline friend invite", description = "Declines a pending friend request.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Invite declined",
-                    content = @Content(schema = @Schema(implementation = FriendInviteResponse.class))),
+                    content = @Content(schema = @Schema(implementation = FriendInviteStatusResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invite not found",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))),
             @ApiResponse(responseCode = "401", description = "Authentication failed",
@@ -114,5 +115,23 @@ public class FriendController {
             @AuthenticationPrincipal UserDetailImpl userDetail
     ) {
         return ResponseEntity.ok(friendFacade.declineInvite(userDetail.getAuthenticatedUser(), inviteId));
+    }
+
+    @PostMapping("/invites/{inviteId}/cancle")
+    @Operation(summary = "Decline friend invite", description = "Declines a pending friend request.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Invite declined",
+                    content = @Content(schema = @Schema(implementation = FriendInviteStatusResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invite not found",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Authentication failed",
+                    content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
+    })
+    public ResponseEntity<FriendInviteResponse> cancelInviteRequest(
+            @Parameter(description = "Invite id", example = "1")
+            @PathVariable Long inviteId,
+            @AuthenticationPrincipal UserDetailImpl userDetail
+    ) {
+        return ResponseEntity.ok(friendFacade.cancelInviteRequest(userDetail.getAuthenticatedUser(),inviteId));
     }
 }

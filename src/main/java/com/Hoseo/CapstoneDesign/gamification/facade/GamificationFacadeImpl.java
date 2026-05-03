@@ -29,16 +29,15 @@ public class GamificationFacadeImpl implements GamificationFacade {
     @Override
     @Transactional(readOnly = true)
     public List<RankingResponse> getRanking(Integer page, Integer size) {
-        List<UserMetaInformation> sorted = metaService.getAllMetaInfoByExpDesc();
+        List<UserMetaInformation> sorted = metaService.getAllMetaInfoByRank();
         return paginate(GamificationDtoFactory.toRankingList(sorted), page, size);
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional(readOnly = true)
     public RankingResponse getMyRank(AuthenticatedUserCacheEntry user) {
         UserMetaInformation meta = metaService.getMetaInfo(user.userId());
-        int rank = (int) metaService.countUsersAbove(meta.getTotalExp()) + 1;
-        return GamificationDtoFactory.toRankingResponse(rank, meta);
+        return GamificationDtoFactory.toRankingResponse(meta);
     }
 
     @Override
