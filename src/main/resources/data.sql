@@ -127,3 +127,4 @@ VALUES
   ('KOCW',    'SEARCH_KEYWORD_PLATFORM', '대학 공개강의 플랫폼 (이론/과목명 중심)', NULL, NULL, NOW(), NULL),
   ('KMOOC',   'SEARCH_KEYWORD_PLATFORM', '온라인 공개강좌 플랫폼 (커리큘럼/강좌명 중심)', NULL, NULL, NOW(), NULL),
   ('YOUTUBE', 'SEARCH_KEYWORD_PLATFORM', '영상 플랫폼 (실습/튜토리얼/최신 기술 중심)', NULL, NULL, NOW(), NULL);
+
