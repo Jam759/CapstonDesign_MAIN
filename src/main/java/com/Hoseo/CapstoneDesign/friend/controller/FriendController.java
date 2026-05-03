@@ -117,10 +117,11 @@ public class FriendController {
         return ResponseEntity.ok(friendFacade.declineInvite(userDetail.getAuthenticatedUser(), inviteId));
     }
 
-    @PostMapping("/invites/{inviteId}/cancle")
-    @Operation(summary = "Decline friend invite", description = "Declines a pending friend request.")
+    // 주석 필요
+    @PostMapping("/invites/{inviteId}/cancel")
+    @Operation(summary = "Cancel friend invite", description = "Cancels a pending friend request.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Invite declined",
+            @ApiResponse(responseCode = "200", description = "Invite canceled",
                     content = @Content(schema = @Schema(implementation = FriendInviteStatusResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invite not found",
                     content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class))),
