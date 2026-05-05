@@ -22,7 +22,10 @@ import com.Hoseo.CapstoneDesign.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Facade
 @RequiredArgsConstructor
@@ -34,7 +37,7 @@ public class QuestionFacadeImpl implements QuestionFacade {
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
 
-    // 전체 질문 목록 조회 (더미 제거)
+    // 전체 질문 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<QuestionSummaryResponse> getQuestions() {
@@ -46,9 +49,9 @@ public class QuestionFacadeImpl implements QuestionFacade {
                 .toList();
     }
 
-    // 질문 상세 단건 조회 (더미 제거 및 조회수 증가 포함)
+    // 질문 상세 단건 조회
     @Override
-    @Transactional(readOnly = false) // 조회수를 증가시키므로 읽기 전용 해제
+    @Transactional(readOnly = false)
     public QuestionDetailResponse getQuestion(Long questionId) {
         Question question = questionService.getQuestionWithViews(questionId);
 
@@ -59,6 +62,7 @@ public class QuestionFacadeImpl implements QuestionFacade {
         return QuestionDtoFactory.toDetailResponse(question, answers);
     }
 
+    // 새로운 질문을 생성하고, 본문 내에 포함된 마크다운 이미지 ID를 파싱하여 매핑합니다.
     @Override
     @Transactional(readOnly = false)
     public QuestionDetailResponse createQuestion(Long userId, QuestionCreateRequest request) {
@@ -68,13 +72,15 @@ public class QuestionFacadeImpl implements QuestionFacade {
                 writer, request.title(), request.content(), request.tags()
         );
 
-        if (request.imageIds() != null && !request.imageIds().isEmpty()) {
-            imageService.attachImagesToTarget(request.imageIds(), savedQuestion.getQuestionId(), "QUESTION");
+        List<Long> extractedImageIds = extractImageIdsFromContent(request.content());
+        if (!extractedImageIds.isEmpty()) {
+            imageService.attachImagesToTarget(extractedImageIds, savedQuestion.getQuestionId(), "QUESTION");
         }
 
         return QuestionDtoFactory.toDetailResponse(savedQuestion, List.of());
     }
 
+    // 특정 질문에 대한 새로운 답변(댓글)을 생성합니다.
     @Override
     @Transactional(readOnly = false)
     public AnswerResponse createAnswer(Long userId, Long questionId, AnswerCreateRequest request) {
@@ -95,6 +101,7 @@ public class QuestionFacadeImpl implements QuestionFacade {
         );
     }
 
+    // 현재 로그인한 사용자가 작성한 질문 목록만 최신순으로 조회합니다.
     @Override
     @Transactional(readOnly = true)
     public List<QuestionSummaryResponse> getMyQuestions(Long userId) {
@@ -110,21 +117,41 @@ public class QuestionFacadeImpl implements QuestionFacade {
                 .toList();
     }
 
+    // 작성한 기존 질문의 내용(제목, 본문, 태그)을 수정하고 이미지 ID를 재매핑합니다.
     @Override
     @Transactional(readOnly = false)
     public QuestionDetailResponse updateQuestion(Long userId, Long questionId, QuestionUpdateRequest request) {
         Question updatedQuestion = questionService.updateQuestion(questionId, userId, request.title(), request.content(), request.tags());
 
-        if (request.imageIds() != null && !request.imageIds().isEmpty()) {
-            imageService.attachImagesToTarget(request.imageIds(), updatedQuestion.getQuestionId(), "QUESTION");
+        List<Long> extractedImageIds = extractImageIdsFromContent(request.content());
+        if (!extractedImageIds.isEmpty()) {
+            imageService.attachImagesToTarget(extractedImageIds, updatedQuestion.getQuestionId(), "QUESTION");
         }
 
         return QuestionDtoFactory.toDetailResponse(updatedQuestion, List.of());
     }
 
+    // 본인이 작성한 특정 질문을 삭제합니다.
     @Override
     @Transactional(readOnly = false)
     public void deleteQuestion(Long userId, Long questionId) {
         questionService.deleteQuestion(questionId, userId);
+    }
+
+    // 본문에서 정규식을 사용해 ![imageId:101] 패턴의 ID 값을 추출하는 프라이빗 메서드
+    private List<Long> extractImageIdsFromContent(String content) {
+        List<Long> imageIds = new ArrayList<>();
+        if (content == null || content.isBlank()) {
+            return imageIds;
+        }
+
+        Pattern pattern = Pattern.compile("!\\[imageId:(\\d+)\\]");
+        Matcher matcher = pattern.matcher(content);
+
+        while (matcher.find()) {
+            imageIds.add(Long.parseLong(matcher.group(1)));
+        }
+
+        return imageIds;
     }
 }

@@ -25,7 +25,7 @@ public class FriendFacadeImpl implements FriendFacade {
 
     private final FriendRequestService friendRequestService;
     private final FriendShipService friendShipService;
-    private final UserService userService; // 유저 정보 연동을 위해 추가
+    private final UserService userService;
 
     @Override
     @Transactional(readOnly = true)
@@ -55,12 +55,10 @@ public class FriendFacadeImpl implements FriendFacade {
         Users me = userService.getReferenceById(user.userId());
         Users targetUser = userService.getReferenceById(targetUserId);
 
-        // 이미 친구인지 확인합니다.
         if (friendShipService.areFriends(me, targetUser)) {
             throw new FriendException(FriendErrorCode.FRIENDSHIP_ALREADY_EXISTS);
         }
 
-        // 친구 요청을 생성하고 저장합니다.
         FriendRequest request = friendRequestService.createRequest(me, targetUser);
         return FriendDtoFactory.toInviteResponse(request);
     }
@@ -71,15 +69,9 @@ public class FriendFacadeImpl implements FriendFacade {
         Users me = userService.getReferenceById(user.userId());
         FriendRequest request = friendRequestService.getPendingRequest(inviteId);
 
-        // 받은 사람 본인만 수락할 수 있습니다.
-        if (!request.getReceiver().getUserId().equals(me.getUserId())) {
-            throw new FriendException(FriendErrorCode.FRIENDSHIP_NOT_FOUND);
-        }
+        validateReceiverOwnership(request, me.getUserId());
 
-        // 엔티티 상태를 수락으로 변경합니다.
         request.accept();
-
-        // 실제 친구 관계로 등록합니다.
         friendShipService.createFriendship(request.getRequester(), request.getReceiver());
 
         return FriendDtoFactory.toInviteResponse(request);
@@ -91,12 +83,8 @@ public class FriendFacadeImpl implements FriendFacade {
         Users me = userService.getReferenceById(user.userId());
         FriendRequest request = friendRequestService.getPendingRequest(inviteId);
 
-        // 받은 사람 본인만 거절할 수 있습니다.
-        if (!request.getReceiver().getUserId().equals(me.getUserId())) {
-            throw new FriendException(FriendErrorCode.FRIENDSHIP_NOT_FOUND);
-        }
+        validateReceiverOwnership(request, me.getUserId());
 
-        // 엔티티 상태를 거절로 변경합니다.
         request.reject();
 
         return FriendDtoFactory.toInviteResponse(request);
@@ -108,14 +96,23 @@ public class FriendFacadeImpl implements FriendFacade {
         Users me = userService.getReferenceById(authenticatedUser.userId());
         FriendRequest request = friendRequestService.getPendingRequest(inviteId);
 
-        // 보낸 사람 본인만 취소할 수 있습니다.
-        if (!request.getRequester().getUserId().equals(me.getUserId())) {
-            throw new FriendException(FriendErrorCode.FRIENDSHIP_NOT_FOUND);
-        }
+        validateRequesterOwnership(request, me.getUserId());
 
-        // 엔티티 상태를 취소로 변경합니다.
         request.cancel();
 
         return FriendDtoFactory.toInviteResponse(request);
+    }
+
+    // 중복 제거를 위한 권한 검증 프라이빗 메서드
+    private void validateReceiverOwnership(FriendRequest request, Long userId) {
+        if (!request.getReceiver().getUserId().equals(userId)) {
+            throw new FriendException(FriendErrorCode.FRIENDSHIP_NOT_FOUND);
+        }
+    }
+
+    private void validateRequesterOwnership(FriendRequest request, Long userId) {
+        if (!request.getRequester().getUserId().equals(userId)) {
+            throw new FriendException(FriendErrorCode.FRIENDSHIP_NOT_FOUND);
+        }
     }
 }

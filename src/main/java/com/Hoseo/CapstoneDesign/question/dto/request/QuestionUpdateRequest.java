@@ -14,13 +14,10 @@ public record QuestionUpdateRequest(
         String title,
 
         @NotBlank(message = "내용은 필수 입력 항목입니다.")
-        @Schema(description = "Question body", example = "수정된 본문 내용입니다.")
+        @Schema(description = "Question body", example = "수정된 본문 내용입니다. ![imageId:102](https://...)")
         String content,
 
         @Schema(description = "Question tags")
-        List<String> tags,
-
-        @Schema(description = "첨부된 이미지 ID 목록")
-        List<Long> imageIds
+        List<String> tags
 ) {
 }

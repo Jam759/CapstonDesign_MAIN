@@ -2,7 +2,7 @@ package com.Hoseo.CapstoneDesign.question.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank; // 유효성 검증 임포트 추가
-import jakarta.validation.constraints.Size;     // 글자 수 검증 임포트 추가
+import jakarta.validation.constraints.Size; // 글자 수 검증 임포트 추가
 
 import java.util.List;
 
@@ -16,14 +16,10 @@ public record QuestionCreateRequest(
         String title,
 
         @NotBlank(message = "내용은 필수 입력 항목입니다.")
-        @Schema(description = "Question body", example = "I want to separate facade and service responsibilities.")
+        @Schema(description = "Question body", example = "I want to separate facade and service. ![imageId:101](https://...)")
         String content,
 
         @Schema(description = "Question tags", example = "[\"spring\", \"architecture\"]")
-        List<String> tags,
-
-        // 프론트엔드가 업로드했던 임시 이미지들의 ID 목록을 받습니다.
-        @Schema(description = "첨부된 이미지 ID 목록", example = "[1, 2, 3]")
-        List<Long> imageIds
+        List<String> tags
 ) {
 }

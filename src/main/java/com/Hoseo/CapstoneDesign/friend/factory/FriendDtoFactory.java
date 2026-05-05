@@ -22,10 +22,10 @@ public class FriendDtoFactory {
 
         return new FriendResponse(
                 friend.getUserId(),
-                friend.getServiceNickname() != null ? friend.getServiceNickname() : "unknown"
+                friend.getServiceNickname() != null ? friend.getServiceNickname() : "unknown",
+                friend.getOauthNickname() != null ? friend.getOauthNickname() : "unknown"
         );
     }
-
     // FriendRequest 엔티티를 FriendInviteResponse 로 변환합니다.
     public static FriendInviteResponse toInviteResponse(FriendRequest request) {
         return new FriendInviteResponse(
@@ -35,7 +35,6 @@ public class FriendDtoFactory {
                 request.getStatus().name().toLowerCase()
         );
     }
-
     // 보낸 요청과 받은 요청 리스트를 묶어서 상태 응답 DTO 로 변환합니다.
     public static FriendInviteStatusResponse toInviteStatusResponse(List<FriendRequest> sentRequests, List<FriendRequest> receivedRequests) {
         List<FriendInviteResponse> sentList = sentRequests.stream()
