@@ -8,6 +8,7 @@ import com.Hoseo.CapstoneDesign.user.cache.service.UserResponseCacheService;
 import com.Hoseo.CapstoneDesign.user.dto.request.UserProfileUpdateRequest;
 import com.Hoseo.CapstoneDesign.user.dto.response.MyInfoResponse;
 import com.Hoseo.CapstoneDesign.user.dto.response.UpdateUserInfoResponse;
+import com.Hoseo.CapstoneDesign.user.dto.response.UserProfileThumbnail;
 import com.Hoseo.CapstoneDesign.user.entity.UserInfoUpdateHistory;
 import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.UserTechStack;
@@ -119,6 +120,14 @@ public class UserFacadeImpl implements UserFacade {
     public MyInfoResponse getMyInfo(AuthenticatedUserCacheEntry user) {
         return userResponseCacheService.findMyInfo(user.userId())
                 .orElseGet(() -> loadMyInfo(user));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserProfileThumbnail> searchUserByServiceNickname(String serviceNickname, Integer page, Integer size) {
+        return userService.searchByServiceNickname(serviceNickname, page, size).stream()
+                .map(UserDtoFactory::toUserProfileThumbnail)
+                .toList();
     }
 
     private MyInfoResponse loadMyInfo(AuthenticatedUserCacheEntry user) {

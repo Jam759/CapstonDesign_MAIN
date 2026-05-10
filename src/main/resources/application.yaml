@@ -116,7 +116,7 @@ auth:
     access-ttl: 15 #min
     refresh-ttl: 7 # days
     cookie-name: "REFRESH_TOKEN"  #prod -> os var
-    cookie-http-only: ${COOKIE_HTTP_ONLY:false}
+    cookie-http-only: ${COOKIE_HTTP_ONLY:true}
     cookie-secure: ${COOKIE_SECURE:true}
     cookie-samesite: "None"
     front-redirect-url: "${FRONTEND_REDIRECT_URL:http://localhost:5173/install-app/auth-test.html}"
@@ -138,3 +138,7 @@ github:
     state-secret: ${GITHUB_APP_STATE_SECRET}
   webhook:
     secret: ${GITHUB_WEBHOOK_SECRET}
+
+library:
+  KMOOC: ${KMOOC_API_KEY}
+  YOUTUBE: ${YOUTUBE_API_KEY}
