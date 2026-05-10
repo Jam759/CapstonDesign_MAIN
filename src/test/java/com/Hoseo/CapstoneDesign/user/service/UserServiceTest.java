@@ -18,9 +18,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -28,6 +31,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -123,6 +128,24 @@ class UserServiceTest {
         assertThat(result.isProfileComplete()).isTrue();
         verify(usersRepository).save(user);
         log.info("[TEST] profile common code update validated");
+    }
+
+    @Test
+    @DisplayName("searchByServiceNickname trims keyword and converts one-based page")
+    void searchByServiceNicknameUsesPageRequest() {
+        Users user = UsersTestBuilder.defaultUser().userId(1L).serviceNickname("commit-master").build();
+        when(usersRepository.findByServiceNicknameContainingIgnoreCase(eq("commit"), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(user)));
+
+        List<Users> result = userService.searchByServiceNickname(" commit ", 2, 5);
+
+        assertThat(result).containsExactly(user);
+        var pageableCaptor = forClass(Pageable.class);
+        verify(usersRepository).findByServiceNicknameContainingIgnoreCase(eq("commit"), pageableCaptor.capture());
+        assertThat(pageableCaptor.getValue().getPageNumber()).isEqualTo(1);
+        assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(5);
+        assertThat(pageableCaptor.getValue().getSort().getOrderFor("userId").getDirection().isDescending()).isTrue();
+        log.info("[TEST] search paging request validated");
     }
 
     private static Stream<Arguments> newOauthUserSamples() {

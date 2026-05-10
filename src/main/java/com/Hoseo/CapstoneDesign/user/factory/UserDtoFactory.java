@@ -1,6 +1,7 @@
 package com.Hoseo.CapstoneDesign.user.factory;
 
 import com.Hoseo.CapstoneDesign.user.dto.response.UpdateUserInfoResponse;
+import com.Hoseo.CapstoneDesign.user.dto.response.UserProfileThumbnail;
 import com.Hoseo.CapstoneDesign.user.entity.UserInfoUpdateHistory;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 
@@ -21,6 +22,16 @@ public class UserDtoFactory {
                 techStackIds,
                 updatedUser.isProfileComplete(),
                 savedUpdateHistory.getUpdatedAt()
+        );
+    }
+
+    public static UserProfileThumbnail toUserProfileThumbnail(Users user) {
+        return new UserProfileThumbnail(
+                user.getUserId(),
+                null,
+                user.getServiceNickname(),
+                user.getOauthType().name(),
+                user.getOauthNickname()
         );
     }
 }
