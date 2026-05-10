@@ -28,7 +28,6 @@ public class UserDtoFactory {
     public static UserProfileThumbnail toUserProfileThumbnail(Users user) {
         return new UserProfileThumbnail(
                 user.getUserId(),
-                null,
                 user.getServiceNickname(),
                 user.getOauthType().name(),
                 user.getOauthNickname()
