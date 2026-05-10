@@ -10,6 +10,7 @@ import com.Hoseo.CapstoneDesign.user.cache.service.UserResponseCacheService;
 import com.Hoseo.CapstoneDesign.user.dto.request.UserProfileUpdateRequest;
 import com.Hoseo.CapstoneDesign.user.dto.response.MyInfoResponse;
 import com.Hoseo.CapstoneDesign.user.dto.response.UpdateUserInfoResponse;
+import com.Hoseo.CapstoneDesign.user.dto.response.UserProfileThumbnail;
 import com.Hoseo.CapstoneDesign.user.entity.UserInfoUpdateHistory;
 import com.Hoseo.CapstoneDesign.user.entity.UserMetaInformation;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
@@ -192,6 +193,27 @@ class UserFacadeImplTest {
         assertThat(response.maxXp()).isEqualTo(300L);
         assertThat(response.topPercentage()).isEqualTo(20);
         verify(userResponseCacheService).saveMyInfo(user.getUserId(), response);
+    }
+
+    @Test
+    @DisplayName("searchUserByServiceNickname maps users to thumbnail responses")
+    void searchUserByServiceNicknameMapsThumbnailResponses() {
+        Users user = UsersTestBuilder.defaultUser()
+                .userId(1L)
+                .serviceNickname("commit-master")
+                .oauthNickname("github-master")
+                .build();
+
+        when(userService.searchByServiceNickname("commit", 1, 10)).thenReturn(List.of(user));
+
+        List<UserProfileThumbnail> response = facade.searchUserByServiceNickname("commit", 1, 10);
+
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).userId()).isEqualTo(1L);
+        assertThat(response.get(0).profileImageUrl()).isNull();
+        assertThat(response.get(0).serviceNickname()).isEqualTo("commit-master");
+        assertThat(response.get(0).oauthType()).isEqualTo("GITHUB");
+        assertThat(response.get(0).oauthNickname()).isEqualTo("github-master");
     }
 
     @Test

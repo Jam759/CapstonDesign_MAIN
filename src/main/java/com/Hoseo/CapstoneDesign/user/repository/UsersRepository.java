@@ -2,6 +2,8 @@ package com.Hoseo.CapstoneDesign.user.repository;
 
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.entity.enums.OauthType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -11,5 +13,6 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 
     Optional<Users> findByIdentityId(UUID identityId);
     Optional<Users> findByOauthTypeAndOauthProviderId(OauthType oauthType, String oauthProviderId);
+    Page<Users> findByServiceNicknameContainingIgnoreCase(String serviceNickname, Pageable pageable);
 
 }

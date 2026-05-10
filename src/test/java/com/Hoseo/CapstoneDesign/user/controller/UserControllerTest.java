@@ -4,6 +4,7 @@ import com.Hoseo.CapstoneDesign.global.exception.GlobalExceptionHandler;
 import com.Hoseo.CapstoneDesign.support.factory.UserProfileUpdateRequestFactory;
 import com.Hoseo.CapstoneDesign.support.fixture.auth.WithMockUserDetail;
 import com.Hoseo.CapstoneDesign.user.dto.response.UpdateUserInfoResponse;
+import com.Hoseo.CapstoneDesign.user.dto.response.UserProfileThumbnail;
 import com.Hoseo.CapstoneDesign.user.exception.CustomUserException;
 import com.Hoseo.CapstoneDesign.user.exception.UserErrorCode;
 import com.Hoseo.CapstoneDesign.user.facade.UserFacade;
@@ -32,9 +33,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -135,6 +138,30 @@ class UserControllerTest {
 
         verify(userFacade).updateUserProfile(any(), any());
         log.info("[TEST] request body binding validated");
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/users/search returns user thumbnails")
+    void searchUserByServiceNicknameSuccess() throws Exception {
+        when(userFacade.searchUserByServiceNickname("commit", 1, 10))
+                .thenReturn(List.of(new UserProfileThumbnail(
+                        1L,
+                        null,
+                        "commit-master",
+                        "GITHUB",
+                        "github-master"
+                )));
+
+        mockMvc.perform(get("/api/v1/users/search")
+                        .param("serviceNickname", "commit"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].userId").value(1L))
+                .andExpect(jsonPath("$[0].serviceNickname").value("commit-master"))
+                .andExpect(jsonPath("$[0].oauthType").value("GITHUB"))
+                .andExpect(jsonPath("$[0].oauthNickname").value("github-master"));
+
+        verify(userFacade).searchUserByServiceNickname(eq("commit"), eq(1), eq(10));
+        log.info("[TEST] search user controller contract validated");
     }
 
     @ParameterizedTest

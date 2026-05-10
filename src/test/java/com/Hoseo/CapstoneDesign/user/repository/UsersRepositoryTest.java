@@ -9,10 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -75,5 +78,32 @@ class UsersRepositoryTest {
         assertThat(deletedAt).isInstanceOf(Timestamp.class);
         assertThat(((Timestamp) deletedAt).toLocalDateTime()).isNotNull();
         log.info("[TEST] soft delete SQLDelete behavior validated");
+    }
+
+    @Test
+    @DisplayName("serviceNickname 부분 일치 검색은 대소문자를 구분하지 않는다")
+    void findByServiceNicknameContainingIgnoreCaseSuccess() {
+        Users first = usersRepository.save(UsersTestBuilder.defaultUser()
+                .serviceNickname("CommitMaster")
+                .oauthProviderId("provider-1")
+                .build());
+        Users second = usersRepository.save(UsersTestBuilder.defaultUser()
+                .serviceNickname("commit-runner")
+                .oauthProviderId("provider-2")
+                .build());
+        usersRepository.save(UsersTestBuilder.defaultUser()
+                .serviceNickname("reviewer")
+                .oauthProviderId("provider-3")
+                .build());
+        usersRepository.flush();
+
+        List<Users> result = usersRepository.findByServiceNicknameContainingIgnoreCase(
+                        "commit",
+                        PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "userId"))
+                )
+                .getContent();
+
+        assertThat(result).containsExactly(first, second);
+        log.info("[TEST] repository service nickname search validated");
     }
 }

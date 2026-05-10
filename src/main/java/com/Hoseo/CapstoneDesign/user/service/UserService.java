@@ -8,8 +8,11 @@ import com.Hoseo.CapstoneDesign.user.exception.UserErrorCode;
 import com.Hoseo.CapstoneDesign.user.factory.UserEntityFactory;
 import com.Hoseo.CapstoneDesign.user.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -66,5 +69,14 @@ public class UserService {
         return repository.save(user);
     }
 
+    public List<Users> searchByServiceNickname(String serviceNickname, Integer page, Integer size) {
+        PageRequest pageRequest = PageRequest.of(
+                page - 1,
+                size,
+                Sort.by(Sort.Direction.DESC, "userId")
+        );
+        return repository.findByServiceNicknameContainingIgnoreCase(serviceNickname.trim(), pageRequest)
+                .getContent();
+    }
 
 }
