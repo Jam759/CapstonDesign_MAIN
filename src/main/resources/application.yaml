@@ -96,7 +96,7 @@ app:
     server-type: spring
     directory: ./.logs
     console-enabled: ${APP_LOGGING_CONSOLE_ENABLED:true}
-    structured-enabled: ${APP_LOGGING_STRUCTURED_ENABLED:true}
+    structured-enabled: ${APP_LOGGING_STRUCTURED_ENABLED:false}
     exclude-paths:
       - /favicon.ico
       - /actuator/health
