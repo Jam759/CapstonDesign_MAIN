@@ -88,3 +88,9 @@ auth:
     cookie-secure: false
     cookie-samesite: "Lax"
     front-redirect-url: "http://localhost:8080/tmp/oauth2/test"
+
+library:
+  KMOOC: test-kmooc-api-key
+  YOUTUBE: test-youtube-api-key
+  kmooc-base-url: https://example.com/kmooc
+  youtube-base-url: https://example.com/youtube
