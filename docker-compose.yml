@@ -38,6 +38,10 @@ services:
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-root}
+      KMOOC_API_KEY: ${KMOOC_API_KEY}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY}
+      KMOOC_BASE_URL: ${KMOOC_BASE_URL:-https://apis.data.go.kr/B552881/kmooc_v2_0}
+      YOUTUBE_BASE_URL: ${YOUTUBE_BASE_URL:-https://www.googleapis.com}
     volumes:
       - app-logs:/app/.logs
     env_file:

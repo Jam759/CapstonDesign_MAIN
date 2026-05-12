@@ -55,6 +55,13 @@ public class AnalysisJobService {
                 .toList();
     }
 
+    public java.util.Optional<AnalysisJob> findLatestCompletedJob(Long projectId) {
+        return repository.findFirstByProjectProjectIdAndJobStatusOrderByCreatedAtDesc(
+                projectId,
+                AnalysisJobStatus.NOTIFICATION_COMPLETED
+        );
+    }
+
     public void requestDispatch(Long jobId) {
         applicationEventPublisher.publishEvent(
                 new AnalysisJobDispatchRequestedEvent(jobId, MDC.get(TRACE_ID))
