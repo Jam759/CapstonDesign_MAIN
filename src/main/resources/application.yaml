@@ -142,3 +142,5 @@ github:
 library:
   KMOOC: ${KMOOC_API_KEY}
   YOUTUBE: ${YOUTUBE_API_KEY}
+  kmooc-base-url: ${KMOOC_BASE_URL:https://apis.data.go.kr/B552881/kmooc_v2_0}
+  youtube-base-url: ${YOUTUBE_BASE_URL:https://www.googleapis.com}

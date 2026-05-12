@@ -86,6 +86,12 @@ jobs:
             FRONTEND_BASE_URL=${{ secrets.FRONTEND_BASE_URL }}
             FRONTEND_REDIRECT_URL=${{ secrets.FRONTEND_REDIRECT_URL }}
 
+            # [app] learning library external APIs
+            KMOOC_API_KEY=${{ secrets.KMOOC_API_KEY }}
+            YOUTUBE_API_KEY=${{ secrets.YOUTUBE_API_KEY }}
+            KMOOC_BASE_URL=https://apis.data.go.kr/B552881/kmooc_v2_0
+            YOUTUBE_BASE_URL=https://www.googleapis.com
+
             # [grafana] 관리자 비밀번호 / 외부 접근 포트 / 서브패스 설정
             GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
             GRAFANA_HOST_PORT=3000

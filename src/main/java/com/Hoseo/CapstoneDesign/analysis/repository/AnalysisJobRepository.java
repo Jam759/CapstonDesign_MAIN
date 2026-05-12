@@ -23,6 +23,11 @@ public interface AnalysisJobRepository extends JpaRepository<AnalysisJob, Long> 
 
     List<AnalysisJob> findByJobStatusOrderByCreatedAtAsc(AnalysisJobStatus jobStatus, Pageable pageable);
 
+    Optional<AnalysisJob> findFirstByProjectProjectIdAndJobStatusOrderByCreatedAtDesc(
+            Long projectId,
+            AnalysisJobStatus jobStatus
+    );
+
     /**
      * 해당 프로젝트에 대해 지정 상태(예: NOTIFICATION_COMPLETED) 의 분석 Job 이 1건이라도 존재하는지.
      * 대시보드/로드맵/리포트 진입 가드에서 "첫 분석 완료 여부" 체크용.
