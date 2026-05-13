@@ -13,9 +13,9 @@ import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "image")
-// [수정됨] JpaRepository의 delete() 호출 시 실제 DELETE 쿼리 대신 아래 UPDATE 쿼리가 실행됩니다. (소프트 삭제)
+// JpaRepository의 delete() 호출 시 실제 DELETE 쿼리 대신 아래 UPDATE 쿼리가 실행됩니다. (소프트 삭제)
 @SQLDelete(sql = "UPDATE image SET deleted_at = CURRENT_TIMESTAMP WHERE image_id = ?")
-// [수정됨] JpaRepository로 조회할 때 항상 'deleted_at IS NULL'인 데이터만 가져오도록 전역 필터를 겁니다.
+// JpaRepository로 조회할 때 항상 'deleted_at IS NULL'인 데이터만 가져오도록 전역 필터를 겁니다.
 @SQLRestriction("deleted_at IS NULL")
 @Getter
 @Builder

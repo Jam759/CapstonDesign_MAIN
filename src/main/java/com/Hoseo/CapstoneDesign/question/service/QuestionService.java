@@ -7,6 +7,8 @@ import com.Hoseo.CapstoneDesign.question.factory.QuestionEntityFactory;
 import com.Hoseo.CapstoneDesign.question.repository.QuestionRepository;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,12 @@ public class QuestionService {
     @Transactional(readOnly = true)
     public List<Question> getAllQuestions() {
         return questionRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    // 모든 질문글 조회 (페이징, 최신순)
+    @Transactional(readOnly = true)
+    public Page<Question> getAllQuestions(Pageable pageable) {
+        return questionRepository.findAllByOrderByCreatedAtDesc(pageable);
     }
 
     // 질문 단건 조회 (내부 로직 공통 사용)

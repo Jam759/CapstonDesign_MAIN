@@ -23,7 +23,7 @@ public class ImageController {
     @Operation(summary = "이미지 임시 업로드")
     @PostMapping(value = "/temp", consumes = "multipart/form-data")
     public ResponseEntity<ImageUploadResponse> uploadTempImage(
-            // 인증 토큰에서 유저 정보를 직접 가져옵니다. (제민 님 요구사항)
+            // 인증 토큰에서 유저 정보를 직접 가져옵니다.
             @AuthenticationPrincipal UserDetailImpl userDetail,
             // 이미지 용도(PROFILE, POST)를 파라미터로 받습니다.
             @RequestParam("targetType") TargetType targetType,
