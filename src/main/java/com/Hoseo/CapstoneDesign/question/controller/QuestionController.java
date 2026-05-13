@@ -20,6 +20,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -37,14 +39,20 @@ public class QuestionController {
     private final QuestionFacade questionFacade;
 
     @GetMapping
-    @Operation(summary = "Get questions", description = "Entry point for the frontend question board list.")
+    @Operation(summary = "Get questions", description = "질문 게시판 목록을 페이징하여 조회합니다. (기본 8개씩 최신순)")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Question list returned", content = @Content(array = @ArraySchema(schema = @Schema(implementation = QuestionSummaryResponse.class)))),
+            @ApiResponse(responseCode = "200", description = "Question list returned", content = @Content(schema = @Schema(implementation = Page.class))),
             @ApiResponse(responseCode = "401", description = "Authentication failed", content = @Content(schema = @Schema(implementation = GlobalExceptionResponse.class)))
     })
-    public ResponseEntity<List<QuestionSummaryResponse>> getQuestions() {
-        // [추가] 더미 데이터를 제거하고, 파사드를 호출하여 실제 DB의 전체 질문 목록을 반환합니다.
-        List<QuestionSummaryResponse> response = questionFacade.getQuestions();
+    public ResponseEntity<Page<QuestionSummaryResponse>> getQuestions(
+            @Parameter(description = "페이지 번호 (1부터 시작)", example = "1")
+            @RequestParam(defaultValue = "1") int page,
+            @Parameter(description = "페이지당 게시글 수", example = "8")
+            @RequestParam(defaultValue = "8") int size
+    ) {
+        // 사용자는 1페이지부터 요청하지만 Spring Data는 0페이지부터 시작하므로 -1 처리를 합니다.
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        Page<QuestionSummaryResponse> response = questionFacade.getQuestions(pageRequest);
         return ResponseEntity.ok(response);
     }
 

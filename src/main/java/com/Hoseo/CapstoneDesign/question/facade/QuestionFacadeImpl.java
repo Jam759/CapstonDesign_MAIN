@@ -20,6 +20,8 @@ import com.Hoseo.CapstoneDesign.question.service.QuestionService;
 import com.Hoseo.CapstoneDesign.user.entity.Users;
 import com.Hoseo.CapstoneDesign.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -37,16 +39,15 @@ public class QuestionFacadeImpl implements QuestionFacade {
     private final QuestionRepository questionRepository;
     private final AnswerRepository answerRepository;
 
-    // 전체 질문 목록 조회
+    // 전체 질문 목록 조회 (페이징 지원)
     @Override
     @Transactional(readOnly = true)
-    public List<QuestionSummaryResponse> getQuestions() {
-        return questionService.getAllQuestions().stream()
+    public Page<QuestionSummaryResponse> getQuestions(Pageable pageable) {
+        return questionService.getAllQuestions(pageable)
                 .map(q -> {
                     int repliesCount = answerRepository.countByQuestion(q);
                     return QuestionDtoFactory.toSummaryResponse(q, repliesCount);
-                })
-                .toList();
+                });
     }
 
     // 질문 상세 단건 조회
