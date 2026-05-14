@@ -1,19 +1,21 @@
 package com.Hoseo.CapstoneDesign.global.exception;
 
+import com.Hoseo.CapstoneDesign.auth.exception.AuthErrorCode;
 import com.Hoseo.CapstoneDesign.global.logging.StructuredHttpLogger;
 import com.Hoseo.CapstoneDesign.global.logging.dto.ErrorInfo;
 import com.Hoseo.CapstoneDesign.global.logging.support.HttpEventType;
 import com.Hoseo.CapstoneDesign.global.logging.support.LogCategory;
 import com.Hoseo.CapstoneDesign.security.exception.JwtUtilException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -92,6 +94,33 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
                 .body(response);
+    }
+
+    @ExceptionHandler(MissingRequestCookieException.class)
+    public ResponseEntity<GlobalExceptionResponse> handleMissingRequestCookie(
+            MissingRequestCookieException exception,
+            HttpServletRequest request
+    ) {
+        AuthErrorCode errorCode = AuthErrorCode.UNAUTHORIZED;
+        GlobalExceptionResponse response = new GlobalExceptionResponse(errorCode);
+
+        if (canWriteStructuredLog(request)) {
+            request.setAttribute(ERROR_ALREADY_LOGGED, true);
+            structuredHttpLogger.error(
+                    LogCategory.HTTP.name(),
+                    HttpEventType.HTTP_ERROR.name(),
+                    getClassName(request),
+                    getMethodName(request),
+                    "Required request cookie is missing",
+                    Map.of("cookieName", exception.getCookieName()),
+                    request,
+                    errorCode.getHttpStatus().value(),
+                    structuredHttpLogger.resolveDurationMs(request),
+                    structuredHttpLogger.toErrorInfo(errorCode)
+            );
+        }
+
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
