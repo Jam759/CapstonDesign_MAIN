@@ -57,7 +57,7 @@ public class AuthController {
     })
     public ResponseEntity<AccessTokenReissueResponse> accessTokenReissue(
             @Parameter(description = "Refresh Token 쿠키 값", example = "eyJhbGciOiJIUzI1NiJ9...")
-            @CookieValue(name = "REFRESH_TOKEN", required = false) String refreshTokenRaw,
+            @CookieValue(name = "REFRESH_TOKEN", required = true) String refreshTokenRaw,
             @Parameter(hidden = true)
             HttpServletResponse response
     ) {
